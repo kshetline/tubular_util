@@ -18,7 +18,7 @@
 */
 
 import * as _ from 'lodash';
-import { floor, max, min, round } from './ks-math';
+import { floor, max, min, round } from 'ks-math';
 
 export interface FontMetrics {
   font: string;
