@@ -10,8 +10,10 @@
     "watch:build": "tsc --watch"
   },
   "keywords": [
-    "utility",
-    "math"
+    "canvas",
+    "font",
+    "string",
+    "utility"
   ],
   "author": "Kerry Shetline <kerry@shetline.com>",
   "license": "MIT",
