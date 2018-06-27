@@ -1,5 +1,5 @@
 /*
-  Copyright © 2017 Kerry Shetline, kerry@shetline.com
+  Copyright © 2017-2018 Kerry Shetline, kerry@shetline.com
 
   MIT license: https://opensource.org/licenses/MIT
 
@@ -37,8 +37,7 @@ export function extendDelimited(base: string, newItem: string, delimiter = ', ')
 }
 
 export function beep(): void {
-  /* tslint:disable-next-line:new-parens */
-  const audioContext: AudioContext = <AudioContext> new((<any> window).AudioContext);
+  const audioContext = new((window as any).AudioContext) as AudioContext;
   const oscillator = audioContext.createOscillator();
   const gain = audioContext.createGain();
 
@@ -54,6 +53,7 @@ export function beep(): void {
     oscillator.stop();
     oscillator.disconnect();
     gain.disconnect();
+    // noinspection JSIgnoredPromiseFromCall
     audioContext.close();
   }, 100);
 }
@@ -63,15 +63,17 @@ export function getCssValue(element: Element, property: string): string {
 }
 
 export function getFont(element: Element): string {
-  let font = getCssValue(element, 'font');
+  let style = document.defaultView.getComputedStyle(element, null);
+  let font = style.getPropertyValue('font');
 
   if (!font) {
-    const fontStyle = getCssValue(element, 'font-style');
-    const fontVariant = getCssValue(element, 'font-variant');
-    const fontWeight = getCssValue(element, 'font-weight');
-    const fontSize = parseFloat(getCssValue(element, 'font-size').replace('px', ''));
-    const fontFamily = getCssValue(element, 'font-family');
-    font = fontStyle + ' ' + fontVariant + ' ' + fontWeight + ' ' + fontSize + 'px ' + fontFamily;
+    const fontStyle = style.getPropertyValue('font-style');
+    const fontVariant = style.getPropertyValue('font-variant');
+    const fontWeight = style.getPropertyValue('font-weight');
+    const fontSize = style.getPropertyValue('font-size');
+    const fontFamily = style.getPropertyValue('font-family');
+
+    font = (fontStyle + ' ' + fontVariant + ' ' + fontWeight + ' ' + fontSize + ' ' + fontFamily).replace(/ +/g, ' ').trim();
   }
 
   return font;
@@ -124,8 +126,8 @@ export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
 
   document.body.removeChild(heightDiv);
 
-  const canvas = (<any> getFontMetrics).canvas || ((<any> getFontMetrics).canvas =
-                  <HTMLCanvasElement> <any> document.createElement('canvas'));
+  const canvas = (getFontMetrics as any).canvas || ((getFontMetrics as any).canvas =
+                  document.createElement('canvas') as HTMLCanvasElement);
 
   canvas.width = testFontSize * 2 + PADDING;
   canvas.height = testFontSize * 3;
@@ -181,18 +183,26 @@ export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
   return metrics;
 }
 
-export function getTextWidth(items: string | string[], font: string | HTMLElement): number {
-  const canvas = <HTMLCanvasElement> ((<any> getTextWidth).canvas ||
-                  ((<any> getTextWidth).canvas = <HTMLCanvasElement> <any> document.createElement('canvas')));
+export function getTextWidth(items: string | string[], font: string | HTMLElement, fallbackFont?: string): number {
+  const canvas = ((getTextWidth as any).canvas as HTMLCanvasElement ||
+                  ((getTextWidth as any).canvas = document.createElement('canvas') as HTMLCanvasElement));
   const context = canvas.getContext('2d');
   let maxWidth = 0;
+  let elementFont;
 
-  if (_.isString(font))
-    context.font = (font ? font : 'normal 12px sans-serif');
-  else if (_.isObject(font))
-    context.font = font.style.font;
+  if (typeof font === 'string')
+    elementFont = font;
+  else if (typeof font === 'object')
+    elementFont = getFont(font);
 
-  if (!_.isArray(items))
+  if (elementFont)
+    context.font = elementFont;
+  else if (fallbackFont)
+    context.font = fallbackFont;
+  else
+    context.font = 'normal 12px sans-serif';
+
+  if (!Array.isArray(items))
     items = [items];
 
   for (const item of items) {
@@ -236,10 +246,14 @@ export function isWindows(): boolean {
   return navigator.appVersion.includes('Windows') || navigator.platform.startsWith('Win');
 }
 
+export function isRaspbian(): boolean {
+  return navigator.userAgent.includes('Raspbian');
+}
+
 export function padLeft(item: string | number, length: number, padChar = ' '): string {
   let sign = '';
 
-  if (typeof item === 'number' && <number> item < 0 && padChar === '0') {
+  if (typeof item === 'number' && (item as number) < 0 && padChar === '0') {
     sign = '-';
     item = -item;
     --length;
@@ -394,7 +408,7 @@ export function parseColor(color: string): RGBA {
 
   if (match) {
     if (!utilContext) {
-      const canvas = <HTMLCanvasElement> <any> document.createElement('canvas');
+      const canvas = document.createElement('canvas') as HTMLCanvasElement;
       utilContext = canvas.getContext('2d');
     }
 
@@ -513,7 +527,7 @@ interface FsDocument extends HTMLDocument {
 }
 
 export function isFullScreen(): boolean {
-  const fsDoc = <FsDocument> document;
+  const fsDoc = document as FsDocument;
 
   return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
 }
@@ -524,10 +538,10 @@ interface FsDocumentElement extends HTMLElement {
 }
 
 export function toggleFullScreen(): void {
-  const fsDoc = <FsDocument> document;
+  const fsDoc = document as FsDocument;
 
   if (!isFullScreen()) {
-    const fsDocElem = <FsDocumentElement> document.documentElement;
+    const fsDocElem = document.documentElement as FsDocumentElement;
 
     if (fsDocElem.requestFullscreen)
       fsDocElem.requestFullscreen();
@@ -551,4 +565,18 @@ export function toggleFullScreen(): void {
 export function setFullScreen(full: boolean): void {
   if (full !== isFullScreen())
     toggleFullScreen();
+}
+
+export function toBoolean(str, defaultValue?: boolean) {
+  if (/^(true|t|yes|y)$/i.test(str))
+    return true;
+  else if (/^(false|f|no|n)$/i.test(str))
+    return false;
+
+  const n = Number(str);
+
+  if (!isNaN(n))
+    return n !== 0;
+
+  return defaultValue;
 }
