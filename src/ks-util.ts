@@ -250,6 +250,10 @@ export function isRaspbian(): boolean {
   return navigator.userAgent.includes('Raspbian');
 }
 
+export function isIOS(): boolean {
+  return !!navigator.platform.match(/i(Pad|Pod|Phone)/i);
+}
+
 export function padLeft(item: string | number, length: number, padChar = ' '): string {
   let sign = '';
 
@@ -579,4 +583,62 @@ export function toBoolean(str, defaultValue?: boolean) {
     return n !== 0;
 
   return defaultValue;
+}
+
+export function eventToKey(event: KeyboardEvent): string {
+  let key = event.key;
+
+  if (key === undefined) {
+    const charCode = event.charCode;
+
+    if (charCode !== 0) {
+      key = String.fromCodePoint(charCode);
+    }
+    else {
+      const keyCode = event.keyCode || event.which;
+
+      switch (keyCode) {
+        case   8: key = 'Backspace'; break;
+        case   9: key = 'Tab'; break;
+        case  12: key = 'Clear'; break;
+        case  13: key = 'Enter'; break;
+        case  16: key = 'Shift'; break;
+        case  17: key = 'Control'; break;
+        case  18: key = 'Alt'; break;
+        case  19: key = 'Pause'; break;
+        case  20: key = 'CapsLock'; break;
+        case  27: key = 'Escape'; break;
+        case  33: key = 'PageUp'; break;
+        case  34: key = 'PageDown'; break;
+        case  35: key = 'End'; break;
+        case  36: key = 'Home'; break;
+        case  37: key = 'ArrowLeft'; break;
+        case  38: key = 'ArrowUp'; break;
+        case  39: key = 'ArrowRight'; break;
+        case  40: key = 'ArrowDown'; break;
+        case  44: key = 'PrintScreen'; break;
+        case  45: key = 'Insert'; break;
+        case  46: key = 'Delete'; break;
+        case  91: key = 'OS'; break;
+        case  93: key = 'ContextMenu'; break;
+        case 144: key = 'NumLock'; break;
+        case 145: key = 'ScrollLock'; break;
+        case 224: key = 'Meta'; break;
+
+        default:
+          if (112 <= keyCode && keyCode <= 135)
+            key = 'F' + (keyCode - 111);
+      }
+    }
+  }
+  else {
+    switch (key) {
+      case 'UIKeyInputLeftArrow':  key = 'ArrowLeft'; break;
+      case 'UIKeyInputUpArrow':    key = 'ArrowUp'; break;
+      case 'UIKeyInputRightArrow': key = 'ArrowRight'; break;
+      case 'UIKeyInputDownArrow':  key = 'ArrowDown'; break;
+    }
+  }
+
+  return key;
 }
