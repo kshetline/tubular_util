@@ -254,6 +254,10 @@ export function isIOS(): boolean {
   return !!navigator.platform.match(/i(Pad|Pod|Phone)/i);
 }
 
+export function isAndroid(): boolean {
+  return navigator.userAgent.includes('Android');
+}
+
 export function padLeft(item: string | number, length: number, padChar = ' '): string {
   let sign = '';
 
@@ -633,10 +637,27 @@ export function eventToKey(event: KeyboardEvent): string {
   }
   else {
     switch (key) {
+      case 'Left':
       case 'UIKeyInputLeftArrow':  key = 'ArrowLeft'; break;
+      case 'Up':
       case 'UIKeyInputUpArrow':    key = 'ArrowUp'; break;
+      case 'Right':
       case 'UIKeyInputRightArrow': key = 'ArrowRight'; break;
+      case 'Down':
       case 'UIKeyInputDownArrow':  key = 'ArrowDown'; break;
+
+      case 'Add':      key = '+'; break;
+      case 'Subtract': key = '-'; break;
+      case 'Multiply': key = '*'; break;
+      case 'Divide':   key = '/'; break;
+      case 'Decimal':  key = '.'; break;
+
+      case 'Apps':     key = 'ContextMenu'; break;
+      case 'Del ':     key = 'Delete'; break;
+      case 'Esc':      key = 'Escape'; break;
+      case 'Scroll':   key = 'ScrollLock'; break;
+      case 'Spacebar': key = ' '; break;
+      case 'Win':      key = 'Meta'; break;
     }
   }
 
