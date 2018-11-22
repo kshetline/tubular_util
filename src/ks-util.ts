@@ -373,12 +373,12 @@ export function colorFromRGB(r: number, g: number, b: number, alpha = 1.0): stri
   g = min(max(round(g), 0), 255);
   b = min(max(round(b), 0), 255);
 
-  if (alpha === 1.0)
+  if (alpha >= 1.0)
     return ('#' + padLeft(r.toString(16), 2, '0')
                 + padLeft(g.toString(16), 2, '0')
                 + padLeft(b.toString(16), 2, '0')).toUpperCase();
   else
-    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + max(alpha, 0) + ')';
 }
 
 export function colorFrom24BitInt(i: number, alpha = 1.0): string {
