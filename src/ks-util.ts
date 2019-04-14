@@ -1,5 +1,5 @@
 /*
-  Copyright © 2017-2018 Kerry Shetline, kerry@shetline.com
+  Copyright © 2017-2019 Kerry Shetline, kerry@shetline.com
 
   MIT license: https://opensource.org/licenses/MIT
 
@@ -17,7 +17,9 @@
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import * as _ from 'lodash';
+import forEach from 'lodash/forEach';
+import isNil from 'lodash/isNil';
+import isString from 'lodash/isString';
 import { floor, max, min, round } from 'ks-math';
 
 export interface FontMetrics {
@@ -84,7 +86,7 @@ const cachedMetrics: {[font: string]: FontMetrics} = {};
 export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
   let font;
 
-  if (_.isString(elementOrFont))
+  if (isString(elementOrFont))
     font = <string> elementOrFont;
   else
     font = getFont(<Element> elementOrFont);
@@ -291,8 +293,8 @@ export function padRight(item: string, length: number, padChar?: string): string
 export function urlEncodeParams(params: { [key: string]: string }): string {
   const result: string[] = [];
 
-  _.forEach(params, (value: string, key: string) => {
-    if (!_.isNil(value))
+  forEach(params, (value: string, key: string) => {
+    if (isNil(value))
       result.push(key + '=' + encodeURIComponent(value));
   });
 
