@@ -294,7 +294,7 @@ export function urlEncodeParams(params: { [key: string]: string }): string {
   const result: string[] = [];
 
   forEach(params, (value: string, key: string) => {
-    if (isNil(value))
+    if (!isNil(value))
       result.push(key + '=' + encodeURIComponent(value));
   });
 
