@@ -105,16 +105,65 @@ export function toDefaultLocaleFixed(n: number, minFracDigits?: number, maxFracD
   return n.toLocaleString(undefined, options);
 }
 
-export function toBoolean(str, defaultValue?: boolean): boolean {
-  if (/^(true|t|yes|y)$/i.test(str))
+export function toBoolean(value, defaultValue?: boolean): boolean {
+  if (typeof value === 'boolean')
+    return value;
+  else if (typeof value === 'number')
+    return isNaN(value) ? defaultValue : value !== 0;
+  else if (typeof value !== 'string')
+    return !!value;
+  else if (/^(true|t|yes|y)$/i.test(value) || defaultValue && value === '')
     return true;
-  else if (/^(false|f|no|n)$/i.test(str))
+  else if (/^(false|f|no|n)$/i.test(value))
     return false;
 
-  const n = Number(str);
+  const n = Number(value);
 
-  if (!isNaN(n))
-    return n !== 0;
+  return isNaN(n) ? defaultValue : n !== 0;
+}
 
-  return defaultValue;
+export function toInt(value: any, defaultValue = 0): number {
+  if (typeof value === 'number')
+    return Math.floor(value);
+  else if (typeof value === 'string') {
+    const result = parseInt(value, 10);
+
+    if (isNaN(result) || !isFinite(result))
+      return defaultValue;
+    else
+      return result;
+  }
+  else if (typeof value === 'bigint') {
+    const result = Number(value);
+
+    if (isNaN(result) || !isFinite(result))
+      return defaultValue;
+    else
+      return result;
+  }
+  else
+    return defaultValue;
+}
+
+export function toNumber(value: any, defaultValue = 0): number {
+  if (typeof value === 'number')
+    return value;
+  else if (typeof value === 'string') {
+    const result = parseFloat(value);
+
+    if (isNaN(result) || !isFinite(result))
+      return defaultValue;
+    else
+      return result;
+  }
+  else if (typeof value === 'bigint') {
+    const result = Number(value);
+
+    if (isNaN(result) || !isFinite(result))
+      return defaultValue;
+    else
+      return result;
+  }
+  else
+    return defaultValue;
 }

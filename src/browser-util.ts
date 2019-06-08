@@ -33,11 +33,14 @@ interface FsDocument extends HTMLDocument {
   msFullscreenElement?: Element;
   msExitFullscreen?: () => void;
   mozCancelFullScreen?: () => void;
+  webkitExitFullscreen?: () => void;
+  webkitFullscreenElement?: Element;
 }
 
 interface FsDocumentElement extends HTMLElement {
   msRequestFullscreen?: () => void;
   mozRequestFullScreen?: () => void;
+  webkitRequestFullscreen?: () => void;
 }
 
 export function beep(): void {

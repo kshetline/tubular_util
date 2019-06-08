@@ -19,7 +19,7 @@
 
 import { parseColor } from './browser-graphics-util';
 import { DateTimeOptions, formatDateTime } from './misc-util';
-import { extendDelimited } from './string-util';
+import { extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
 
 describe('ks-util', () => {
   it('should extend a string, adding delimiters where needed', () => {
@@ -56,5 +56,19 @@ describe('ks-util', () => {
     expect(formatDateTime(1559956716890,
       [DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z])).toEqual('2019-06-08 01:18:36.890Z');
     expect(formatDateTime([DateTimeOptions.TIME_ONLY])).toMatch(/\d\d:\d\d:\d\d [-+]\d{4}/);
+  });
+
+  it ('should strip diacritical marks from latin characters', () => {
+    expect(stripLatinDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
+      .toEqual('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþy');
+  });
+
+  it ('should simplify symbols and latin characters to plain ASCII', () => {
+    expect(makePlainASCII('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
+      .toEqual('AAAAAAAeCEEEEIIIIDhNOOOOO_OUUUUYThssaaaaaaaeceeeeiiiidhnooooo_ouuuuythy');
+    expect(makePlainASCII('Þjóð')).toEqual('Thjodh');
+    expect(makePlainASCII('ÞJÓÐ')).toEqual('THJODH');
+    expect(makePlainASCII('[café*]')).toEqual('[cafe*]');
+    expect(makePlainASCII('[café*]', true)).toEqual('(cafe-)');
   });
 });
