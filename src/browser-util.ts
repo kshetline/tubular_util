@@ -298,6 +298,16 @@ export function isAndroid(): boolean {
   return navigator.userAgent.includes('Android');
 }
 
+export function isChrome(): boolean {
+  return navigator.vendor === 'Google Inc.' &&
+    ((/\bChrome\b/i.test(navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera()) ||
+     /\bCriOS\b/.test(navigator.userAgent));
+}
+
+export function isChromium(): boolean {
+  return !!(window as any).chrome && !isIE();
+}
+
 export function isEdge(): boolean {
   return /\bedge\b/i.test(navigator.userAgent) && isWindows();
 }
@@ -320,12 +330,20 @@ export function isIOS(): boolean {
   return !!navigator.platform.match(/i(Pad|Pod|Phone)/i);
 }
 
+export function isOpera(): boolean {
+  return typeof (window as any).opr !== "undefined";
+}
+
 export function isRaspbian(): boolean {
   return navigator.userAgent.includes('Raspbian');
 }
 
 export function isSafari(): boolean {
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !isEdge();
+}
+
+export function isSamsung(): boolean {
+  return /\bSamsungBrowser\b/i.test(navigator.userAgent);
 }
 
 export function isWindows(): boolean {

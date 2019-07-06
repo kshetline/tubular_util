@@ -1,6 +1,6 @@
 {
   "name": "ks-util",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Miscellaneous utility functions",
   "main": "dist/index.js",
   "typings": "dist/index",
@@ -24,17 +24,17 @@
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.16",
-    "@types/lodash": "^4.14.123",
+    "@types/lodash": "^4.14.135",
     "jasmine-core": "^2.99.1",
     "jasmine-spec-reporter": "^4.2.1",
-    "karma": "^4.0.1",
+    "karma": "^4.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "^1.1.2",
     "karma-jasmine-html-reporter": "^0.2.2",
-    "karma-typescript": "^4.0.0",
-    "karma-typescript-es6-transform": "^4.0.0",
-    "tslint": "^5.16.0",
-    "typescript": "^3.4.5"
+    "karma-typescript": "^4.1.1",
+    "karma-typescript-es6-transform": "^4.1.1",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.2"
   },
-  "repository": "github:kshetline/ks-util"
+  "repository": "https://github.com/kshetline/ks-util.git"
 }
