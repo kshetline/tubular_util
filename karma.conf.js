@@ -8,7 +8,7 @@ module.exports = function(config) {
       "**/*.ts": "karma-typescript"
     },
     reporters: ["progress", "karma-typescript", "kjhtml"],
-    browsers: ["Chrome"],
+    browsers: ["Chrome", "Firefox"],
     karmaTypescriptConfig: {
       bundlerOptions: {
         transforms: [

@@ -46,6 +46,31 @@ export function extendDelimited(base: string, newItem: string, delimiter = ', ')
     return base + delimiter + newItem;
 }
 
+const diacriticals = '\u00C0\u00C1\u00C2\u00C3\u00C4\u00C5\u00C7\u00C8\u00C9\u00CA\u00CB\u00CC' +
+                     '\u00CD\u00CE\u00CF\u00D1\u00D2\u00D3\u00D4\u00D5\u00D6\u00D8\u00D9\u00DA' +
+                     '\u00DB\u00DC\u00DD\u00E0\u00E1\u00E2\u00E3\u00E4\u00E5\u00E7\u00E8\u00E9' +
+                     '\u00EA\u00EB\u00EC\u00ED\u00EE\u00EF\u00F1\u00F2\u00F3\u00F4\u00F5\u00F6' +
+                     '\u00F8\u00F9\u00FA\u00FB\u00FC\u00FD\u00FF' +
+                     '\u00AD\u00B4\u00B7\u2022' + // soft hyphen, acute accent, middle dot, bullet
+                     '\u2010\u2011\u2012\u2013' + // hyphen, no-break hyphen, figure dash, en dash
+                     '\u2018\u2019\u201A\u201B' + // left single quote, right single quote, single low-9 quote, single high reversed-9 single quote
+                     '\u201C\u201D\u201F\u201C' + // left double quote, right double quote, double low-9 quote, double high reversed-9 single quote
+                     '\u2024\u2027\u2032\u2033' + // One dot leader, hyphenation point, prime, double prime
+                     '\u2039\u203A\u2044';        // left single angle quote, right single angle quote, fraction slash
+const plainChars = 'AAAAAACEEEEI' +
+                   'IIINOOOOOOUU' +
+                   'UUYaaaaaacee' +
+                   'eeiiiinooooo' +
+                   'ouuuuyy' +
+                   "-'**" +
+                   '----' +
+                   "''''" +
+                   '""""' +
+                   `.-'"` +
+                   '<>/';
+const latinExtendedASubstitutions = 'AaAaAaCcCcCcCcDdDdEeEeEeEeEeGgGgGgGgHhHhIiIiIiIiIi--JjKkkLlLlLlL' +
+                                    'lLlNnNnNnn--OoOoOo--RrRrRrSsSsSsSsTtTtTtUuUuUuUuUuUuWwYyYZzZzZzs';
+
 export function makePlainASCII(s: string, forFileName = false): string {
   if (!s)
     return s;
@@ -208,31 +233,6 @@ export function replace(str: string, searchStr: string, replaceStr: string, case
 
   return str.replace(new RegExp(searchStr, 'g' + (caseInsensitive ? 'i' : '')), replaceStr);
 }
-
-const diacriticals = '\u00C0\u00C1\u00C2\u00C3\u00C4\u00C5\u00C7\u00C8\u00C9\u00CA\u00CB\u00CC' +
-                     '\u00CD\u00CE\u00CF\u00D1\u00D2\u00D3\u00D4\u00D5\u00D6\u00D8\u00D9\u00DA' +
-                     '\u00DB\u00DC\u00DD\u00E0\u00E1\u00E2\u00E3\u00E4\u00E5\u00E7\u00E8\u00E9' +
-                     '\u00EA\u00EB\u00EC\u00ED\u00EE\u00EF\u00F1\u00F2\u00F3\u00F4\u00F5\u00F6' +
-                     '\u00F8\u00F9\u00FA\u00FB\u00FC\u00FD\u00FF' +
-                     '\u00AD\u00B4\u00B7\u2022' + // soft hyphen, acute accent, middle dot, bullet
-                     '\u2010\u2011\u2012\u2013' + // hyphen, no-break hyphen, figure dash, en dash
-                     '\u2018\u2019\u201A\u201B' + // left single quote, right single quote, single low-9 quote, single high reversed-9 single quote
-                     '\u201C\u201D\u201F\u201C' + // left double quote, right double quote, double low-9 quote, double high reversed-9 single quote
-                     '\u2024\u2027\u2032\u2033' + // One dot leader, hyphenation point, prime, double prime
-                     '\u2039\u203A\u2044';        // left single angle quote, right single angle quote, fraction slash
-const plainChars = 'AAAAAACEEEEI' +
-                   'IIINOOOOOOUU' +
-                   'UUYaaaaaacee' +
-                   'eeiiiinooooo' +
-                   'ouuuuyy' +
-                   "-'**" +
-                   '----' +
-                   "''''" +
-                   '""""' +
-                   `.-'"` +
-                   '<>/';
-const latinExtendedASubstitutions = 'AaAaAaCcCcCcCcDdDdEeEeEeEeEeGgGgGgGgHhHhIiIiIiIiIi--JjKkkLlLlLlL' +
-                                    'lLlNnNnNnn--OoOoOo--RrRrRrSsSsSsSsTtTtTtUuUuUuUuUuUuWwYyYZzZzZzs';
 
 export function stripLatinDiacriticals(s: string): string {
   if (!s)

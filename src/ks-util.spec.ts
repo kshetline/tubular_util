@@ -18,7 +18,8 @@
 */
 
 import { parseColor } from './browser-graphics-util';
-import { DateTimeOptions, formatDateTime } from './misc-util';
+import { doesCharacterGlyphExist, getFont, isFirefox } from './browser-util';
+import { DateTimeOptions, formatDateTime, processMillis } from './misc-util';
 import { extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
 
 describe('ks-util', () => {
@@ -48,7 +49,7 @@ describe('ks-util', () => {
     expect(rgba.b).toEqual(160);
   });
 
-  it ('should format date/time correctly', () => {
+  it('should format date/time correctly', () => {
     expect(formatDateTime()).toMatch(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d [-+]\d{4}/);
     expect(formatDateTime('Fri Jun 07 2019 21:18:36 GMT-0400',
       [DateTimeOptions.USE_T, DateTimeOptions.USE_Z])).toEqual('2019-06-08T01:18:36Z');
@@ -58,17 +59,59 @@ describe('ks-util', () => {
     expect(formatDateTime([DateTimeOptions.TIME_ONLY])).toMatch(/\d\d:\d\d:\d\d [-+]\d{4}/);
   });
 
-  it ('should strip diacritical marks from latin characters', () => {
+  it('should strip diacritical marks from latin characters', () => {
     expect(stripLatinDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
       .toEqual('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþy');
   });
 
-  it ('should simplify symbols and latin characters to plain ASCII', () => {
+  it('should simplify symbols and latin characters to plain ASCII', () => {
     expect(makePlainASCII('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
       .toEqual('AAAAAAAeCEEEEIIIIDhNOOOOO_OUUUUYThssaaaaaaaeceeeeiiiidhnooooo_ouuuuythy');
     expect(makePlainASCII('Þjóð')).toEqual('Thjodh');
     expect(makePlainASCII('ÞJÓÐ')).toEqual('THJODH');
     expect(makePlainASCII('[café*]')).toEqual('[cafe*]');
     expect(makePlainASCII('[café*]', true)).toEqual('(cafe-)');
+  });
+
+  it('should get fonts in correct shorthand form', () => {
+    const span = document.createElement('span');
+
+    span.textContent = '?';
+    span.style.font = 'bold italic 14pt "Courier New", monospace';
+    span.style.lineHeight = '1.5em';
+    span.style.fontStretch = '125%';
+    document.body.appendChild(span);
+
+    const font = getFont(span);
+
+    expect(font).toContain('italic');
+    expect(font).toContain('"Courier New"');
+    expect(font).toContain('monospace');
+    expect(font).toContain('expanded');
+    expect(font).toMatch(/\b18\.6\d+px\s*\/\s*28px\b/);
+    expect(font).toMatch(/\b(bold|700)\b/);
+    document.body.removeChild(span);
+  });
+
+  it('should accurately measure time intervals', done => {
+    const start = processMillis();
+
+    setTimeout(() => {
+      const time = processMillis() - start;
+
+      expect(40 <= time && time <= 60).toBeTruthy();
+      done();
+    }, 50);
+  });
+
+  it('should correctly identify missing character glyphs', () => {
+    const fonts = ['12px sans-serif', '14pt monospace'];
+
+    for (const font of fonts) {
+      expect(doesCharacterGlyphExist(font, 'a')).toBeTruthy();
+      expect(doesCharacterGlyphExist(font, '\uFFFE')).toBeFalsy();
+      expect(doesCharacterGlyphExist(font, 0x2022)).toBeTruthy();
+      expect(doesCharacterGlyphExist(font, 0xFFFF)).toBeFalsy();
+    }
   });
 });

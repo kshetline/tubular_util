@@ -77,10 +77,10 @@ export function eventToKey(event: KeyboardEvent): string {
       const keyCode = event.keyCode || event.which;
 
       switch (keyCode) {
+        case   3: case 13: key = 'Enter'; break;
         case   8: key = 'Backspace'; break;
         case   9: key = 'Tab'; break;
         case  12: key = 'Clear'; break;
-        case  13: key = 'Enter'; break;
         case  16: key = 'Shift'; break;
         case  17: key = 'Control'; break;
         case  18: key = 'Alt'; break;
@@ -95,18 +95,41 @@ export function eventToKey(event: KeyboardEvent): string {
         case  38: key = 'ArrowUp'; break;
         case  39: key = 'ArrowRight'; break;
         case  40: key = 'ArrowDown'; break;
+        case  43: key = '+'; break;
         case  44: key = 'PrintScreen'; break;
         case  45: key = 'Insert'; break;
         case  46: key = 'Delete'; break;
         case  91: key = 'OS'; break;
         case  93: key = 'ContextMenu'; break;
+        case 107: key = '+'; break;
+        case 109: key = '-'; break;
+        case 110: key = '.'; break;
+        case 111: key = '/'; break;
         case 144: key = 'NumLock'; break;
         case 145: key = 'ScrollLock'; break;
+        case 173: case 181: key = 'AudioVolumeMute'; break;
+        case 174: case 182: key = 'AudioVolumeDown'; break;
+        case 175: case 183: key = 'AudioVolumeUp'; break;
+        case 179: key = 'MediaPlayPause'; break;
+        case 186: key = ';'; break;
+        case 187: key = '='; break;
+        case 188: key = ','; break;
+        case 189: key = '-'; break;
+        case 191: key = '/'; break;
+        case 192: key = '~'; break;
+        case 219: key = '['; break;
+        case 220: key = '\\'; break;
+        case 221: key = ']'; break;
+        case 222: key = '\''; break;
         case 224: key = 'Meta'; break;
 
         default:
           if (112 <= keyCode && keyCode <= 135)
             key = 'F' + (keyCode - 111);
+          else if (48 <= keyCode && keyCode <= 90)
+            key = String.fromCharCode(keyCode);
+          else if (96 <= keyCode && keyCode <= 105)
+            key = String.fromCharCode(keyCode - 48);
       }
     }
   }
@@ -143,6 +166,18 @@ export function getCssValue(element: Element, property: string): string {
   return document.defaultView.getComputedStyle(element, null).getPropertyValue(property);
 }
 
+const fontStretches = {
+  '50%': 'ultra-condensed',
+  '62.5%': 'extra-condensed',
+  '75%': 'condensed',
+  '87.5%': 'semi-condensed',
+  '100%': 'normal',
+  '112.5%': 'semi-expanded',
+  '125%': 'expanded',
+  '150%': 'extra-expanded',
+  '200%': 'ultra-expanded'
+};
+
 export function getFont(element: Element): string {
   const style = document.defaultView.getComputedStyle(element, null);
   let font = style.getPropertyValue('font');
@@ -151,10 +186,19 @@ export function getFont(element: Element): string {
     const fontStyle = style.getPropertyValue('font-style');
     const fontVariant = style.getPropertyValue('font-variant');
     const fontWeight = style.getPropertyValue('font-weight');
+    const fontStretch = fontStretches[style.getPropertyValue('font-stretch')] || '';
     const fontSize = style.getPropertyValue('font-size');
+    const lineHeight = style.getPropertyValue('line-height');
     const fontFamily = style.getPropertyValue('font-family');
 
-    font = (fontStyle + ' ' + fontVariant + ' ' + fontWeight + ' ' + fontSize + ' ' + fontFamily).replace(/ +/g, ' ').trim();
+    font = (
+      fontStyle + ' ' +
+      fontVariant + ' ' +
+      fontWeight + ' ' +
+      fontStretch + ' ' +
+      fontSize + (lineHeight ? ' / ' + lineHeight : '') + ' ' +
+      fontFamily
+    ).replace(/ +/g, ' ').trim();
   }
 
   return font;
@@ -264,6 +308,58 @@ export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
   return metrics;
 }
 
+function changeItalic(font: string): string {
+  if (/\b(italic|oblique)\b/.test(font))
+    return font.replace(/\b(italic|oblique)\b/, '');
+  else
+    return 'italic ' + font;
+}
+
+export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrCodePoint: string | number): boolean {
+  if (typeof charOrCodePoint === 'number')
+    charOrCodePoint = String.fromCodePoint(charOrCodePoint);
+
+  const metrics = getFontMetrics(elementOrFont);
+  const PADDING = 8;
+  const size = metrics.lineHeight + PADDING;
+
+  const canvas0 = (getFontMetrics as any).canvas0 || ((doesCharacterGlyphExist as any).canvas0 =
+                  document.createElement('canvas') as HTMLCanvasElement);
+  const canvas1 = (getFontMetrics as any).canvas1 || ((doesCharacterGlyphExist as any).canvas1 =
+                  document.createElement('canvas') as HTMLCanvasElement);
+  const canvases = [canvas0, canvas1];
+  const pixmaps = [];
+
+  for (let i = 0; i < 2; ++i) {
+    const canvas = canvases[i];
+
+    canvas.width = size;
+    canvas.height = size;
+    canvas.style.opacity = '1';
+
+    const context = canvas.getContext('2d');
+
+    context.fillStyle = 'white';
+    context.fillRect(-1, -1, size + 2, size + 2);
+    context.fillStyle = 'black';
+    // Compare pixels for test character to pixels for known character without a glyph.
+    // For Firefox, which renders missing glyphs all differently, check if a character
+    // looks the same as itself when rendered in italics -- the missing glyph boxes
+    // remain straight when italicized.
+    context.font = (i === 1 && isFirefox() ? changeItalic(metrics.font) : metrics.font);
+    context.fillText(i === 0 || isFirefox() ? charOrCodePoint : '\uFFFE', 0, metrics.ascent);
+
+    pixmaps[i] = context.getImageData(0, 0, size, size).data;
+  }
+
+  for (let i = 0; i < pixmaps[0].length; ++i) {
+    if (pixmaps[0][i] !== pixmaps[1][i])
+      return true;
+  }
+
+  return false;
+}
+
 export function getTextWidth(items: string | string[], font: string | HTMLElement, fallbackFont?: string): number {
   const canvas = ((getTextWidth as any).canvas as HTMLCanvasElement ||
                   ((getTextWidth as any).canvas = document.createElement('canvas') as HTMLCanvasElement));
@@ -331,7 +427,7 @@ export function isIOS(): boolean {
 }
 
 export function isOpera(): boolean {
-  return typeof (window as any).opr !== "undefined";
+  return typeof (window as any).opr !== 'undefined';
 }
 
 export function isRaspbian(): boolean {
