@@ -18,7 +18,7 @@
 */
 
 import { parseColor } from './browser-graphics-util';
-import { doesCharacterGlyphExist, getFont, isFirefox } from './browser-util';
+import { doesCharacterGlyphExist, getFont } from './browser-util';
 import { DateTimeOptions, formatDateTime, processMillis } from './misc-util';
 import { extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
 
