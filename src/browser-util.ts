@@ -323,9 +323,9 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
   const PADDING = 8;
   const size = metrics.lineHeight + PADDING;
 
-  const canvas0 = (getFontMetrics as any).canvas0 || ((doesCharacterGlyphExist as any).canvas0 =
+  const canvas0 = (doesCharacterGlyphExist as any).canvas0 || ((doesCharacterGlyphExist as any).canvas0 =
                   document.createElement('canvas') as HTMLCanvasElement);
-  const canvas1 = (getFontMetrics as any).canvas1 || ((doesCharacterGlyphExist as any).canvas1 =
+  const canvas1 = (doesCharacterGlyphExist as any).canvas1 || ((doesCharacterGlyphExist as any).canvas1 =
                   document.createElement('canvas') as HTMLCanvasElement);
   const canvases = [canvas0, canvas1];
   const pixmaps = [];
