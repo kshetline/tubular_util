@@ -121,13 +121,17 @@ export function toDefaultLocaleFixed(n: number, minFracDigits?: number, maxFracD
   return n.toLocaleString(undefined, options);
 }
 
-export function toBoolean(value, defaultValue?: boolean): boolean {
+export function toBoolean(value, defaultValue = false, forHtmlAttribute = false): boolean {
   if (typeof value === 'boolean')
     return value;
+  else if (value == null)
+    return defaultValue;
   else if (typeof value === 'number')
     return isNaN(value) ? defaultValue : value !== 0;
   else if (typeof value !== 'string')
     return !!value;
+  else if (forHtmlAttribute && value === '')
+    return true;
   else if (/^(true|t|yes|y)$/i.test(value) || defaultValue && value === '')
     return true;
   else if (/^(false|f|no|n)$/i.test(value))

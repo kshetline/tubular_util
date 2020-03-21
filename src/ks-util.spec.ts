@@ -19,7 +19,7 @@
 
 import { parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont } from './browser-util';
-import { DateTimeOptions, formatDateTime, processMillis } from './misc-util';
+import { DateTimeOptions, formatDateTime, processMillis, toBoolean } from './misc-util';
 import { extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
 
 describe('ks-util', () => {
@@ -113,5 +113,20 @@ describe('ks-util', () => {
       expect(doesCharacterGlyphExist(font, 0x2022)).toBeTruthy();
       expect(doesCharacterGlyphExist(font, 0xFFFF)).toBeFalsy();
     }
+  });
+
+  it('should correctly convert to boolean', () => {
+    expect(toBoolean('t', false)).toBe(true);
+    expect(toBoolean('YES', false)).toBe(true);
+    expect(toBoolean('False', true)).toBe(false);
+    expect(toBoolean('n', true)).toBe(false);
+    expect(toBoolean('?', true)).toBe(true);
+    expect(toBoolean('?', false)).toBe(false);
+    expect(toBoolean('?')).toBe(false);
+    expect(toBoolean(null, true)).toBe(true);
+    expect(toBoolean(undefined, true)).toBe(true);
+    expect(toBoolean('')).toBe(false);
+    expect(toBoolean('', true)).toBe(true);
+    expect(toBoolean('', false, true)).toBe(true);
   });
 });
