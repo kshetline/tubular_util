@@ -19,7 +19,7 @@
 
 import { parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont } from './browser-util';
-import { DateTimeOptions, formatDateTime, processMillis, toBoolean } from './misc-util';
+import { DateTimeOptions, formatDateTime, last, processMillis, toBoolean } from './misc-util';
 import { extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
 
 describe('ks-util', () => {
@@ -94,13 +94,19 @@ describe('ks-util', () => {
   });
 
   it('should accurately measure time intervals', done => {
-    const start = processMillis();
+    let start = processMillis();
+    const intervals: number[] = [];
+    const interval = setInterval(() => {
+      intervals.push(processMillis() - start);
 
-    setTimeout(() => {
-      const time = processMillis() - start;
+      if (intervals.length >= 5) {
+        clearInterval(interval);
+        // Allow for some outlier values caused by slowness of start-up
+        expect(intervals.filter(t => 40 <= t && t <= 60).length).toBeGreaterThanOrEqual(3);
+        done();
+      }
 
-      expect(40 <= time && time <= 60).toBeTruthy();
-      done();
+      start = processMillis();
     }, 50);
   });
 
@@ -128,5 +134,12 @@ describe('ks-util', () => {
     expect(toBoolean('')).toBe(false);
     expect(toBoolean('', true)).toBe(true);
     expect(toBoolean('', false, true)).toBe(true);
+  });
+
+  it('should get last element of an array', () => {
+    expect(last([1, 2, 4, -3])).toBe(-3);
+    expect(last(['alpha', 'omega'])).toBe('omega');
+    expect(last([])).toBe(undefined);
+    expect(last(null)).toBe(undefined);
   });
 });

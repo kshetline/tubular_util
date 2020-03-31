@@ -187,3 +187,10 @@ export function toNumber(value: any, defaultValue = 0): number {
   else
     return defaultValue;
 }
+
+export function last<T>(array: Array<T>): T {
+  if (Array.isArray(array) && array.length > 0)
+    return array[array.length - 1];
+  else
+    return undefined;
+}
