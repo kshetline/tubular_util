@@ -1,5 +1,5 @@
 /*
-  Copyright © 2017-2019 Kerry Shetline, kerry@shetline.com
+  Copyright © 2017-2020 Kerry Shetline, kerry@shetline.com
 
   MIT license: https://opensource.org/licenses/MIT
 
@@ -20,7 +20,7 @@
 import { parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont } from './browser-util';
 import { DateTimeOptions, formatDateTime, last, processMillis, toBoolean } from './misc-util';
-import { extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
+import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
 
 describe('ks-util', () => {
   it('should extend a string, adding delimiters where needed', () => {
@@ -141,5 +141,12 @@ describe('ks-util', () => {
     expect(last(['alpha', 'omega'])).toBe('omega');
     expect(last([])).toBe(undefined);
     expect(last(null)).toBe(undefined);
+  });
+
+  it('should split string into lines', () => {
+    expect(asLines('')).toEqual([]);
+    expect(asLines('no breaks')).toEqual(['no breaks']);
+    expect(asLines('foo\nbar\r\nbaz\rqux')).toEqual(['foo', 'bar', 'baz', 'qux']);
+    expect(asLines('The end\n')).toEqual(['The end', '']);
   });
 });
