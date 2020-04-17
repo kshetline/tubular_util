@@ -148,5 +148,6 @@ describe('ks-util', () => {
     expect(asLines('no breaks')).toEqual(['no breaks']);
     expect(asLines('foo\nbar\r\nbaz\rqux')).toEqual(['foo', 'bar', 'baz', 'qux']);
     expect(asLines('The end\n')).toEqual(['The end', '']);
+    expect(asLines('The\n\nend\n\n\n', true)).toEqual(['The', '', 'end']);
   });
 });

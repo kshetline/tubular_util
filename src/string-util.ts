@@ -17,9 +17,17 @@
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-export function asLines(s: string): string[] {
-  if (s)
-    return s.split(/\r\n|\r|\n/);
+import { last } from './misc-util';
+
+export function asLines(s: string, trimFinalBlankLines = false): string[] {
+  if (s) {
+    const lines = s.split(/\r\n|\r|\n/);
+
+    while (trimFinalBlankLines && last(lines) === '')
+      lines.pop();
+
+    return lines;
+  }
   else
     return [];
 }
