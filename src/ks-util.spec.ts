@@ -18,8 +18,8 @@
 */
 
 import { parseColor } from './browser-graphics-util';
-import { doesCharacterGlyphExist, getFont } from './browser-util';
-import { DateTimeOptions, formatDateTime, last, processMillis, toBoolean } from './misc-util';
+import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape } from './browser-util';
+import { DateTimeOptions, formatDateTime, last, processMillis, toBoolean, toInt } from './misc-util';
 import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
 
 describe('ks-util', () => {
@@ -136,6 +136,14 @@ describe('ks-util', () => {
     expect(toBoolean('', false, true)).toBe(true);
   });
 
+  it('should correctly convert to int', () => {
+    expect(toInt('-47')).toBe(-47);
+    expect(toInt('foo', 99)).toBe(99);
+    expect(toInt('1011', -1, 2)).toBe(11);
+    expect(toInt('cafebabe', -1, 16)).toBe(3405691582);
+    expect(toInt('cafegabe', -1, 16)).toBe(-1);
+  });
+
   it('should get last element of an array', () => {
     expect(last([1, 2, 4, -3])).toBe(-3);
     expect(last(['alpha', 'omega'])).toBe('omega');
@@ -149,5 +157,13 @@ describe('ks-util', () => {
     expect(asLines('foo\nbar\r\nbaz\rqux')).toEqual(['foo', 'bar', 'baz', 'qux']);
     expect(asLines('The end\n')).toEqual(['The end', '']);
     expect(asLines('The\n\nend\n\n\n', true)).toEqual(['The', '', 'end']);
+  });
+
+  it('should escape and unescape for HTML', () => {
+    expect(htmlEscape(`2 < 3 & 5 > 4, "Don't you see?"`)).toEqual(`2 &lt; 3 &amp; 5 &gt; 4, "Don't you see?"`);
+    expect(htmlEscape(`2 < 3 & 5 > 4, "Don't you see?"`, true))
+      .toEqual('2 &lt; 3 &amp; 5 &gt; 4, &quot;Don&apos;t you see?&quot;');
+    expect(htmlUnescape('2 &lt; 3 &amp; 5 &gt; 4, &quot;Don&apos;t you see?&quot; &#33 &#xB6; &unknown; &#nope; @'))
+      .toEqual(`2 < 3 & 5 > 4, "Don't you see?" ! ¶ &unknown; &#nope; @`);
   });
 });

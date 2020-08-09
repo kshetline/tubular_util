@@ -142,11 +142,26 @@ export function toBoolean(value, defaultValue = false, forHtmlAttribute = false)
   return isNaN(n) ? defaultValue : n !== 0;
 }
 
-export function toInt(value: any, defaultValue = 0): number {
+const digitMatchers: RegExp[] = [];
+
+for (let radix = 2; radix <= 36; ++radix) {
+  if (radix <= 10)
+    digitMatchers[radix] = new RegExp('^[-+]?[0-' + (radix - 1) + ']+$');
+  else
+    digitMatchers[radix] = new RegExp('^[-+]?[0-9A-' + String.fromCharCode(54 + radix) + ']+$', 'i');
+}
+
+export function toInt(value: any, defaultValue = 0, radix = 10): number {
   if (typeof value === 'number')
     return Math.floor(value);
   else if (typeof value === 'string') {
-    const result = parseInt(value, 10);
+    const matcher = digitMatchers[radix];
+
+    // Let's be stricter than parseInt and allow only signs and valid base digits.
+    if (!matcher || !matcher.test(value))
+      return defaultValue;
+
+    const result = parseInt(value, radix);
 
     if (isNaN(result) || !isFinite(result))
       return defaultValue;

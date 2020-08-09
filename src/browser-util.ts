@@ -18,6 +18,7 @@
 */
 
 import { forEach, isNil, isString } from 'lodash';
+import { toInt } from './misc-util';
 
 export interface FontMetrics {
   font: string;
@@ -390,6 +391,50 @@ export function getTextWidth(items: string | string[], font: string | HTMLElemen
   return maxWidth;
 }
 
+const escapeLookup = {
+  '<': '&lt;',
+  '>': '&gt;',
+  '&': '&amp;',
+  '"': '&quot;',
+  "'": '&apos;'
+};
+
+const unescapeLookup: Record<string, string> = {};
+Object.keys(escapeLookup).forEach(key => unescapeLookup[escapeLookup[key]] = key);
+
+export function htmlEscape(s: string, escapeQuotes = false): string {
+  return s.replace(escapeQuotes ? /[<>&"']/g : /[<>&]/g, m => escapeLookup[m[0]]);
+}
+
+export function htmlUnescape(s: string): string {
+  s = s.replace(/&(?:#[xX]?)?[a-zA-Z0-9]+(?:;|$|(?=[^a-fA-F0-9]))/g, entity => {
+    let replacement = unescapeLookup[entity];
+
+    if (!replacement) {
+      let base = 10;
+      let digits: RegExpMatchArray;
+
+      if (/^&#x/i.test(entity)) {
+        base = 16;
+        digits = /^([a-fA-F0-9]+);?/.exec(entity.substr(3));
+      }
+      else if (entity.startsWith('&#'))
+        digits = /^([0-9]+);?/.exec(entity.substr(2));
+
+      if (digits) {
+        const n = toInt(digits[1], -1, base);
+
+        if (0 <= n && n <= 0x10FFFF)
+          replacement = String.fromCodePoint(n);
+      }
+    }
+
+    return replacement ?? entity;
+  });
+
+  return s;
+}
+
 export function isAndroid(): boolean {
   return navigator.userAgent.includes('Android');
 }
@@ -424,6 +469,10 @@ export function isIE(): boolean {
 
 export function isIOS(): boolean {
   return !!navigator.platform.match(/i(Pad|Pod|Phone)/i);
+}
+
+export function isMacOS(): boolean {
+  return navigator.platform.startsWith('Mac') || /\bMac OS X\b/i.test(navigator.userAgent);
 }
 
 export function isOpera(): boolean {
