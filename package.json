@@ -1,6 +1,6 @@
 {
   "name": "ks-util",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Miscellaneous utility functions",
   "main": "dist/index.js",
   "typings": "dist/index",
@@ -20,24 +20,24 @@
   "author": "Kerry Shetline <kerry@shetline.com>",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^12.12.35",
-    "ks-math": "^1.2.0",
-    "lodash": "^4.17.19"
+    "@types/node": "^12.12.54",
+    "ks-math": "^1.2.1",
+    "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "@types/jasmine": "^2.8.16",
-    "@types/lodash": "^4.14.144",
+    "@types/jasmine": "^2.8.17",
+    "@types/lodash": "^4.14.159",
     "jasmine-core": "^2.99.1",
     "jasmine-spec-reporter": "^4.2.1",
-    "karma": "^5.1.0",
+    "karma": "^5.1.1",
     "karma-chrome-launcher": "^2.2.0",
     "karma-firefox-launcher": "^1.2.0",
     "karma-jasmine": "^1.1.2",
     "karma-jasmine-html-reporter": "^0.2.2",
-    "karma-typescript": "^5.0.2",
+    "karma-typescript": "^5.1.0",
     "karma-typescript-es6-transform": "^4.1.1",
     "tslint": "^5.20.0",
-    "typescript": "^3.6.4"
+    "typescript": "^3.9.7"
   },
   "repository": "https://github.com/kshetline/ks-util.git"
 }

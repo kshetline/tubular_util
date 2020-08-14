@@ -468,7 +468,7 @@ export function isIE(): boolean {
 }
 
 export function isIOS(): boolean {
-  return !!navigator.platform.match(/i(Pad|Pod|Phone)/i);
+  return /i(Pad|Pod|Phone)/i.test(navigator.platform) || (isMacOS() && isSafari() && navigator.maxTouchPoints > 1);
 }
 
 export function isMacOS(): boolean {
