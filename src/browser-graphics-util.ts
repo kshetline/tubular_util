@@ -17,7 +17,7 @@
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { floor, max, min, round } from 'ks-math';
+import { max, min, round } from 'ks-math';
 import { padLeft } from './string-util';
 
 export interface RGBA {
@@ -33,7 +33,7 @@ const rgbRegex  =  /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
 
 let utilContext: CanvasRenderingContext2D;
 
-export function blendColors(color1: string, color2: string): string {
+export function blendColors(color1: string, color2: string, portion1 = 0.5): string {
   const c1 = parseColor(color1);
   const c2 = parseColor(color2);
   const r1 = c1.r;
@@ -44,11 +44,12 @@ export function blendColors(color1: string, color2: string): string {
   const g2 = c2.g;
   const b2 = c2.b;
   const a2 = c2.alpha;
+  const portion2 = 1 - portion1;
 
-  return colorFromRGB(floor((r1 + r2 + 1) / 2),
-                      floor((g1 + g2 + 1) / 2),
-                      floor((b1 + b2 + 1) / 2),
-                            (a1 + a2)     / 2);
+  return colorFromRGB(r1 * portion1 + r2 * portion2,
+                      g1 * portion1 + g2 * portion2,
+                      b1 * portion1 + b2 * portion2,
+                      a1 * portion1 + a2 * portion2);
 }
 
 export function colorFrom24BitInt(i: number, alpha = 1.0): string {
@@ -72,13 +73,14 @@ export function colorFromRGB(r: number, g: number, b: number, alpha = 1.0): stri
   r = min(max(round(r), 0), 255);
   g = min(max(round(g), 0), 255);
   b = min(max(round(b), 0), 255);
+  const a = min(max(alpha, 0), 1).toFixed(4).replace(/([01]).0000/, '$1').replace(/([^0])0+$/, '$1');
 
-  if (alpha >= 1.0)
+  if (a === '1')
     return ('#' + padLeft(r.toString(16), 2, '0')
                 + padLeft(g.toString(16), 2, '0')
                 + padLeft(b.toString(16), 2, '0')).toUpperCase();
   else
-    return 'rgba(' + r + ',' + g + ',' + b + ',' + max(alpha, 0) + ')';
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 export function drawOutlinedText(context: CanvasRenderingContext2D, text: string, x: number, y: number,

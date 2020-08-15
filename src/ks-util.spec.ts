@@ -17,7 +17,7 @@
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { parseColor } from './browser-graphics-util';
+import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape } from './browser-util';
 import { DateTimeOptions, formatDateTime, last, processMillis, toBoolean, toInt } from './misc-util';
 import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals } from './string-util';
@@ -47,6 +47,17 @@ describe('ks-util', () => {
     expect(rgba.r).toEqual(128);
     expect(rgba.g).toEqual(144);
     expect(rgba.b).toEqual(160);
+  });
+
+  it('should blend colors correctly', () => {
+    let color = blendColors('white', 'black');
+    expect(color).toEqual('#808080');
+
+    color = blendColors('white', 'black', 0.75);
+    expect(color).toEqual('#BFBFBF');
+
+    color = blendColors('rgba(20, 40, 60, 0.6)', 'rgba(40, 60, 80, 0.4)');
+    expect(color).toEqual('rgba(30, 50, 70, 0.5)');
   });
 
   it('should format date/time correctly', () => {
