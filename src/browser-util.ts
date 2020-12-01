@@ -480,7 +480,7 @@ export function isOpera(): boolean {
 }
 
 export function isRaspbian(): boolean {
-  return navigator.userAgent.includes('Raspbian');
+  return navigator.userAgent.includes('Raspbian') || navigator.userAgent.includes('Linux armv7l');
 }
 
 export function isSafari(): boolean {
