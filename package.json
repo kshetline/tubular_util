@@ -1,6 +1,6 @@
 {
   "name": "ks-util",
-  "version": "2.1.1",
+  "version": "2.2.1",
   "description": "Miscellaneous utility functions",
   "main": "dist/index.js",
   "typings": "dist/index",
