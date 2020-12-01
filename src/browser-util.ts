@@ -61,6 +61,7 @@ export function beep(): void {
     oscillator.stop();
     oscillator.disconnect();
     gain.disconnect();
+    // noinspection JSIgnoredPromiseFromCall
     audioContext.close();
   }, 100);
 }
@@ -69,12 +70,14 @@ export function eventToKey(event: KeyboardEvent): string {
   let key = event.key;
 
   if (key === undefined) {
+    // noinspection JSDeprecatedSymbols
     const charCode = event.charCode;
 
     if (charCode !== 0) {
       key = String.fromCodePoint(charCode);
     }
     else {
+      // noinspection JSDeprecatedSymbols
       const keyCode = event.keyCode || event.which;
 
       switch (keyCode) {
@@ -463,6 +466,11 @@ export function isFullScreen(): boolean {
   return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
 }
 
+export function isEffectivelyFullScreen(): boolean {
+  return isFullScreen() ||
+    (window.innerWidth === window.screen?.width && window.innerHeight === window.screen?.height);
+}
+
 export function isIE(): boolean {
   return /(?:\b(MS)?IE\s+|\bTrident\/7\.0;.*\s+rv:)(\d+)/.test(navigator.userAgent);
 }
@@ -509,33 +517,55 @@ export function restrictPixelWidth(text: string, font: string | HTMLElement, max
 }
 
 export function setFullScreen(full: boolean): void {
+  // noinspection JSIgnoredPromiseFromCall
+  setFullScreenAsync(full, true);
+}
+
+export function setFullScreenAsync(full: boolean, throwImmediate = false): Promise<void> {
   if (full !== isFullScreen())
-    toggleFullScreen();
+    return toggleFullScreenAsync(throwImmediate);
+
+  return Promise.resolve();
 }
 
 export function toggleFullScreen(): void {
+  // noinspection JSIgnoredPromiseFromCall
+  toggleFullScreenAsync();
+}
+
+export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   const fsDoc = document as FsDocument;
 
-  if (!isFullScreen()) {
-    const fsDocElem = document.documentElement as FsDocumentElement;
+  try {
+    if (!isFullScreen()) {
+      const fsDocElem = document.documentElement as FsDocumentElement;
 
-    if (fsDocElem.requestFullscreen)
-      fsDocElem.requestFullscreen();
-    else if (fsDocElem.msRequestFullscreen)
-      fsDocElem.msRequestFullscreen();
-    else if (fsDocElem.mozRequestFullScreen)
-      fsDocElem.mozRequestFullScreen();
-    else if (fsDocElem.webkitRequestFullscreen)
-      fsDocElem.webkitRequestFullscreen();
+      if (fsDocElem.requestFullscreen)
+        return fsDocElem.requestFullscreen();
+      else if (fsDocElem.msRequestFullscreen)
+        fsDocElem.msRequestFullscreen();
+      else if (fsDocElem.mozRequestFullScreen)
+        fsDocElem.mozRequestFullScreen();
+      else if (fsDocElem.webkitRequestFullscreen)
+        fsDocElem.webkitRequestFullscreen();
+    }
+    else if (fsDoc.exitFullscreen)
+      return fsDoc.exitFullscreen();
+    else if (fsDoc.msExitFullscreen)
+      fsDoc.msExitFullscreen();
+    else if (fsDoc.mozCancelFullScreen)
+      fsDoc.mozCancelFullScreen();
+    else if (fsDoc.webkitExitFullscreen)
+      fsDoc.webkitExitFullscreen();
   }
-  else if (fsDoc.exitFullscreen)
-    fsDoc.exitFullscreen();
-  else if (fsDoc.msExitFullscreen)
-    fsDoc.msExitFullscreen();
-  else if (fsDoc.mozCancelFullScreen)
-    fsDoc.mozCancelFullScreen();
-  else if (fsDoc.webkitExitFullscreen)
-    fsDoc.webkitExitFullscreen();
+  catch (e) {
+    if (throwImmediate)
+      throw e;
+
+    return Promise.reject(e);
+  }
+
+  return Promise.resolve()
 }
 
 export function urlEncodeParams(params: { [key: string]: string }): string {
