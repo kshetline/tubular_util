@@ -20,7 +20,7 @@
 import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape } from './browser-util';
 import { DateTimeOptions, formatDateTime, last, processMillis, toBoolean, toInt } from './misc-util';
-import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals, toMixedCase } from './string-util';
+import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
 
 describe('ks-util', () => {
   it('should extend a string, adding delimiters where needed', () => {
@@ -113,7 +113,7 @@ describe('ks-util', () => {
       if (intervals.length >= 5) {
         clearInterval(interval);
         // Allow for some outlier values caused by slowness of start-up
-        expect(intervals.filter(t => 40 <= t && t <= 60).length).toBeGreaterThanOrEqual(3);
+        expect(intervals.filter(t => t >= 40 && t <= 60).length).toBeGreaterThanOrEqual(3);
         done();
       }
 
@@ -179,6 +179,19 @@ describe('ks-util', () => {
   });
 
   it('should properly convert strings to mixed case', () => {
-    expect(toMixedCase("isn't this working ?")).toEqual("Isn't This Working ?");
+    expect(toMixedCase("isn't this working?")).toEqual("Isn't This Working?");
+    expect(toMixedCase('ISN’T THIS WORKING?')).toEqual('Isn’t This Working?');
+    expect(toMixedCase('one two-three 4x j99')).toEqual('One Two-Three 4x j99');
+  });
+
+  it('should properly convert strings to title case', () => {
+    expect(toTitleCase("isn't this working?")).toEqual("Isn't This Working?");
+    expect(toTitleCase('ISN’T THIS WORKING?')).toEqual('Isn’t This Working?');
+    expect(toTitleCase('read ’em and weep', { shortSmall: ["'em"] })).toEqual('Read ’em and Weep');
+    expect(toTitleCase('from the ëarth to the moon')).toEqual('From the Ëarth to the Moon');
+    expect(toTitleCase('YOUR NEW IPHONE')).toEqual('Your New iPhone');
+    expect(toTitleCase('born in the usa', { special: ['USA'] })).toEqual('Born in the USA');
+    expect(toTitleCase('born in the USA', { keepAllCaps: true })).toEqual('Born in the USA');
+    expect(toTitleCase("born in the ol' USA", { keepAllCaps: true, shortSmall: ['-in', "ol'"] })).toEqual("Born In the ol' USA");
   });
 });

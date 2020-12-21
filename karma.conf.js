@@ -1,21 +1,21 @@
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
-    frameworks: ["jasmine", "karma-typescript"],
+    frameworks: ['jasmine', 'karma-typescript'],
     files: [
-      "src/**/*.ts"
+      'src/**/*.ts'
     ],
     preprocessors: {
-      "**/*.ts": "karma-typescript"
+      '**/*.ts': 'karma-typescript'
     },
-    reporters: ["progress", "karma-typescript", "kjhtml"],
-    browsers: ["Chrome"], // , "Firefox"],
+    reporters: ['progress', 'karma-typescript', 'kjhtml'],
+    browsers: ['Chrome'], // , 'Firefox'],
     karmaTypescriptConfig: {
       bundlerOptions: {
         transforms: [
-          require("karma-typescript-es6-transform")()
+          require('karma-typescript-es6-transform')()
         ]
       },
-      tsconfig: "./tsconfig.karma.json"
+      tsconfig: './tsconfig.karma.json'
     }
   });
 };
