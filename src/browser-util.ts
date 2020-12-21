@@ -1,5 +1,5 @@
 /*
-  Copyright © 2017-2019 Kerry Shetline, kerry@shetline.com
+  Copyright © 2017-2020 Kerry Shetline, kerry@shetline.com
 
   MIT license: https://opensource.org/licenses/MIT
 
@@ -306,7 +306,7 @@ export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
   }
   const leading = lineHeight - fullAscent - descent;
 
-  metrics = {font: font, lineHeight: lineHeight, ascent: ascent, fullAscent: fullAscent, descent: descent, leading: leading};
+  metrics = { font: font, lineHeight: lineHeight, ascent: ascent, fullAscent: fullAscent, descent: descent, leading: leading };
   cachedMetrics[font] = metrics;
 
   return metrics;
@@ -565,7 +565,7 @@ export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
     return Promise.reject(e);
   }
 
-  return Promise.resolve()
+  return Promise.resolve();
 }
 
 export function urlEncodeParams(params: { [key: string]: string }): string {

@@ -19,12 +19,22 @@
 
 import { last } from './misc-util';
 
+let unicodePatternsWork = true;
+
+try {
+  'm&m'.split(/[^\p{L}]+/u);
+}
+catch {
+  unicodePatternsWork = false;
+}
+
 export function asLines(s: string, trimFinalBlankLines = false): string[] {
   if (s) {
     const lines = s.split(/\r\n|\r|\n/);
 
-    while (trimFinalBlankLines && last(lines) === '')
-      lines.pop();
+    if (trimFinalBlankLines)
+      while (last(lines) === '')
+        lines.pop();
 
     return lines;
   }
@@ -132,8 +142,7 @@ export function makePlainASCII(s: string, forFileName = false): string {
 
     const cc = ch.charCodeAt(0);
 
-    if (32 <= cc && cc <= 126)
-      {} // Do nothing
+    if (32 <= cc && cc <= 126) {} // Do nothing
     else if (cc === 0xC6) // Latin capital letter AE
       ch2 = 'Ae';
     else if (cc === 0xD0) // Latin capital letter Eth
@@ -212,6 +221,15 @@ export function makePlainASCII_UC(s: string): string {
     return s;
 }
 
+export function toMixedCase(s: string): string {
+  if (unicodePatternsWork)
+    // eslint-disable-next-line no-misleading-character-class
+    return s.replace(/\p{L}[\p{L}'’ʼ\u0300-\u036F]*/gu, word => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase());
+  else
+    // eslint-disable-next-line no-misleading-character-class
+    return s.replace(/\w[\w'’ʼ\u0300-\u036F]*/g, word => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase());
+}
+
 export function padLeft(item: string | number, length: number, padChar = ' '): string {
   let sign = '';
 
@@ -244,7 +262,7 @@ export function padRight(item: string, length: number, padChar?: string): string
 
 export function replace(str: string, searchStr: string, replaceStr: string, caseInsensitive = false): string {
   // escape regexp special characters in search string
-  searchStr = searchStr.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  searchStr = searchStr.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 
   return str.replace(new RegExp(searchStr, 'g' + (caseInsensitive ? 'i' : '')), replaceStr);
 }
@@ -271,8 +289,7 @@ export function stripLatinDiacriticals(s: string): string {
     let ch2;
     let pos: number;
 
-    if (cc < 0xC0)
-      {} // Do nothing
+    if (cc < 0xC0) {} // Do nothing
     else if (0x100 <= cc && cc <= 0x17F) { // Various Latin Extended A
       ch2 = latinExtendedASubstitutions.charAt(cc - 0x100);
 

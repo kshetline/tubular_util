@@ -1,5 +1,5 @@
 /*
-  Copyright © 2017-2019 Kerry Shetline, kerry@shetline.com
+  Copyright © 2017-2020 Kerry Shetline, kerry@shetline.com
 
   MIT license: https://opensource.org/licenses/MIT
 
@@ -17,7 +17,7 @@
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { max, min, round } from 'ks-math';
+import { max, min, round } from '@tubular/math';
 import { padLeft } from './string-util';
 
 export interface RGBA {
@@ -118,6 +118,7 @@ export function getPixel(imageData: ImageData, x: number, y: number): number {
 
   const offset = (y * imageData.width + x) * 4;
 
+  // eslint-disable-next-line computed-property-spacing
   return (imageData.data[offset    ] << 16) |
          (imageData.data[offset + 1] <<  8) |
           imageData.data[offset + 2]        |
@@ -139,28 +140,32 @@ export function parseColor(color: string): RGBA {
 
   if (color.startsWith('#')) {
     if (color.length === 4)
-      return {r: parseInt(color.substr(1, 1) + color.substr(1, 1), 16),
-              g: parseInt(color.substr(2, 1) + color.substr(2, 1), 16),
-              b: parseInt(color.substr(3, 1) + color.substr(3, 1), 16),
-              alpha: 1.0};
+      return {
+        r: parseInt(color.substr(1, 1) + color.substr(1, 1), 16),
+        g: parseInt(color.substr(2, 1) + color.substr(2, 1), 16),
+        b: parseInt(color.substr(3, 1) + color.substr(3, 1), 16),
+        alpha: 1.0
+      };
     else if (color.length === 7)
-      return {r: parseInt(color.substr(1, 2), 16),
-              g: parseInt(color.substr(3, 2), 16),
-              b: parseInt(color.substr(5, 2), 16),
-              alpha: 1.0};
+      return {
+        r: parseInt(color.substr(1, 2), 16),
+        g: parseInt(color.substr(3, 2), 16),
+        b: parseInt(color.substr(5, 2), 16),
+        alpha: 1.0
+      };
   }
 
   match = rgbRegex.exec(color);
 
   if (match)
-    return {r: Number(match[1]), g: Number(match[2]), b: Number(match[3]), alpha: 1};
+    return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]), alpha: 1 };
 
   match = rgbaRegex.exec(color);
 
   if (match)
-    return {r: Number(match[1]), g: Number(match[2]), b: Number(match[3]), alpha: Number(match[4])};
+    return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]), alpha: Number(match[4]) };
 
-  return {r: 0, g: 0, b: 0, alpha: 0};
+  return { r: 0, g: 0, b: 0, alpha: 0 };
 }
 
 export function replaceAlpha(color: string, newAlpha: number): string {
@@ -175,6 +180,7 @@ export function setPixel(imageData: ImageData, x: number, y: number, pixel: numb
 
   const offset = (y * imageData.width + x) * 4;
 
+  // eslint-disable-next-line computed-property-spacing
   imageData.data[offset    ] =  (pixel & 0x00FF0000) >> 16;
   imageData.data[offset + 1] =  (pixel & 0x0000FF00) >>  8;
   imageData.data[offset + 2] =   pixel & 0x000000FF;
