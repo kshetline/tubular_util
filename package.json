@@ -11,7 +11,7 @@
     "build": "rimraf dist/ && tsc && webpack && webpack --env target=umd",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts'",
-    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc --reporter=html mocha --require ts-node/register src/**/*.spec.ts"
+    "test": "nyc --reporter=html mocha --require ts-node/register src/**/*.spec.ts"
   },
   "keywords": [
     "canvas",
@@ -43,6 +43,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^5.0.0",
+    "esm": "^3.2.25",
     "mocha": "^8.2.1",
     "nyc": "^15.1.0",
     "rimraf": "^3.0.2",
