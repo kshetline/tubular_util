@@ -29,7 +29,7 @@ export interface RGBA {
 
 const colorNameRegex = /[a-z]+/i;
 const rgbaRegex = /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)\s*\)/;
-const rgbRegex  =  /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
+const rgbRegex  = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
 
 let utilContext: CanvasRenderingContext2D;
 
