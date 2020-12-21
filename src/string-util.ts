@@ -19,12 +19,29 @@
 
 import { last } from './misc-util';
 
+let allUpperPattern: RegExp;
+let wordPattern: RegExp;
+
+try {
+  'm&m'.split(/(?<!4)[^\p{L}]+/u);
+  // This line reached if Unicode character classes and lookbehind both work.
+  allUpperPattern = /^\p{Lu}+$/u;
+  // eslint-disable-next-line no-misleading-character-class
+  wordPattern = /(?:['’ʼ]|(?<=[-\s,.:;"]|^))[\p{L}'’ʼ\u0300-\u036F]+\b['’ʼ]?/gu;
+}
+catch {
+  allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
+  // eslint-disable-next-line no-misleading-character-class
+  wordPattern = /[A-Za-zÀ-ÖØ-ÿ'’ʼ\u0300-\u036F]+\b['’ʼ]?/g;
+}
+
 export function asLines(s: string, trimFinalBlankLines = false): string[] {
   if (s) {
     const lines = s.split(/\r\n|\r|\n/);
 
-    while (trimFinalBlankLines && last(lines) === '')
-      lines.pop();
+    if (trimFinalBlankLines)
+      while (last(lines) === '')
+        lines.pop();
 
     return lines;
   }
@@ -72,6 +89,7 @@ const diacriticals = '\u00C0\u00C1\u00C2\u00C3\u00C4\u00C5\u00C7\u00C8\u00C9\u00
                      '\u201C\u201D\u201F\u201C' + // left double quote, right double quote, double low-9 quote, double high reversed-9 single quote
                      '\u2024\u2027\u2032\u2033' + // One dot leader, hyphenation point, prime, double prime
                      '\u2039\u203A\u2044';        // left single angle quote, right single angle quote, fraction slash
+// noinspection SpellCheckingInspection
 const plainChars = 'AAAAAACEEEEI' +
                    'IIINOOOOOOUU' +
                    'UUYaaaaaacee' +
@@ -85,6 +103,7 @@ const plainChars = 'AAAAAACEEEEI' +
                    '<>/';
 const latinExtendedASubstitutions = 'AaAaAaCcCcCcCcDdDdEeEeEeEeEeGgGgGgGgHhHhIiIiIiIiIi--JjKkkLlLlLlL' +
                                     'lLlNnNnNnn--OoOoOo--RrRrRrSsSsSsSsTtTtTtUuUuUuUuUuUuWwYyYZzZzZzs';
+// inspection SpellCheckingInspection
 
 export function makePlainASCII(s: string, forFileName = false): string {
   if (!s)
@@ -132,8 +151,7 @@ export function makePlainASCII(s: string, forFileName = false): string {
 
     const cc = ch.charCodeAt(0);
 
-    if (32 <= cc && cc <= 126)
-      {} // Do nothing
+    if (32 <= cc && cc <= 126) {} // Do nothing
     else if (cc === 0xC6) // Latin capital letter AE
       ch2 = 'Ae';
     else if (cc === 0xD0) // Latin capital letter Eth
@@ -212,6 +230,90 @@ export function makePlainASCII_UC(s: string): string {
     return s;
 }
 
+function capitalizeFirstLetter(s: string): string {
+  if (s.length > 1 && /^['’ʼ]/.test(s))
+    return s.charAt(0) + s.charAt(1).toUpperCase() + s.substr(2).toLowerCase();
+  else
+    return s.charAt(0).toUpperCase() + s.substr(1).toLowerCase();
+}
+
+function toCanonicalLowercase(s: string): string {
+  return s.toLowerCase().replace(/['’ʼ]/g, "'");
+}
+
+export function isAllUppercase(s: string): boolean {
+  return s && allUpperPattern.test(s);
+}
+
+export function toMixedCase(s: string): string {
+  return s.replace(wordPattern, word => capitalizeFirstLetter(word));
+}
+
+const defaultShortSmalls = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'by', 'de', 'for', 'for', 'from',
+  'in', 'into', 'near', 'nor', 'of', 'on', 'onto', 'or', 'the', 'to', 'with']);
+const specialsRaw = ['eBay', 'FedEx', 'iCloud', 'iMac', 'iOS', 'iPad', 'iPhone', 'MacBook', 'macOS', 'PepsiCo', 'watchOS'];
+const defaultSpecials = new Map<string, string>();
+
+specialsRaw.forEach(word => defaultSpecials.set(toCanonicalLowercase(word), word));
+
+export interface TitleCaseOptions {
+  keepAllCaps?: boolean;
+  shortSmall?: string[];
+  special?: string[];
+}
+
+export function toTitleCase(s: string, options?: TitleCaseOptions): string {
+  options = options ?? {};
+
+  let shortSmalls = defaultShortSmalls;
+  let specials = defaultSpecials;
+  const firstNonSpaceIndex = /^\s*/.exec(s)[0].length;
+  const lastNonSpaceIndex = s.length - /\s*$/.exec(s)[0].length;
+
+  if (options.shortSmall) {
+    shortSmalls = new Set(shortSmalls);
+    options.shortSmall.forEach(word => {
+      if (word.startsWith('-'))
+        shortSmalls.delete(word.substr(1));
+      else
+        shortSmalls.add(word);
+    });
+  }
+
+  if (options.special) {
+    specials = new Map(specials);
+    options.special.forEach(word => {
+      const lcWord = toCanonicalLowercase(word);
+
+      if (word.startsWith('-'))
+        specials.delete(lcWord.substr(1));
+      else
+        specials.set(lcWord, word);
+    });
+  }
+
+  const wordHandler = (word: string, offset: number): string => {
+    if (options.keepAllCaps && isAllUppercase(word))
+      return word;
+
+    const lcWord = toCanonicalLowercase(word);
+
+    if (specials.has(lcWord))
+      return specials.get(lcWord);
+
+    word = capitalizeFirstLetter(word);
+
+    const atStartOrEnd = (offset === firstNonSpaceIndex || offset === lastNonSpaceIndex - word.length);
+
+    if (!atStartOrEnd && shortSmalls.has(lcWord))
+      word = word.toLowerCase(); // Turn to lowercase again to keep original apostrophe forms.
+
+    return word;
+  };
+
+  return s.replace(wordPattern, wordHandler);
+}
+
 export function padLeft(item: string | number, length: number, padChar = ' '): string {
   let sign = '';
 
@@ -223,28 +325,25 @@ export function padLeft(item: string | number, length: number, padChar = ' '): s
 
   let result = String(item);
 
-  while (result.length < length) {
+  while (result.length < length)
     result = padChar + result;
-  }
 
   return sign + result;
 }
 
 export function padRight(item: string, length: number, padChar?: string): string {
-  if (!padChar) {
+  if (!padChar)
     padChar = ' ';
-  }
 
-  while (item.length < length) {
+  while (item.length < length)
     item += padChar;
-  }
 
   return item;
 }
 
 export function replace(str: string, searchStr: string, replaceStr: string, caseInsensitive = false): string {
   // escape regexp special characters in search string
-  searchStr = searchStr.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  searchStr = searchStr.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 
   return str.replace(new RegExp(searchStr, 'g' + (caseInsensitive ? 'i' : '')), replaceStr);
 }
@@ -271,8 +370,7 @@ export function stripLatinDiacriticals(s: string): string {
     let ch2;
     let pos: number;
 
-    if (cc < 0xC0)
-      {} // Do nothing
+    if (cc < 0xC0) {} // Do nothing
     else if (0x100 <= cc && cc <= 0x17F) { // Various Latin Extended A
       ch2 = latinExtendedASubstitutions.charAt(cc - 0x100);
 

@@ -28,11 +28,13 @@
 # misc
 /.sass-cache
 /connect.lock
+/.nyc_output
 /coverage
 /libpeerconnection.log
 npm-debug.log
 testem.log
 /typings
+*.tgz
 
 # e2e
 /e2e/*.js
