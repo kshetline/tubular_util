@@ -209,3 +209,7 @@ export function last<T>(array: Array<T>): T {
   else
     return undefined;
 }
+
+export function forEach<T>(obj: { [key: string]: T }, callback: (key: string, value: T) => void): void {
+  Object.keys(obj).forEach(key => callback(key, obj[key]));
+}
