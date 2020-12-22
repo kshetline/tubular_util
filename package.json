@@ -1,19 +1,18 @@
 {
   "name": "@tubular/util",
-  "version": "3.0.0",
+  "version": "3.0.3",
   "description": "Miscellaneous utility functions",
-  "type": "module",
   "browser": "dist/index.umd.js",
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
+  "esm2015": "dist/index.js",
   "typings": "dist/index",
+  "sideEffects": false,
   "scripts": {
-    "build": "npm run set-module && rimraf dist/ && tsc && webpack && webpack --env target=umd",
+    "build": "rimraf dist/ && tsc && webpack && webpack --env target=umd",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts'",
-    "set-cjs": "replace --silent '\"type\": \"module\"' '\"type\": \"commonjs\"' package.json",
-    "set-module": "replace --silent '\"type\": \"commonjs\"' '\"type\": \"module\"' package.json",
-    "test": "npm run set-cjs && (karma start --single-run --watch=false || true) && npm run set-module"
+    "test": "karma start --single-run --watch=false"
   },
   "keywords": [
     "canvas",
@@ -24,7 +23,7 @@
   "author": "Kerry Shetline <kerry@shetline.com>",
   "license": "MIT",
   "dependencies": {
-    "@tubular/math": "^2.0.2",
+    "@tubular/math": "^2.0.5",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
@@ -32,8 +31,8 @@
     "@babel/preset-env": "^7.12.11",
     "@babel/register": "^7.12.10",
     "@types/jasmine": "^3.6.2",
-    "@typescript-eslint/eslint-plugin": "^4.10.0",
-    "@typescript-eslint/parser": "^4.10.0",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0",
     "babel-loader": "^8.2.2",
     "eslint": "^7.16.0",
     "eslint-config-standard": "^16.0.2",

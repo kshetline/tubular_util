@@ -1,8 +1,9 @@
 const { resolve } = require('path');
 
 module.exports = env => {
+  const target = env?.target === 'umd' ? 'es5' : 'es2015';
   const libraryTarget = env?.target === 'umd' ? 'umd' : 'commonjs';
-  const target = env?.target === 'umd' ? 'es5' : 'node';
+  const library = env?.target === 'umd' ? 'tbMath' : undefined;
 
   return {
     mode: env?.dev ? 'development' : 'production',
@@ -12,7 +13,7 @@ module.exports = env => {
       path: resolve(__dirname, 'dist'),
       filename: `index.${env?.target || 'cjs'}.js`,
       libraryTarget,
-      library: '@tubular_math'
+      library
     },
     module: {
       rules: [
