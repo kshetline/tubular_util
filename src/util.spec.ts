@@ -18,7 +18,7 @@
 */
 
 import { blendColors, parseColor } from './browser-graphics-util';
-import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape } from './browser-util';
+import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import { DateTimeOptions, formatDateTime, last, processMillis, toBoolean, toInt } from './misc-util';
 import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
 
@@ -176,6 +176,10 @@ describe('ks-util', () => {
       .toEqual('2 &lt; 3 &amp; 5 &gt; 4, &quot;Don&apos;t you see?&quot;');
     expect(htmlUnescape('2 &lt; 3 &amp; 5 &gt; 4, &quot;Don&apos;t you see?&quot; &#33 &#xB6; &unknown; &#nope; @'))
       .toEqual(`2 < 3 & 5 > 4, "Don't you see?" ! ¶ &unknown; &#nope; @`);
+  });
+
+  it('should properly encode URL parameters', () => {
+    expect(urlEncodeParams({ foo: 22, bar: false, baz: 'M&M', nil: null })).toEqual('foo=22&bar=false&baz=M%26M');
   });
 
   it('should properly convert strings to mixed case', () => {

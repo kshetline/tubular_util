@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Miscellaneous utility functions",
   "browser": "dist/index.umd.js",
   "main": "dist/index.cjs.js",
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "rimraf dist/ && tsc && webpack && webpack --env target=umd",
     "prepublishOnly": "npm run build",
-    "lint": "eslint 'src/**/*.ts'",
+    "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
     "test": "karma start --single-run --watch=false"
   },
   "keywords": [
@@ -23,8 +23,7 @@
   "author": "Kerry Shetline <kerry@shetline.com>",
   "license": "MIT",
   "dependencies": {
-    "@tubular/math": "^2.0.5",
-    "lodash": "^4.17.20"
+    "@tubular/math": "^2.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

@@ -17,8 +17,7 @@
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { forEach, isNil, isString } from 'lodash';
-import { toInt } from './misc-util';
+import { forEach, toInt } from './misc-util';
 
 export interface FontMetrics {
   font: string;
@@ -213,7 +212,7 @@ const cachedMetrics: {[font: string]: FontMetrics} = {};
 export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
   let font;
 
-  if (isString(elementOrFont))
+  if (typeof elementOrFont === 'string')
     font = <string> elementOrFont;
   else
     font = getFont(<Element> elementOrFont);
@@ -568,12 +567,12 @@ export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   return Promise.resolve();
 }
 
-export function urlEncodeParams(params: { [key: string]: string }): string {
+export function urlEncodeParams(params: { [key: string]: string | number | boolean }): string {
   const result: string[] = [];
 
-  forEach(params, (value: string, key: string) => {
-    if (!isNil(value))
-      result.push(key + '=' + encodeURIComponent(value));
+  forEach(params, (key, value) => {
+    if (value != null)
+      result.push(key + '=' + encodeURIComponent(value.toString()));
   });
 
   return result.join('&');
