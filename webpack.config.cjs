@@ -1,30 +1,24 @@
 const { resolve } = require('path');
 
 module.exports = env => {
-  const target = env?.target === 'umd' ? 'es5' : 'es2015';
-  const libraryTarget = env?.target === 'umd' ? 'umd' : 'commonjs';
-  const library = env?.target === 'umd' ? 'tbUtil' : undefined;
-
-  const config = {
+  return {
     mode: env?.dev ? 'development' : 'production',
-    target,
+    target: 'es5',
     entry: './dist/index.js',
     output: {
-      path: resolve(__dirname, 'dist'),
-      filename: `index.${env?.target || 'cjs'}.js`,
-      libraryTarget,
-      library
+      path: resolve(__dirname, 'dist/web'),
+      filename: `index.js`,
+      libraryTarget: 'umd',
+      library: 'tbUtil'
     },
     module: {
       rules: [
         { test: /\.js$/, use: 'babel-loader', resolve: { fullySpecified: false } }
       ]
-    }
+    },
+    resolve: {
+      mainFields: ['esm2015', 'es2015', 'module', 'main', 'browser']
+    },
+    devtool: 'source-map'
   };
-
-  // Allow umd target to bundle @tubular/math
-  if (env?.target !== 'umd')
-    config.externals = ['@tubular/math'];
-
-  return config;
 };

@@ -213,3 +213,104 @@ export function last<T>(array: Array<T>): T {
 export function forEach<T>(obj: { [key: string]: T }, callback: (key: string, value: T) => void): void {
   Object.keys(obj).forEach(key => callback(key, obj[key]));
 }
+
+export function isArray(a: any): boolean {
+  return Array.isArray(a);
+}
+
+/* eslint-disable no-prototype-builtins */
+export function isArrayLike(a: any): boolean {
+  return Array.isArray(a) || (isObject(a) && isNumber(a.length) && a.length >= 0 && a.length <= Number.MAX_SAFE_INTEGER &&
+    a.length === Math.floor(a.length));
+}
+
+export function isBoolean(a: any): boolean {
+  return typeof a === 'boolean';
+}
+
+export function isFunction(a: any): boolean {
+  return typeof a === 'function';
+}
+
+export function isNonFunctionObject(a: any): boolean {
+  return a && typeof a === 'object';
+}
+
+export function isNumber(a: any): boolean {
+  return typeof a === 'number';
+}
+
+export function isObject(a: any): boolean {
+  return a && (typeof a === 'function' || typeof a === 'object');
+}
+
+export function isString(a: any): boolean {
+  return typeof a === 'string';
+}
+
+export function isSymbol(a: any): boolean {
+  return typeof a === 'symbol';
+}
+
+export function clone(a: any): any {
+  if (isFunction(a) || !isObject(a))
+    return a;
+
+  if (isArray(a)) {
+    const c = [];
+
+    c.length = a.length;
+
+    for (let i = 0; i < a.length; ++i) {
+      if (a.hasOwnProperty(i))
+        c[i] = clone(a[i]);
+    }
+
+    return c;
+  }
+
+  const c = {};
+  const keys = Object.keys(a);
+
+  for (const key of keys)
+    c[key] = clone(a[key]);
+
+  return c;
+}
+
+export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
+  if (a === b || Object.is(a, b))
+    return true;
+  else if (typeof a !== typeof b || isArray(a) !== isArray(b))
+    return false;
+  else if (mustBeSameClass && (!a.constructor !== !b.constructor || a.constructor !== b.constructor))
+    return false;
+  else if (isArray(a)) {
+    for (let i = 0; i < a.length; ++i) {
+      if (a.hasOwnProperty(i)) {
+        if (!b.hasOwnProperty(i) || !isEqual(a[i], b[i], mustBeSameClass))
+          return false;
+      }
+      else if (b.hasOwnProperty(i))
+        return false;
+    }
+  }
+  else if (!isObject(a))
+    return false;
+  else {
+    const keys = Object.keys(a);
+    const keysB = new Set(Object.keys(b));
+
+    for (const key of keys) {
+      keysB.delete(key);
+
+      if (!b.hasOwnProperty(key) || !isEqual(a[key], b[key], mustBeSameClass))
+        return false;
+    }
+
+    if (keysB.size > 0)
+      return false;
+  }
+
+  return true;
+}

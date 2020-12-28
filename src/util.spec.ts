@@ -19,7 +19,10 @@
 
 import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
-import { DateTimeOptions, formatDateTime, last, processMillis, toBoolean, toInt } from './misc-util';
+import {
+  clone, DateTimeOptions, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction, isNonFunctionObject,
+  isNumber, isObject, isString, isSymbol, last, processMillis, toBoolean, toInt
+} from './misc-util';
 import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
 
 describe('ks-util', () => {
@@ -197,5 +200,74 @@ describe('ks-util', () => {
     expect(toTitleCase('born in the usa', { special: ['USA'] })).toEqual('Born in the USA');
     expect(toTitleCase('born in the USA', { keepAllCaps: true })).toEqual('Born in the USA');
     expect(toTitleCase("born in the ol' USA", { keepAllCaps: true, shortSmall: ['-in', "ol'"] })).toEqual("Born In the ol' USA");
+  });
+
+  it('should properly recognize data types', () => {
+    expect(isArray(5)).toBeFalse();
+    expect(isArray('foo')).toBeFalse();
+    const elem = document.createElement('div');
+    elem.appendChild(document.createElement('p'));
+    expect(isArray(elem.childNodes)).toBeFalse();
+
+    expect(isArrayLike(-7)).toBeFalse();
+    expect(isArrayLike([-7])).toBeTrue();
+    expect(isArrayLike(elem.childNodes)).toBeTrue();
+
+    expect(isBoolean(-7)).toBeFalse();
+    expect(isBoolean(false)).toBeTrue();
+    expect(isBoolean(elem.childNodes)).toBeFalse();
+
+    expect(isFunction(-7)).toBeFalse();
+    expect(isFunction(() => 'bar')).toBeTrue();
+    expect(isFunction(Math.sin)).toBeTrue();
+
+    expect(isNonFunctionObject(Math.PI)).toBeFalse();
+    expect(isNonFunctionObject({})).toBeTrue();
+    expect(isNonFunctionObject(() => 'bar')).toBeFalse();
+    expect(isNonFunctionObject('baz')).toBeFalse();
+
+    expect(isNumber(Math.PI)).toBeTrue();
+    expect(isNumber(() => 'bar')).toBeFalse();
+    expect(isNumber(NaN)).toBeTrue();
+
+    expect(isObject(Math.PI)).toBeFalse();
+    expect(isObject({})).toBeTrue();
+    expect(isObject(() => 'bar')).toBeTrue();
+    expect(isObject('baz')).toBeFalse();
+
+    expect(isString(Math.PI)).toBeFalse();
+    expect(isString('bar')).toBeTrue();
+    expect(isString(NaN)).toBeFalse();
+
+    expect(isSymbol(Math.PI)).toBeFalse();
+    expect(isSymbol(Symbol('bar'))).toBeTrue();
+  });
+
+  it('should properly deep clone values', () => {
+    expect(clone(5)).toEqual(5);
+    expect(clone('it')).toEqual('it');
+    expect(clone(false)).toEqual(false);
+    expect(clone({ a: 5, b: { c: -7 } })).toEqual({ a: 5, b: { c: -7 } });
+    expect(clone([1, 2, [3, 4]])).toEqual([1, 2, [3, 4]]);
+  });
+
+  it('should properly deep compares values', () => {
+    expect(isEqual(0, -0)).toBeTrue();
+    expect(isEqual(5, 5)).toBeTrue();
+    expect(isEqual('it', 'it')).toBeTrue();
+    expect(isEqual(false, false)).toBeTrue();
+    expect(isEqual({ a: 5, b: { c: -7 } }, { a: 5, b: { c: -7 } })).toBeTrue();
+    expect(isEqual([1, 2, [3, 4]], [1, 2, [3, 4]])).toBeTrue();
+
+    expect(isEqual(5, -7)).toBeFalse();
+    expect(isEqual('it', 'not it')).toBeFalse();
+    expect(isEqual(false, {})).toBeFalse();
+    expect(isEqual({ a: 5, b: { c: -7 } }, { a: 5, b: { c: -7, d: 'y' } })).toBeFalse();
+    expect(isEqual([1, 2, [3, 4]], [1, -2, [3, 4]])).toBeFalse();
+
+    const a1 = [1, undefined, 3]; // Undefined element vs. non-existent element
+    const a2 = [1]; a2[2] = 3;
+
+    expect(isEqual(a1, a2)).toBeFalse();
   });
 });
