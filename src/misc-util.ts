@@ -214,41 +214,41 @@ export function forEach<T>(obj: { [key: string]: T }, callback: (key: string, va
   Object.keys(obj).forEach(key => callback(key, obj[key]));
 }
 
-export function isArray(a: any): boolean {
+export function isArray(a: any): a is any[] {
   return Array.isArray(a);
 }
 
 /* eslint-disable no-prototype-builtins */
 export function isArrayLike(a: any): boolean {
-  return Array.isArray(a) || (isObject(a) && isNumber(a.length) && a.length >= 0 && a.length <= Number.MAX_SAFE_INTEGER &&
-    a.length === Math.floor(a.length));
+  return Array.isArray(a) || (isObject(a) && isNumber((a as any).length) &&
+      (a as any).length >= 0 && (a as any).length <= Number.MAX_SAFE_INTEGER && (a as any).length === Math.floor((a as any).length));
 }
 
-export function isBoolean(a: any): boolean {
+export function isBoolean(a: any): a is boolean {
   return typeof a === 'boolean';
 }
 
-export function isFunction(a: any): boolean {
+export function isFunction(a: any): a is (...args: any[]) => any {
   return typeof a === 'function';
 }
 
-export function isNonFunctionObject(a: any): boolean {
+export function isNonFunctionObject(a: any): a is object {
   return a && typeof a === 'object';
 }
 
-export function isNumber(a: any): boolean {
+export function isNumber(a: any): a is number {
   return typeof a === 'number';
 }
 
-export function isObject(a: any): boolean {
+export function isObject(a: any): a is object {
   return a && (typeof a === 'function' || typeof a === 'object');
 }
 
-export function isString(a: any): boolean {
+export function isString(a: any): a is string {
   return typeof a === 'string';
 }
 
-export function isSymbol(a: any): boolean {
+export function isSymbol(a: any): a is symbol {
   return typeof a === 'symbol';
 }
 
@@ -313,4 +313,23 @@ export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
   }
 
   return true;
+}
+
+function _flatten(result: any[], source: any[], depth: number): any[] {
+  for (const item of source) {
+    if (depth === 0 || !isArray(item))
+      result.push(item);
+    else
+      _flatten(result, item, depth - 1);
+  }
+
+  return result;
+}
+
+export function flatten(a: any[]): any[] {
+  return _flatten([], a, 1);
+}
+
+export function flattenDeep(a: any[]): any[] {
+  return _flatten([], a, Number.MAX_SAFE_INTEGER);
 }

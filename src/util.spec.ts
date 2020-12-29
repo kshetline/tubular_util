@@ -20,8 +20,8 @@
 import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
-  clone, DateTimeOptions, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction, isNonFunctionObject,
-  isNumber, isObject, isString, isSymbol, last, processMillis, toBoolean, toInt
+  clone, DateTimeOptions, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, processMillis, toBoolean, toInt
 } from './misc-util';
 import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
 
@@ -269,5 +269,12 @@ describe('ks-util', () => {
     const a2 = [1]; a2[2] = 3;
 
     expect(isEqual(a1, a2)).toBeFalse();
+  });
+
+  it('should properly flatten arrays', () => {
+    expect(flatten([1, 2, 3])).toEqual([1, 2, 3]);
+    expect(flatten([1, [2, 3], 4])).toEqual([1, 2, 3, 4]);
+    expect(flatten([1, [2, [3, 4]], 5])).toEqual([1, 2, [3, 4], 5]);
+    expect(flattenDeep([1, [2, [3, 4]], 5])).toEqual([1, 2, 3, 4, 5]);
   });
 });

@@ -3,7 +3,7 @@ const { resolve } = require('path');
 module.exports = env => {
   return {
     mode: env?.dev ? 'development' : 'production',
-    target: 'es5',
+    target: ['es5', 'web'],
     entry: './dist/index.js',
     output: {
       path: resolve(__dirname, 'dist/web'),

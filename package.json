@@ -1,15 +1,15 @@
 {
   "name": "@tubular/util",
-  "version": "3.0.4",
+  "version": "3.1.0",
   "description": "Miscellaneous utility functions",
-  "browser": "dist/index.umd.js",
-  "main": "dist/index.cjs.js",
+  "browser": "dist/web/index.js",
+  "main": "dist/es5/index.js",
   "module": "dist/index.js",
   "esm2015": "dist/index.js",
   "typings": "dist/index",
   "sideEffects": false,
   "scripts": {
-    "build": "rimraf dist/ && tsc && webpack && webpack --env target=umd",
+    "build": "rimraf dist/ && tsc && tsc --build tsconfig.es5.json && webpack",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
     "test": "karma start --single-run --watch=false"
@@ -23,7 +23,7 @@
   "author": "Kerry Shetline <kerry@shetline.com>",
   "license": "MIT",
   "dependencies": {
-    "@tubular/math": "^2.0.5"
+    "@tubular/math": "^2.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
