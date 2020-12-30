@@ -13,7 +13,14 @@ module.exports = env => {
     },
     module: {
       rules: [
-        { test: /\.js$/, use: 'babel-loader', resolve: { fullySpecified: false } }
+        {
+          test: /\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: { presets: ['@babel/preset-env'] }
+          },
+          resolve: { fullySpecified: false },
+        }
       ]
     },
     resolve: {
