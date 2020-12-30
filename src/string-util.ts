@@ -23,11 +23,15 @@ let allUpperPattern: RegExp;
 let wordPattern: RegExp;
 
 try {
-  'm&m'.split(/(?<!4)[^\p{L}]+/u);
+  // I want these regexes to fail if not supported, so it takes a bit of obfuscation
+  // to prevent Babel from transforming them into something that doesn't fail.
+  /* eslint-disable prefer-regex-literals */
+  const u = String.fromCharCode(117);
+  'm&m'.split(new RegExp('(?<!4)[^\\' + 'p{L}]+', u));
   // This line reached if Unicode character classes and lookbehind both work.
-  allUpperPattern = /^\p{Lu}+$/u;
+  allUpperPattern = new RegExp('^\\' + 'p{Lu}+$', u);
   // eslint-disable-next-line no-misleading-character-class
-  wordPattern = /(?:['’ʼ]|(?<=[-\s,.:;"]|^))[\p{L}'’ʼ\u0300-\u036F]+\b['’ʼ]?/gu;
+  wordPattern = new RegExp(`(?:['’ʼ]|(?<=[-\\s,.:;"]|^))[\\` + `p{L}'’ʼ\\u0300-\\u036F]+\\b['’ʼ]?`, 'g' + u);
 }
 catch {
   allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
