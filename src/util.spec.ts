@@ -21,9 +21,9 @@ import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
   clone, DateTimeOptions, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, processMillis, toBoolean, toInt
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, processMillis, sortObjectEntries, toBoolean, toInt
 } from './misc-util';
-import { asLines, extendDelimited, makePlainASCII, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
+import { asLines, extendDelimited, makePlainASCII, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
 
 describe('ks-util', () => {
   it('should extend a string, adding delimiters where needed', () => {
@@ -276,5 +276,18 @@ describe('ks-util', () => {
     expect(flatten([1, [2, 3], 4])).toEqual([1, 2, 3, 4]);
     expect(flatten([1, [2, [3, 4]], 5])).toEqual([1, 2, [3, 4], 5]);
     expect(flattenDeep([1, [2, [3, 4]], 5])).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('should properly escape characters for literal use in regexes', () => {
+    expect(regexEscape('foo[*]')).toEqual('foo\\[\\*\\]');
+    expect(regexEscape('abc.def$g')).toEqual('abc\\.def\\$g');
+  });
+
+  it('should properly sort order of object keys', () => {
+    const sample = { b: 1, c: -2, a: 5 };
+
+    expect(JSON.stringify(sortObjectEntries(sample))).toEqual('{"a":5,"b":1,"c":-2}');
+    expect(JSON.stringify(sortObjectEntries(sample, (a, b) => a[1] - b[1]))).toEqual('{"c":-2,"b":1,"a":5}');
+    expect(sortObjectEntries(sample, true)).toBe(sample);
   });
 });

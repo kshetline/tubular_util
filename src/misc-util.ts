@@ -17,7 +17,7 @@
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { zeroPad } from './string-util';
+import { compareStrings, zeroPad } from './string-util';
 
 export function processMillis(): number {
   if (typeof performance !== 'undefined')
@@ -228,11 +228,11 @@ export function isBoolean(a: any): a is boolean {
   return typeof a === 'boolean';
 }
 
-export function isFunction(a: any): a is (...args: any[]) => any {
+export function isFunction(a: any): a is Function {
   return typeof a === 'function';
 }
 
-export function isNonFunctionObject(a: any): a is object {
+export function isNonFunctionObject(a: any): a is Exclude<Record<string | number | symbol, any>, Function> {
   return a && typeof a === 'object';
 }
 
@@ -240,7 +240,7 @@ export function isNumber(a: any): a is number {
   return typeof a === 'number';
 }
 
-export function isObject(a: any): a is object {
+export function isObject(a: any): a is Record<string | number | symbol, any> {
   return a && (typeof a === 'function' || typeof a === 'object');
 }
 
@@ -332,4 +332,27 @@ export function flatten(a: any[]): any[] {
 
 export function flattenDeep(a: any[]): any[] {
   return _flatten([], a, Number.MAX_SAFE_INTEGER);
+}
+
+type EntrySorter = (a: [number | string | symbol, any], b: [number | string | symbol, any]) => number;
+const defaultSorter: EntrySorter = (a, b) => compareStrings(a[0].toString(), b[0].toString());
+
+export function sortObjectEntries<T>(obj: T, inPlace?: boolean): T;
+export function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boolean);
+export function sortObjectEntries<T>(obj: T, sorterOrInplace?: boolean | EntrySorter, inPlace = false): T {
+  const sorter = isFunction(sorterOrInplace) ? sorterOrInplace : undefined;
+  let result: T = {} as any;
+  const entries = Object.entries(obj);
+
+  inPlace = isBoolean(sorterOrInplace) ? sorterOrInplace : inPlace;
+  entries.sort(sorter ?? defaultSorter);
+
+  if (inPlace) {
+    Object.keys(obj).forEach(key => delete obj[key]);
+    result = obj;
+  }
+
+  entries.forEach(entry => result[entry[0]] = entry[1]);
+
+  return result;
 }

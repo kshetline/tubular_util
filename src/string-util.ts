@@ -418,3 +418,12 @@ export function zeroPad(n: number | string, digits: number): string {
 
   return '0'.repeat(Math.max(0, digits - s.length)) + s;
 }
+
+// The \ escape before the second [ is considered unnecessary here by ESLint,
+// but being left out is an error for some regex parsers.
+// eslint-disable-next-line no-useless-escape
+const charsNeedingRegexEscape = /[-\[\]/{}()*+?.\\^$|]/g;
+
+export function regexEscape(s: string): string {
+  return s.replace(charsNeedingRegexEscape, '\\$&');
+}
