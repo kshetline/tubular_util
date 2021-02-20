@@ -266,7 +266,7 @@ export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
     return false;
   else if (mustBeSameClass && (!a.constructor !== !b.constructor || a.constructor !== b.constructor))
     return false;
-  else if (isArray(a)) {
+  else if (isArray(a) && a.length === b.length) {
     for (let i = 0; i < a.length; ++i) {
       if (a.hasOwnProperty(i)) {
         if (!b.hasOwnProperty(i) || !isEqual(a[i], b[i], mustBeSameClass))
@@ -276,7 +276,7 @@ export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
         return false;
     }
   }
-  else if (!isObject(a))
+  else if (!isObject(a) || !isObject(b))
     return false;
   else {
     const keys = Object.keys(a);
@@ -337,3 +337,5 @@ export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySo
 
   return result;
 }
+
+export const noop = (..._args: any[]): void => {};
