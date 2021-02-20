@@ -28,7 +28,7 @@ module.exports = env => {
       ]
     },
     resolve: {
-      mainFields: ['esm2015', 'es2015', 'module', 'main', 'browser']
+      mainFields: ['es2015', 'browser', 'module', 'main', 'main-es5']
     },
     devtool: 'source-map'
   };

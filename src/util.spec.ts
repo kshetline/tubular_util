@@ -235,10 +235,22 @@ describe('ks-util', () => {
   it('should properly deep compares values', () => {
     expect(isEqual(0, -0)).toBeTrue();
     expect(isEqual(5, 5)).toBeTrue();
+    expect(isEqual(null, null)).toBeTrue();
+    expect(isEqual(5, null)).toBeFalse();
+    expect(isEqual(null, 5)).toBeFalse();
+    expect(isEqual(undefined, undefined)).toBeTrue();
+    expect(isEqual(5, undefined)).toBeFalse();
+    expect(isEqual(undefined, 5)).toBeFalse();
+    expect(isEqual(null, undefined)).toBeFalse();
+    expect(isEqual(undefined, null)).toBeFalse();
+    expect(isEqual(NaN, NaN)).toBeTrue();
+    expect(isEqual(null, undefined)).toBeFalse();
     expect(isEqual('it', 'it')).toBeTrue();
     expect(isEqual(false, false)).toBeTrue();
     expect(isEqual({ a: 5, b: { c: -7 } }, { a: 5, b: { c: -7 } })).toBeTrue();
     expect(isEqual([1, 2, [3, 4]], [1, 2, [3, 4]])).toBeTrue();
+    expect(isEqual([], [0])).toBeFalse();
+    expect(isEqual([0], [1])).toBeFalse();
 
     expect(isEqual(5, -7)).toBeFalse();
     expect(isEqual('it', 'not it')).toBeFalse();
@@ -250,6 +262,11 @@ describe('ks-util', () => {
     const a2 = [1]; a2[2] = 3;
 
     expect(isEqual(a1, a2)).toBeFalse();
+
+    expect(isEqual(null, a2)).toBeFalse();
+    expect(isEqual(null, { foo: 'bar' })).toBeFalse();
+    expect(isEqual(a2, null)).toBeFalse();
+    expect(isEqual({ foo: 'bar' }, null)).toBeFalse();
   });
 
   it('should properly flatten arrays', () => {
