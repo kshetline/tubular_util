@@ -205,6 +205,10 @@ export function isArrayLike(a: any): boolean {
       (a as any).length >= 0 && (a as any).length <= Number.MAX_SAFE_INTEGER && (a as any).length === Math.floor((a as any).length));
 }
 
+export function isBigint(a: any): a is boolean {
+  return typeof a === 'bigint';
+}
+
 export function isBoolean(a: any): a is boolean {
   return typeof a === 'boolean';
 }
@@ -233,30 +237,74 @@ export function isSymbol(a: any): a is symbol {
   return typeof a === 'symbol';
 }
 
-export function clone(a: any): any {
-  if (isFunction(a) || !isObject(a))
-    return a;
-
-  if (isArray(a)) {
-    const c = [];
-
-    c.length = a.length;
-
-    for (let i = 0; i < a.length; ++i) {
-      if (a.hasOwnProperty(i))
-        c[i] = clone(a[i]);
-    }
-
-    return c;
+export function classOf(a: any, noClassResult = false): string {
+  if (isObject(a)) {
+    if (a.constructor?.name)
+      return a.constructor.name;
+    else
+      return noClassResult ? 'no-class:object' : null;
   }
 
-  const c = {};
-  const keys = Object.keys(a);
+  return noClassResult ? 'no-class:' + typeof a : null;
+}
+
+export function clone<T>(orig: T): T {
+  if (isFunction(orig) || !isObject(orig))
+    return orig;
+
+  if (orig instanceof Date)
+    return new Date(orig) as unknown as T;
+  else if (orig instanceof RegExp)
+    return new RegExp(orig) as unknown as T;
+  else if (orig instanceof Map)
+    return new Map(Array.from(orig.entries()).map(entry => [entry[0], clone(entry[1])])) as unknown as T;
+  else if (orig instanceof Set)
+    return new Set(Array.from(orig.values()).map(item => clone(item))) as unknown as T;
+  else if (orig instanceof BigInt64Array)
+    return new BigInt64Array(orig) as unknown as T;
+  else if (orig instanceof BigUint64Array)
+    return new BigUint64Array(orig) as unknown as T;
+  else if (orig instanceof Float32Array)
+    return new Float32Array(orig) as unknown as T;
+  else if (orig instanceof Float64Array)
+    return new Float64Array(orig) as unknown as T;
+  else if (orig instanceof Int8Array)
+    return new Int8Array(orig) as unknown as T;
+  else if (orig instanceof Int16Array)
+    return new Int8Array(orig) as unknown as T;
+  else if (orig instanceof Int32Array)
+    return new Int8Array(orig) as unknown as T;
+  else if (orig instanceof Uint8Array)
+    return new Uint8Array(orig) as unknown as T;
+  else if (orig instanceof Uint16Array)
+    return new Uint8Array(orig) as unknown as T;
+  else if (orig instanceof Uint32Array)
+    return new Uint8Array(orig) as unknown as T;
+  else if (orig instanceof Uint8ClampedArray)
+    return new Uint8ClampedArray(orig) as unknown as T;
+
+  let theClone: any;
+  const qlass = classOf(orig);
+
+  if (qlass != null && qlass !== 'Array') {
+    theClone = Object.create(Object.getPrototypeOf(orig));
+
+    if (isArray(orig))
+      theClone.length = orig.length;
+  }
+  else if (isArray(orig)) {
+    theClone = [];
+    theClone.length = orig.length;
+  }
+  else
+    theClone = {};
+
+  const keys = Object.keys(orig);
 
   for (const key of keys)
-    c[key] = clone(a[key]);
+    theClone[key] = clone(orig[key]);
 
-  return c;
+  return theClone;
 }
 
 export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
