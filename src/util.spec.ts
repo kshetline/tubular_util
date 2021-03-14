@@ -281,10 +281,16 @@ describe('ks-util', () => {
     expect(instanceClone2.sum()).toEqual(5);
 
     expect(clone(new Date('2021-04-01T12:34Z')).toISOString()).toEqual('2021-04-01T12:34:00.000Z');
-    expect(clone(new Set([2, 78])).has(78)).toBeTruthy();
+    expect(clone(new Set([2, 78])).has(78)).toBeTrue();
     expect(clone(new Map([[2, 78]])).get(2)).toEqual(78);
     expect(clone(new Float32Array([1.25]))[0]).toEqual(1.25);
     expect(clone(new Uint8ClampedArray([3, 400]))[1]).toEqual(255);
+
+    const recurse = new Set<any>([1, 2]);
+
+    recurse.add([recurse]);
+    expect(clone(recurse)).toEqual(recurse);
+    expect(isEqual(recurse, recurse)).toBeTrue();
   });
 
   it('should properly deep compares values', () => {
@@ -322,6 +328,8 @@ describe('ks-util', () => {
     expect(isEqual(null, { foo: 'bar' })).toBeFalse();
     expect(isEqual(a2, null)).toBeFalse();
     expect(isEqual({ foo: 'bar' }, null)).toBeFalse();
+    expect(isEqual(new Float32Array([4.56, -3.14]), new Float32Array([4.56, -3.14]))).toBeTrue();
+    expect(isEqual(new Float32Array([4.56, -3.142]), new Float32Array([4.56, -3.14]))).toBeFalse();
   });
 
   it('should properly flatten arrays', () => {

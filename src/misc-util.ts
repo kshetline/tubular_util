@@ -249,41 +249,64 @@ export function classOf(a: any, noClassResult = false): string {
 }
 
 export function clone<T>(orig: T): T {
+  return cloneAux(orig, new WeakMap<any, any>());
+}
+
+function cloneAux<T>(orig: T, hash: WeakMap<any, any>): T {
   if (isFunction(orig) || !isObject(orig))
     return orig;
-
-  if (orig instanceof Date)
-    return new Date(orig) as unknown as T;
-  else if (orig instanceof RegExp)
-    return new RegExp(orig) as unknown as T;
-  else if (orig instanceof Map)
-    return new Map(Array.from(orig.entries()).map(entry => [entry[0], clone(entry[1])])) as unknown as T;
-  else if (orig instanceof Set)
-    return new Set(Array.from(orig.values()).map(item => clone(item))) as unknown as T;
-  else if (orig instanceof BigInt64Array)
-    return new BigInt64Array(orig) as unknown as T;
-  else if (orig instanceof BigUint64Array)
-    return new BigUint64Array(orig) as unknown as T;
-  else if (orig instanceof Float32Array)
-    return new Float32Array(orig) as unknown as T;
-  else if (orig instanceof Float64Array)
-    return new Float64Array(orig) as unknown as T;
-  else if (orig instanceof Int8Array)
-    return new Int8Array(orig) as unknown as T;
-  else if (orig instanceof Int16Array)
-    return new Int8Array(orig) as unknown as T;
-  else if (orig instanceof Int32Array)
-    return new Int8Array(orig) as unknown as T;
-  else if (orig instanceof Uint8Array)
-    return new Uint8Array(orig) as unknown as T;
-  else if (orig instanceof Uint16Array)
-    return new Uint8Array(orig) as unknown as T;
-  else if (orig instanceof Uint32Array)
-    return new Uint8Array(orig) as unknown as T;
-  else if (orig instanceof Uint8ClampedArray)
-    return new Uint8ClampedArray(orig) as unknown as T;
+  else if (hash.has(orig))
+    return hash.get(orig);
 
   let theClone: any;
+
+  if (orig instanceof Date)
+    theClone = new Date(orig);
+  else if (orig instanceof RegExp)
+    theClone = new RegExp(orig);
+  else if (orig instanceof Map) {
+    theClone = new Map();
+    hash.set(orig, theClone);
+    Array.from(orig.entries()).forEach(entry => theClone.set(entry[0], cloneAux(entry[1], hash)));
+
+    return theClone;
+  }
+  else if (orig instanceof Set) {
+    theClone = new Set();
+    hash.set(orig, theClone);
+    orig.forEach(item => theClone.add(cloneAux(item, hash)));
+
+    return theClone;
+  }
+  else if (orig instanceof BigInt64Array)
+    theClone = new BigInt64Array(orig);
+  else if (orig instanceof BigUint64Array)
+    theClone = new BigUint64Array(orig);
+  else if (orig instanceof Float32Array)
+    theClone = new Float32Array(orig);
+  else if (orig instanceof Float64Array)
+    theClone = new Float64Array(orig);
+  else if (orig instanceof Int8Array)
+    theClone = new Int8Array(orig);
+  else if (orig instanceof Int16Array)
+    theClone = new Int8Array(orig);
+  else if (orig instanceof Int32Array)
+    theClone = new Int8Array(orig);
+  else if (orig instanceof Uint8Array)
+    theClone = new Uint8Array(orig);
+  else if (orig instanceof Uint16Array)
+    theClone = new Uint8Array(orig);
+  else if (orig instanceof Uint32Array)
+    theClone = new Uint8Array(orig);
+  else if (orig instanceof Uint8ClampedArray)
+    theClone = new Uint8ClampedArray(orig);
+
+  if (theClone) {
+    hash.set(orig, theClone);
+
+    return theClone;
+  }
+
   const qlass = classOf(orig);
 
   if (qlass != null && qlass !== 'Array') {
@@ -299,10 +322,12 @@ export function clone<T>(orig: T): T {
   else
     theClone = {};
 
+  hash.set(orig, theClone);
+
   const keys = Object.keys(orig);
 
   for (const key of keys)
-    theClone[key] = clone(orig[key]);
+    theClone[key] = cloneAux(orig[key], hash);
 
   return theClone;
 }
