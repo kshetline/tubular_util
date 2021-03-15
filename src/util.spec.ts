@@ -1,10 +1,35 @@
 import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
+  classOf,
   clone, DateTimeOptions, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, processMillis, sortObjectEntries, toBoolean, toInt
 } from './misc-util';
 import { asLines, extendDelimited, makePlainASCII, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
+
+class TestClass {
+  array: number[];
+
+  constructor(public a: number, public b: number) {
+    this.array = [a, b];
+  }
+
+  sum(): number {
+    return this.a + this.b;
+  }
+}
+
+class TestClass2 extends Array<number> {
+  constructor(public name: string, a: number, b: number) {
+    super();
+    this.push(a);
+    this.push(b);
+  }
+
+  sum(): number {
+    return this.reduce((a, b) => a + b);
+  }
+}
 
 describe('ks-util', () => {
   it('should extend a string, adding delimiters where needed', () => {
@@ -224,12 +249,48 @@ describe('ks-util', () => {
     expect(isSymbol(Symbol('bar'))).toBeTrue();
   });
 
+  it('should properly get class names', () => {
+    expect(classOf(3)).toEqual(null);
+    expect(classOf(3, true)).toEqual('no-class:number');
+    expect(classOf(new Date())).toEqual('Date');
+    expect(classOf(new TestClass(44, 55))).toEqual('TestClass');
+  });
+
   it('should properly deep clone values', () => {
     expect(clone(5)).toEqual(5);
     expect(clone('it')).toEqual('it');
     expect(clone(false)).toEqual(false);
     expect(clone({ a: 5, b: { c: -7 } })).toEqual({ a: 5, b: { c: -7 } });
     expect(clone([1, 2, [3, 4]])).toEqual([1, 2, [3, 4]]);
+
+    const orig = new TestClass(2, 3);
+    const instanceClone = clone(orig);
+
+    expect(instanceClone.sum()).toEqual(5);
+    expect(classOf(instanceClone)).toEqual('TestClass');
+    orig.array[0] = -7;
+    expect(instanceClone.array[0]).toEqual(2);
+
+    const orig2 = new TestClass2('foo', 2, 3);
+    const instanceClone2 = clone(orig2);
+
+    expect(instanceClone2.name).toEqual('foo');
+    expect(instanceClone2.sum()).toEqual(5);
+    expect(classOf(instanceClone2)).toEqual('TestClass2');
+    orig2[0] = -7;
+    expect(instanceClone2.sum()).toEqual(5);
+
+    expect(clone(new Date('2021-04-01T12:34Z')).toISOString()).toEqual('2021-04-01T12:34:00.000Z');
+    expect(clone(new Set([2, 78])).has(78)).toBeTrue();
+    expect(clone(new Map([[2, 78]])).get(2)).toEqual(78);
+    expect(clone(new Float32Array([1.25]))[0]).toEqual(1.25);
+    expect(clone(new Uint8ClampedArray([3, 400]))[1]).toEqual(255);
+
+    const recurse = new Set<any>([1, 2]);
+
+    recurse.add([recurse]);
+    expect(clone(recurse)).toEqual(recurse);
+    expect(isEqual(recurse, recurse)).toBeTrue();
   });
 
   it('should properly deep compares values', () => {
@@ -267,6 +328,8 @@ describe('ks-util', () => {
     expect(isEqual(null, { foo: 'bar' })).toBeFalse();
     expect(isEqual(a2, null)).toBeFalse();
     expect(isEqual({ foo: 'bar' }, null)).toBeFalse();
+    expect(isEqual(new Float32Array([4.56, -3.14]), new Float32Array([4.56, -3.14]))).toBeTrue();
+    expect(isEqual(new Float32Array([4.56, -3.142]), new Float32Array([4.56, -3.14]))).toBeFalse();
   });
 
   it('should properly flatten arrays', () => {

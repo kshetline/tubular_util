@@ -205,6 +205,10 @@ export function isArrayLike(a: any): boolean {
       (a as any).length >= 0 && (a as any).length <= Number.MAX_SAFE_INTEGER && (a as any).length === Math.floor((a as any).length));
 }
 
+export function isBigint(a: any): a is boolean {
+  return typeof a === 'bigint';
+}
+
 export function isBoolean(a: any): a is boolean {
   return typeof a === 'boolean';
 }
@@ -233,30 +237,99 @@ export function isSymbol(a: any): a is symbol {
   return typeof a === 'symbol';
 }
 
-export function clone(a: any): any {
-  if (isFunction(a) || !isObject(a))
-    return a;
-
-  if (isArray(a)) {
-    const c = [];
-
-    c.length = a.length;
-
-    for (let i = 0; i < a.length; ++i) {
-      if (a.hasOwnProperty(i))
-        c[i] = clone(a[i]);
-    }
-
-    return c;
+export function classOf(a: any, noClassResult = false): string {
+  if (isObject(a)) {
+    if (a.constructor?.name)
+      return a.constructor.name;
+    else
+      return noClassResult ? 'no-class:object' : null;
   }
 
-  const c = {};
-  const keys = Object.keys(a);
+  return noClassResult ? 'no-class:' + typeof a : null;
+}
+
+export function clone<T>(orig: T): T {
+  return cloneAux(orig, new WeakMap<any, any>());
+}
+
+function cloneAux<T>(orig: T, hash: WeakMap<any, any>): T {
+  if (isFunction(orig) || !isObject(orig))
+    return orig;
+  else if (hash.has(orig))
+    return hash.get(orig);
+
+  let theClone: any;
+
+  if (orig instanceof Date)
+    theClone = new Date(orig);
+  else if (orig instanceof RegExp)
+    theClone = new RegExp(orig);
+  else if (orig instanceof Map) {
+    theClone = new Map();
+    hash.set(orig, theClone);
+    Array.from(orig.entries()).forEach(entry => theClone.set(entry[0], cloneAux(entry[1], hash)));
+
+    return theClone;
+  }
+  else if (orig instanceof Set) {
+    theClone = new Set();
+    hash.set(orig, theClone);
+    orig.forEach(item => theClone.add(cloneAux(item, hash)));
+
+    return theClone;
+  }
+  else if (orig instanceof BigInt64Array)
+    theClone = new BigInt64Array(orig);
+  else if (orig instanceof BigUint64Array)
+    theClone = new BigUint64Array(orig);
+  else if (orig instanceof Float32Array)
+    theClone = new Float32Array(orig);
+  else if (orig instanceof Float64Array)
+    theClone = new Float64Array(orig);
+  else if (orig instanceof Int8Array)
+    theClone = new Int8Array(orig);
+  else if (orig instanceof Int16Array)
+    theClone = new Int8Array(orig);
+  else if (orig instanceof Int32Array)
+    theClone = new Int8Array(orig);
+  else if (orig instanceof Uint8Array)
+    theClone = new Uint8Array(orig);
+  else if (orig instanceof Uint16Array)
+    theClone = new Uint8Array(orig);
+  else if (orig instanceof Uint32Array)
+    theClone = new Uint8Array(orig);
+  else if (orig instanceof Uint8ClampedArray)
+    theClone = new Uint8ClampedArray(orig);
+
+  if (theClone) {
+    hash.set(orig, theClone);
+
+    return theClone;
+  }
+
+  const qlass = classOf(orig);
+
+  if (qlass != null && qlass !== 'Array') {
+    theClone = Object.create(Object.getPrototypeOf(orig));
+
+    if (isArray(orig))
+      theClone.length = orig.length;
+  }
+  else if (isArray(orig)) {
+    theClone = [];
+    theClone.length = orig.length;
+  }
+  else
+    theClone = {};
+
+  hash.set(orig, theClone);
+
+  const keys = Object.keys(orig);
 
   for (const key of keys)
-    c[key] = clone(a[key]);
+    theClone[key] = cloneAux(orig[key], hash);
 
-  return c;
+  return theClone;
 }
 
 export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
