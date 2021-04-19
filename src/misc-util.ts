@@ -248,15 +248,26 @@ export function classOf(a: any, noClassResult = false): string {
   return noClassResult ? 'no-class:' + typeof a : null;
 }
 
-export function clone<T>(orig: T): T {
-  return cloneAux(orig, new WeakMap<any, any>());
+export function clone<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth: number) => boolean) = false): T {
+  return cloneAux(orig, shallow, 0, new WeakMap<any, any>());
 }
 
-function cloneAux<T>(orig: T, hash: WeakMap<any, any>): T {
-  if (isFunction(orig) || !isObject(orig))
+function cloneAux<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth: number) => boolean), depth: number,
+                     hash: WeakMap<any, any>): T {
+  if (isFunction(orig) || !isObject(orig) || (shallow === true && depth > 0))
     return orig;
   else if (hash.has(orig))
     return hash.get(orig);
+  else if (shallow && depth > 0) {
+    if (shallow instanceof Set) {
+      for (const qlass of shallow.values()) {
+        if (orig instanceof qlass)
+          return orig;
+      }
+    }
+    else if (isFunction(shallow) && shallow(orig, depth))
+      return orig;
+  }
 
   let theClone: any;
 
@@ -267,14 +278,14 @@ function cloneAux<T>(orig: T, hash: WeakMap<any, any>): T {
   else if (orig instanceof Map) {
     theClone = new Map();
     hash.set(orig, theClone);
-    Array.from(orig.entries()).forEach(entry => theClone.set(entry[0], cloneAux(entry[1], hash)));
+    Array.from(orig.entries()).forEach(entry => theClone.set(entry[0], cloneAux(entry[1], shallow, depth + 1, hash)));
 
     return theClone;
   }
   else if (orig instanceof Set) {
     theClone = new Set();
     hash.set(orig, theClone);
-    orig.forEach(item => theClone.add(cloneAux(item, hash)));
+    orig.forEach(item => theClone.add(cloneAux(item, shallow, depth + 1, hash)));
 
     return theClone;
   }
@@ -327,7 +338,7 @@ function cloneAux<T>(orig: T, hash: WeakMap<any, any>): T {
   const keys = Object.keys(orig);
 
   for (const key of keys)
-    theClone[key] = cloneAux(orig[key], hash);
+    theClone[key] = cloneAux(orig[key], shallow, depth + 1, hash);
 
   return theClone;
 }
