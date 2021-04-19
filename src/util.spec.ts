@@ -291,6 +291,15 @@ describe('ks-util', () => {
     recurse.add([recurse]);
     expect(clone(recurse)).toEqual(recurse);
     expect(isEqual(recurse, recurse)).toBeTrue();
+
+    const sample = { date: new Date(), foo: 5 };
+
+    expect(clone(sample).date).not.toBe(sample.date);
+    expect(clone(sample, true).date).toBe(sample.date);
+    expect(clone(sample, new Set([Date])).date).toBe(sample.date);
+    expect(clone(sample, new Set([Map])).date).not.toBe(sample.date);
+    expect(clone(sample, (value) => value instanceof Date).date).toBe(sample.date);
+    expect(clone(sample, (value, depth) => depth > 2).date).not.toBe(sample.date);
   });
 
   it('should properly deep compares values', () => {
