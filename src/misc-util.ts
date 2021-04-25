@@ -289,9 +289,9 @@ function cloneAux<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth:
 
     return theClone;
   }
-  else if (orig instanceof BigInt64Array)
+  else if (typeof BigInt64Array !== 'undefined' && orig instanceof BigInt64Array)
     theClone = new BigInt64Array(orig);
-  else if (orig instanceof BigUint64Array)
+  else if (typeof BigUint64Array !== 'undefined' && orig instanceof BigUint64Array)
     theClone = new BigUint64Array(orig);
   else if (orig instanceof Float32Array)
     theClone = new Float32Array(orig);
