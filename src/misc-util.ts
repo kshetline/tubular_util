@@ -184,8 +184,8 @@ export function toNumber(value: any, defaultValue = 0): number {
     return defaultValue;
 }
 
-export function last<T>(array: Array<T>): T {
-  if (Array.isArray(array) && array.length > 0)
+export function last<T>(array: ArrayLike<T>): T {
+  if (isArrayLike(array) && array.length > 0)
     return array[array.length - 1];
   else
     return undefined;
@@ -201,7 +201,7 @@ export function isArray(a: any): a is any[] {
 
 /* eslint-disable no-prototype-builtins */
 export function isArrayLike(a: any): boolean {
-  return Array.isArray(a) || (isObject(a) && isNumber((a as any).length) &&
+  return Array.isArray(a) || a instanceof Array || (isObject(a) && isNumber((a as any).length) &&
       (a as any).length >= 0 && (a as any).length <= Number.MAX_SAFE_INTEGER && (a as any).length === Math.floor((a as any).length));
 }
 
