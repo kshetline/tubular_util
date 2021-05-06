@@ -2,8 +2,8 @@ import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
   classOf,
-  clone, DateTimeOptions, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, processMillis, sortObjectEntries, toBoolean, toInt
+  clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, sortObjectEntries, toBoolean, toInt
 } from './misc-util';
 import { asLines, extendDelimited, makePlainASCII, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
 
@@ -164,11 +164,22 @@ describe('ks-util', () => {
     expect(toInt('cafegabe', -1, 16)).toBe(-1);
   });
 
-  it('should get last element of an array', () => {
-    expect(last([1, 2, 4, -3])).toBe(-3);
+  it('should get first, last, nth element of an array', () => {
+    const a = [1.1, 2, 4, -3];
+    const elem = document.createElement('div');
+    elem.appendChild(document.createElement('p'));
+    elem.appendChild(document.createElement('span'));
+    elem.appendChild(document.createElement('script'));
+
+    expect(first(a)).toBe(1.1);
+    expect(last(a)).toBe(-3);
+    expect(nth(a, 2)).toBe(4);
     expect(last(['alpha', 'omega'])).toBe('omega');
     expect(last([])).toBe(undefined);
     expect(last(null)).toBe(undefined);
+    expect(first(elem.children).outerHTML).toBe('<p></p>');
+    expect(last(elem.children).outerHTML).toBe('<script></script>');
+    expect(nth(elem.children, 1).outerHTML).toBe('<span></span>');
   });
 
   it('should split string into lines', () => {
