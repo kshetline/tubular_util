@@ -4,7 +4,7 @@ import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, sortObjectEntries, toBoolean, toInt
 } from './misc-util';
-import { asLines, extendDelimited, makePlainASCII, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
+import { asLines, extendDelimited, isAllUppercase, isAllUppercaseWords, makePlainASCII, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
 
 class TestClass {
   array: number[];
@@ -216,6 +216,16 @@ describe('ks-util', () => {
     expect(toTitleCase('born in the usa', { special: ['USA'] })).toEqual('Born in the USA');
     expect(toTitleCase('born in the USA', { keepAllCaps: true })).toEqual('Born in the USA');
     expect(toTitleCase("born in the ol' USA", { keepAllCaps: true, shortSmall: ['-in', "ol'"] })).toEqual("Born In the ol' USA");
+  });
+
+  it('should properly detect uppercase strings and words', () => {
+    expect(isAllUppercase('FooBar')).toBeFalse();
+    expect(isAllUppercase('FOOBAR')).toBeTrue();
+    expect(isAllUppercase('FOO BAR BAZ, 123')).toBeFalse();
+    expect(isAllUppercaseWords('FooBar')).toBeFalse();
+    expect(isAllUppercaseWords('FOOBAR')).toBeTrue();
+    expect(isAllUppercaseWords('FOO BAR BAZ, 123')).toBeTrue();
+    expect(isAllUppercaseWords('FOO BaR BAZ, 123')).toBeFalse();
   });
 
   it('should properly recognize data types', () => {

@@ -1,5 +1,6 @@
 import { last } from './misc-util';
 
+let notLetterPattern: RegExp;
 let allUpperPattern: RegExp;
 let wordPattern: RegExp;
 
@@ -10,11 +11,13 @@ try {
   const u = String.fromCharCode(117);
   'm&m'.split(new RegExp('(?<!4)[^\\' + 'p{L}]+', u));
   // This line reached if Unicode character classes and lookbehind both work.
+  notLetterPattern = new RegExp('\\' + 'P{L}', 'g' + u);
   allUpperPattern = new RegExp('^\\' + 'p{Lu}+$', u);
   // eslint-disable-next-line no-misleading-character-class
   wordPattern = new RegExp(`(?:['’ʼ]|(?<=[-\\s,.:;"]|^))[\\` + `p{L}'’ʼ\\u0300-\\u036F]+\\b['’ʼ]?`, 'g' + u);
 }
 catch {
+  notLetterPattern = /[A-ZÀ-ÖØ-ÿ]/ig;
   allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
   // eslint-disable-next-line no-misleading-character-class
   wordPattern = /[A-Za-zÀ-ÖØ-ÿ'’ʼ\u0300-\u036F]+\b['’ʼ]?/g;
@@ -228,6 +231,10 @@ function toCanonicalLowercase(s: string): string {
 
 export function isAllUppercase(s: string): boolean {
   return s && allUpperPattern.test(s);
+}
+
+export function isAllUppercaseWords(s: string): boolean {
+  return s && allUpperPattern.test(s.replace(notLetterPattern, ''));
 }
 
 export function toMixedCase(s: string): string {
