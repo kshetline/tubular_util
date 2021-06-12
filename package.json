@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "description": "Miscellaneous utility functions",
   "browser": "dist/web/index.js",
   "browser-es5": "dist/web5/index.js",
@@ -25,7 +25,7 @@
   "author": "Kerry Shetline <kerry@shetline.com>",
   "license": "MIT",
   "dependencies": {
-    "@tubular/math": "^2.2.1"
+    "@tubular/math": "^2.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.14.0",
