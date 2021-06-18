@@ -1,10 +1,13 @@
 import { blendColors, parseColor } from './browser-graphics-util';
-import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
+import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, repeat, sortObjectEntries, toBoolean, toInt
 } from './misc-util';
-import { asLines, extendDelimited, isAllUppercase, isAllUppercaseWords, makePlainASCII, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
+import {
+  asLines, extendDelimited, isAllUppercase, isAllUppercaseWords, makePlainASCII, regexEscape,
+  stripLatinDiacriticals, toMixedCase, toTitleCase
+} from './string-util';
 
 class TestClass {
   array: number[];
@@ -30,7 +33,7 @@ class TestClass2 extends Array<number> {
   }
 }
 
-describe('ks-util', () => {
+describe('@tubular/util', () => {
   it('should extend a string, adding delimiters where needed', () => {
     let s = '';
 
@@ -109,6 +112,19 @@ describe('ks-util', () => {
     expect(font).toContain('expanded');
     expect(font).toMatch(/\b18\.6\d+px\s*\/\s*28px\b/);
     expect(font).toMatch(/\b(bold|700)\b/);
+    document.body.removeChild(span);
+  });
+
+  it('should get single and multiple css style values', () => {
+    const span = document.createElement('span');
+
+    span.style.color = 'red';
+    span.style.lineHeight = '24px';
+    document.body.appendChild(span);
+
+    expect(getCssValue(span, 'color')).toEqual('rgb(255, 0, 0)');
+    expect(getCssValue(span, 'line-height')).toEqual('24px');
+    expect(getCssValues(span, ['color', 'line-height'])).toEqual(['rgb(255, 0, 0)', '24px']);
     document.body.removeChild(span);
   });
 
@@ -385,6 +401,6 @@ describe('ks-util', () => {
     let s = '';
 
     repeat(5, n => s += n);
-    expect(s).toEqual('01234');
+    expect(s).toEqual('43210');
   });
 });

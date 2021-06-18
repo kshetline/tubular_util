@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "3.7.2",
+  "version": "3.8.0",
   "description": "Miscellaneous utility functions",
   "browser": "dist/web/index.js",
   "browser-es5": "dist/web5/index.js",
@@ -52,7 +52,6 @@
     "karma-jasmine": "^4.0.1",
     "karma-jasmine-html-reporter": "^1.5.4",
     "karma-typescript": "^5.5.1",
-    "karma-typescript-es6-transform": "^5.5.1",
     "replace": "^1.2.1",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",

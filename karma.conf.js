@@ -8,13 +8,8 @@ module.exports = function (config) {
       'src/**/*.ts': 'karma-typescript'
     },
     reporters: ['progress', 'karma-typescript', 'kjhtml'],
-    browsers: ['Chrome'], // , 'Firefox'],
+    browsers: ['Chrome', 'Firefox'],
     karmaTypescriptConfig: {
-      bundlerOptions: {
-        transforms: [
-          require('karma-typescript-es6-transform')()
-        ]
-      },
       tsconfig: './tsconfig.karma.json'
     }
   });
