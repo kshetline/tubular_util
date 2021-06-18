@@ -1,4 +1,4 @@
-import { forEach, toInt } from './misc-util';
+import { forEach, isArray, toInt } from './misc-util';
 
 export interface FontMetrics {
   font: string;
@@ -146,8 +146,13 @@ export function eventToKey(event: KeyboardEvent): string {
   return key;
 }
 
-export function getCssValue(element: Element, property: string): string {
-  return document.defaultView.getComputedStyle(element, null).getPropertyValue(property);
+export function getCssValue<T extends(string | string[])>(element: Element, property: T): T {
+  const styles = document.defaultView.getComputedStyle(element, null);
+
+  if (isArray(property))
+    return property.map(p => styles.getPropertyValue(p)) as T;
+  else
+    return styles.getPropertyValue(property) as T;
 }
 
 const fontStretches = {

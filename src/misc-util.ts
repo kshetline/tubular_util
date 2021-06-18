@@ -437,3 +437,5 @@ export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySo
 }
 
 export const noop = (..._args: any[]): void => {};
+
+export const repeat = (n: number, f: (n?: number) => any): void => { while (n-- > 0) f(n); };

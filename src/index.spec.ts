@@ -2,7 +2,7 @@ import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, sortObjectEntries, toBoolean, toInt
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, repeat, sortObjectEntries, toBoolean, toInt
 } from './misc-util';
 import { asLines, extendDelimited, isAllUppercase, isAllUppercaseWords, makePlainASCII, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase } from './string-util';
 
@@ -379,5 +379,12 @@ describe('ks-util', () => {
     expect(JSON.stringify(sortObjectEntries(sample))).toEqual('{"a":5,"b":1,"c":-2}');
     expect(JSON.stringify(sortObjectEntries(sample, (a, b) => a[1] - b[1]))).toEqual('{"c":-2,"b":1,"a":5}');
     expect(sortObjectEntries(sample, true)).toBe(sample);
+  });
+
+  it('should repeatedly call a function', () => {
+    let s = '';
+
+    repeat(5, n => s += n);
+    expect(s).toEqual('01234');
   });
 });
