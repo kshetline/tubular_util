@@ -1,6 +1,6 @@
 module.exports = function (config) {
   config.set({
-    frameworks: ['jasmine', 'karma-typescript'],
+    frameworks: ['chai', 'karma-typescript', 'mocha'],
     files: [
       'src/**/*.ts'
     ],
@@ -8,7 +8,7 @@ module.exports = function (config) {
       'src/**/*.ts': 'karma-typescript'
     },
     reporters: ['progress', 'karma-typescript', 'kjhtml'],
-    browsers: ['Chrome', 'Firefox'],
+    browsers: ['Chrome'], // , 'Firefox'],
     karmaTypescriptConfig: {
       tsconfig: './tsconfig.karma.json'
     }
