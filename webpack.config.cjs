@@ -19,6 +19,7 @@ module.exports = env => {
       rules: [
         {
           test: /\.js$/,
+          exclude: /\.spec\.js$/,
           use: {
             loader: 'babel-loader',
             options: { presets: [['@babel/preset-env', { targets: { chrome: chromeVersion } }]] }

@@ -444,12 +444,16 @@ export function isAndroid(): boolean {
 
 export function isChrome(): boolean {
   return navigator.vendor === 'Google Inc.' &&
-    ((/\bChrome\b/i.test(navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera()) ||
+    ((/\bChrome\b/i.test(navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera() && !isChromiumEdge()) ||
      /\bCriOS\b/.test(navigator.userAgent));
 }
 
 export function isChromium(): boolean {
-  return !!(window as any).chrome && !isIE();
+  return !!(window as any).chrome;
+}
+
+export function isChromiumEdge(): boolean {
+  return isChromium() && /\bedg\//i.test(navigator.userAgent) && isWindows();
 }
 
 export function isEdge(): boolean {
@@ -471,8 +475,12 @@ export function isEffectivelyFullScreen(): boolean {
     (window.innerWidth === window.screen?.width && window.innerHeight === window.screen?.height);
 }
 
+/**
+ * @deprecated Will always be false, as this code no longer runs in IE.
+ */
 export function isIE(): boolean {
-  return /(?:\b(MS)?IE\s+|\bTrident\/7\.0;.*\s+rv:)(\d+)/.test(navigator.userAgent);
+  // return /(?:\b(MS)?IE\s+|\bTrident\/7\.0;.*\s+rv:)(\d+)/.test(navigator.userAgent);
+  return false;
 }
 
 export function isIOS(): boolean {

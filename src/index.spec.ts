@@ -132,17 +132,18 @@ describe('@tubular/util', () => {
     let start = processMillis();
     const intervals: number[] = [];
     const interval = setInterval(() => {
-      intervals.push(processMillis() - start);
+      const now = processMillis();
+      intervals.push(now - start);
 
-      if (intervals.length >= 5) {
+      if (intervals.length >= 7) {
         clearInterval(interval);
         // Allow for some outlier values caused by slowness of start-up
-        expect(intervals.filter(t => t >= 40 && t <= 60).length).toBeGreaterThanOrEqual(3);
+        expect(intervals.filter(t => t >= 80 && t <= 120).length).toBeGreaterThanOrEqual(4);
         done();
       }
 
-      start = processMillis();
-    }, 50);
+      start = now;
+    }, 100);
   });
 
   it('should correctly identify missing character glyphs', () => {

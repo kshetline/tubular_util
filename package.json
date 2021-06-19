@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "3.8.0",
+  "version": "4.0.0",
   "description": "Miscellaneous utility functions",
   "browser": "dist/web/index.js",
   "browser-es5": "dist/web5/index.js",
