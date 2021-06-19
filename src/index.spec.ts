@@ -2,7 +2,8 @@ import { blendColors, parseColor } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, repeat, sortObjectEntries, toBoolean, toInt
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, push, pushIf, repeat, sortObjectEntries,
+  toBoolean, toInt
 } from './misc-util';
 import {
   asLines, extendDelimited, isAllUppercase, isAllUppercaseWords, makePlainASCII, regexEscape,
@@ -403,5 +404,14 @@ describe('@tubular/util', () => {
 
     repeat(5, n => s += n);
     expect(s).toEqual('43210');
+  });
+
+  it('should push items into an array, and return that modified array', () => {
+    expect(push([5])).toEqual([5]);
+    expect(push([5], 6)).toEqual([5, 6]);
+    expect(pushIf(false, [5], 6)).toEqual([5]);
+    expect(pushIf(true, [5], 6)).toEqual([5, 6]);
+    expect(push(['do'], 're', 'mi')).toEqual(['do', 're', 'mi']);
+    expect(push(['do'], ...['re', 'mi'])).toEqual(['do', 're', 'mi']);
   });
 });

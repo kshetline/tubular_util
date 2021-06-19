@@ -356,7 +356,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
       const row = floor(i / 4 / size);
       const col = floor(i / 4) % size;
 
-      if ((row === 0 || row === metrics.fullAscent - 1 || col < 2) && pixmaps[0][i] !== pixmaps[2][i])
+      if ((row < 2 || row === metrics.fullAscent - 1 || col < 2) && pixmaps[0][i] !== pixmaps[2][i])
         return true;
     }
   }
