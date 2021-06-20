@@ -2,23 +2,23 @@
   "name": "@tubular/util",
   "version": "4.0.0-alpha.0",
   "description": "Miscellaneous utility functions",
-  "browser": "dist/umd/index.js",
-  "main": "dist/fesm2015/index.js",
-  "module": "dist/fesm2015/index.js",
+  "web": "dist/umd/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/fesm2015/index.mjs",
   "esm2015": "dist/index.js",
-  "fesm2015": "dist/fesm2015/index.js",
+  "fesm2015": "dist/fesm2015/index.mjs",
   "typings": "dist/index",
   "sideEffects": false,
   "exports": {
     "node": {
-      "module": "./dist/fesm2015/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "import": "./dist/fesm2015/index.mjs",
+      "require": "./dist/cjs/index.js"
     },
     "browser": {
-      "module": "./dist/fesm2015/index.js",
-      "default": "./dist/umd/index.js"
+      "import": "./dist/fesm2015/index.mjs",
+      "script": "./dist/umd/index.js"
     },
-    "default": "./dist/fesm2015/index.js"
+    "default": "./dist/fesm2015/index.mjs"
   },
   "scripts": {
     "build": "rimraf dist/ && tsc && webpack && webpack --env umd=true && webpack --env cjs=true",
@@ -36,7 +36,7 @@
   "author": "Kerry Shetline <kerry@shetline.com>",
   "license": "MIT",
   "dependencies": {
-    "@tubular/math": "^3.0.0-alpha.0",
+    "@tubular/math": "^3.0.0-alpha.4",
     "@types/chai": "^4.2.18",
     "@types/mocha": "^8.2.2"
   },
@@ -55,7 +55,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-standard": "^5.0.0",
-    "esm": "^3.2.25",
     "karma": "^6.3.4",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.1.0",

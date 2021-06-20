@@ -93,19 +93,25 @@ describe('@tubular/util', () => {
     expect(formatDateTime([DateTimeOptions.TIME_ONLY])).to.match(/\d\d:\d\d:\d\d [-+]\d{4}/);
   });
 
+  /* cSpell:disable */
   it('should strip diacritical marks from latin characters', () => {
+    // noinspection SpellCheckingInspection
     expect(stripLatinDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
       .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþy');
   });
 
   it('should simplify symbols and latin characters to plain ASCII', () => {
+    // noinspection SpellCheckingInspection
     expect(makePlainASCII('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
       .to.equal('AAAAAAAeCEEEEIIIIDhNOOOOO_OUUUUYThssaaaaaaaeceeeeiiiidhnooooo_ouuuuythy');
+    // noinspection SpellCheckingInspection
     expect(makePlainASCII('Þjóð')).to.equal('Thjodh');
+    // noinspection SpellCheckingInspection
     expect(makePlainASCII('ÞJÓÐ')).to.equal('THJODH');
     expect(makePlainASCII('[café*]')).to.equal('[cafe*]');
     expect(makePlainASCII('[café*]', true)).to.equal('(cafe-)');
   });
+  /* cSpell:enable */
 
   it('should get fonts in correct shorthand form', () => {
     if (typeof document === 'undefined') {
@@ -146,7 +152,7 @@ describe('@tubular/util', () => {
 
     expect(getCssValue(span, 'color')).to.equal('rgb(255, 0, 0)');
     expect(getCssValue(span, 'line-height')).to.equal('24px');
-    expect(getCssValues(span, ['color', 'line-height'])).to.equal(['rgb(255, 0, 0)', '24px']);
+    expect(getCssValues(span, ['color', 'line-height'])).to.eql(['rgb(255, 0, 0)', '24px']);
     document.body.removeChild(span);
   });
 
@@ -204,6 +210,7 @@ describe('@tubular/util', () => {
     expect(toInt('foo', 99)).to.equal(99);
     expect(toInt('1011', -1, 2)).to.equal(11);
     expect(toInt('cafebabe', -1, 16)).to.equal(3405691582);
+    /* cSpell:disable-next-line */ // noinspection SpellCheckingInspection
     expect(toInt('cafegabe', -1, 16)).to.equal(-1);
   });
 
@@ -238,6 +245,7 @@ describe('@tubular/util', () => {
   it('should split string into lines', () => {
     expect(asLines('')).to.eql([]);
     expect(asLines('no breaks')).to.eql(['no breaks']);
+    /* cSpell:disable-next-line */
     expect(asLines('foo\nbar\r\nbaz\rqux')).to.eql(['foo', 'bar', 'baz', 'qux']);
     expect(asLines('The end\n')).to.eql(['The end', '']);
     expect(asLines('The\n\nend\n\n\n', true)).to.eql(['The', '', 'end']);

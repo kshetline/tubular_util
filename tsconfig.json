@@ -5,6 +5,7 @@
     "outDir": "./dist",
     "sourceMap": true,
     "declaration": true,
+    "declarationMap": true,
     "downlevelIteration": true,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
