@@ -7,7 +7,7 @@ import {
   toBoolean, toInt
 } from './misc-util';
 import {
-  asLines, extendDelimited, isAllUppercase, isAllUppercaseWords, makePlainASCII, regexEscape,
+  asLines, convertDigits, convertDigitsToAscii, extendDelimited, isAllUppercase, isAllUppercaseWords, makePlainASCII, regexEscape,
   stripLatinDiacriticals, toMixedCase, toTitleCase
 } from './string-util';
 
@@ -469,5 +469,15 @@ describe('@tubular/util', () => {
     expect(pushIf(true, [5], 6)).to.eql([5, 6]);
     expect(push(['do'], 're', 'mi')).to.eql(['do', 're', 'mi']);
     expect(push(['do'], ...['re', 'mi'])).to.eql(['do', 're', 'mi']);
+  });
+
+  it('should convert digits between various localities', () => {
+    let result: string;
+    const base: string[] = [];
+
+    expect(result = convertDigitsToAscii('foo ٠١٢٣٤ bar', base)).to.equals('foo 01234 bar');
+    expect(convertDigits(result, base[0])).to.equals('foo ٠١٢٣٤ bar');
+    expect(result = convertDigitsToAscii('baz ৫৬৭৮৯ qux', base)).to.equals('baz 56789 qux');
+    expect(convertDigits(result, base[0])).to.equals('baz ৫৬৭৮৯ qux');
   });
 });

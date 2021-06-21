@@ -9,6 +9,7 @@
 /.vscode
 /webpack.config.*js
 *.js.map
+!/dist/**/*.js.map
 *.spec.d.ts
 *.spec.js
 *.tgz

@@ -10,6 +10,7 @@
   "typings": "dist/index",
   "sideEffects": false,
   "exports": {
+    "type": "./dist/index.d.ts",
     "node": {
       "import": "./dist/fesm2015/index.mjs",
       "require": "./dist/cjs/index.js"
@@ -18,17 +19,21 @@
       "import": "./dist/fesm2015/index.mjs",
       "script": "./dist/umd/index.js"
     },
-    "default": "./dist/fesm2015/index.mjs"
+    "default": "./dist/cjs/index.js"
+  },
+  "engines": {
+    "node": ">= 10.24.1"
   },
   "scripts": {
     "build": "rimraf dist/ && tsc && webpack && webpack --env umd=true && webpack --env cjs=true",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
-    "test": "TS_NODE_FILES=true nyc --reporter=html mocha --require ts-node/register src/**/*.spec.ts",
+    "test": "nyc --reporter=html mocha --require ts-node/register src/**/*.spec.ts",
     "test-karma": "karma start"
   },
   "keywords": [
     "canvas",
+    "clone",
     "font",
     "string",
     "utility"

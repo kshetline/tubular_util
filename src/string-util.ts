@@ -415,3 +415,36 @@ const charsNeedingRegexEscape = /[-\[\]/{}()*+?.\\^$|]/g;
 export function regexEscape(s: string): string {
   return s.replace(charsNeedingRegexEscape, '\\$&');
 }
+
+export function convertDigitsToAscii(n: string, baseDigit?: string[]): string {
+  let base = '0';
+
+  const result = n
+    .replace(/[\u0660-\u0669]/g, ch => {
+      base = '\u0660';
+      return String.fromCodePoint(ch.charCodeAt(0) - 0x0630); })  // Arabic digits
+    .replace(/[\u06F0-\u06F9]/g, ch => { base = '\u06F0'; return String.fromCodePoint(ch.charCodeAt(0) - 0x06C0); })  // Urdu/Persian digits
+    .replace(/[\u0966-\u096F]/g, ch => { base = '\u0966'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0936); })  // Devanagari digits
+    .replace(/[\u09E6-\u09EF]/g, ch => { base = '\u09E6'; return String.fromCodePoint(ch.charCodeAt(0) - 0x09B6); })  // Bengali digits
+    .replace(/[\u0F20-\u0F29]/g, ch => { base = '\u0F20'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0EF0); })  // Tibetan digits
+    .replace(/[\u1040-\u1049]/g, ch => { base = '\u1040'; return String.fromCodePoint(ch.charCodeAt(0) - 0x1010); }); // Myanmarese digits
+
+  if (baseDigit)
+    baseDigit[0] = base;
+
+  return result;
+}
+
+export function convertDigits(n: string, baseDigit: string): string {
+  const base: string[] = [];
+
+  n = convertDigitsToAscii(n, base);
+
+  if (base[0] !== baseDigit) {
+    const delta = baseDigit.charCodeAt(0) - 48;
+
+    n = n.replace(/[0-9]/g, ch => String.fromCodePoint(ch.charCodeAt(0) + delta));
+  }
+
+  return n;
+}
