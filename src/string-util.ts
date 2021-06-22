@@ -1,5 +1,3 @@
-import { last } from './misc-util';
-
 let notLetterPattern: RegExp;
 let allUpperPattern: RegExp;
 let wordPattern: RegExp;
@@ -28,7 +26,7 @@ export function asLines(s: string, trimFinalBlankLines = false): string[] {
     const lines = s.split(/\r\n|\r|\n/);
 
     if (trimFinalBlankLines)
-      while (last(lines) === '')
+      while (lines[lines.length - 1] === '')
         lines.pop();
 
     return lines;
