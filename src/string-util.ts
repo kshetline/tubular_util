@@ -420,9 +420,7 @@ export function convertDigitsToAscii(n: string, baseDigit?: string[]): string {
   let base = '0';
 
   const result = n
-    .replace(/[\u0660-\u0669]/g, ch => {
-      base = '\u0660';
-      return String.fromCodePoint(ch.charCodeAt(0) - 0x0630); })  // Arabic digits
+    .replace(/[\u0660-\u0669]/g, ch => { base = '\u0660'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0630); })  // Arabic digits
     .replace(/[\u06F0-\u06F9]/g, ch => { base = '\u06F0'; return String.fromCodePoint(ch.charCodeAt(0) - 0x06C0); })  // Urdu/Persian digits
     .replace(/[\u0966-\u096F]/g, ch => { base = '\u0966'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0936); })  // Devanagari digits
     .replace(/[\u09E6-\u09EF]/g, ch => { base = '\u09E6'; return String.fromCodePoint(ch.charCodeAt(0) - 0x09B6); })  // Bengali digits
