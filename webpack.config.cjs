@@ -1,3 +1,4 @@
+const TerserPlugin = require('terser-webpack-plugin');
 const { resolve } = require('path');
 
 module.exports = env => {
@@ -39,6 +40,14 @@ module.exports = env => {
     },
     resolve: {
       mainFields: ['fesm2015', 'module', 'main']
+    },
+    optimization: {
+      minimize: !dev,
+      minimizer: [new TerserPlugin({
+        terserOptions: {
+          output: { max_line_len: 511 }
+        }
+      })],
     },
     devtool: 'source-map'
   };
