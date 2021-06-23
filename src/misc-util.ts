@@ -205,6 +205,18 @@ export function last<T>(array: ArrayLike<T>): T {
     return undefined;
 }
 
+export function push<T>(array: T[], ...items): T[] {
+  array.push(...items);
+  return array;
+}
+
+export function pushIf<T>(condition: boolean, array: T[], ...items): T[] {
+  if (condition)
+    array.push(...items);
+
+  return array;
+}
+
 export function forEach<T>(obj: { [key: string]: T }, callback: (key: string, value: T) => void): void {
   Object.keys(obj).forEach(key => callback(key, obj[key]));
 }
@@ -437,3 +449,5 @@ export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySo
 }
 
 export const noop = (..._args: any[]): void => {};
+
+export const repeat = (n: number, f: (n?: number) => any): void => { while (n-- > 0) f(n); };

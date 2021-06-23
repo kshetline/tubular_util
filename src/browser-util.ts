@@ -1,4 +1,4 @@
-import { forEach, toInt } from './misc-util';
+import { forEach, isNumber, toInt } from './misc-util';
 
 export interface FontMetrics {
   font: string;
@@ -148,6 +148,12 @@ export function eventToKey(event: KeyboardEvent): string {
 
 export function getCssValue(element: Element, property: string): string {
   return document.defaultView.getComputedStyle(element, null).getPropertyValue(property);
+}
+
+export function getCssValues(element: Element, properties: string[]): string[] {
+  const styles = document.defaultView.getComputedStyle(element, null);
+
+  return properties.map(p => styles.getPropertyValue(p));
 }
 
 const fontStretches = {
@@ -300,21 +306,22 @@ function changeItalic(font: string): string {
 }
 
 export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrCodePoint: string | number): boolean {
-  if (typeof charOrCodePoint === 'number')
+  if (isNumber(charOrCodePoint))
     charOrCodePoint = String.fromCodePoint(charOrCodePoint);
 
+  const self: any = doesCharacterGlyphExist;
+  const firefox = isFirefox();
   const metrics = getFontMetrics(elementOrFont);
   const PADDING = 8;
   const size = metrics.lineHeight + PADDING;
 
-  const canvas0 = (doesCharacterGlyphExist as any).canvas0 || ((doesCharacterGlyphExist as any).canvas0 =
-                  document.createElement('canvas') as HTMLCanvasElement);
-  const canvas1 = (doesCharacterGlyphExist as any).canvas1 || ((doesCharacterGlyphExist as any).canvas1 =
-                  document.createElement('canvas') as HTMLCanvasElement);
-  const canvases = [canvas0, canvas1];
+  const canvas0 = self.canvas0 || (self.canvas0 = document.createElement('canvas') as HTMLCanvasElement);
+  const canvas1 = self.canvas1 || (self.canvas1 = document.createElement('canvas') as HTMLCanvasElement);
+  const canvas2 = self.canvas2 || (self.canvas2 = firefox && document.createElement('canvas') as HTMLCanvasElement);
+  const canvases = [canvas0, canvas1, canvas2];
   const pixmaps = [];
 
-  for (let i = 0; i < 2; ++i) {
+  for (let i = 0; i < (firefox ? 3 : 2); ++i) {
     const canvas = canvases[i];
 
     canvas.width = size;
@@ -330,15 +337,27 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
     // For Firefox, which renders missing glyphs all differently, check if a character
     // looks the same as itself when rendered in italics -- the missing glyph boxes
     // remain straight when italicized.
-    context.font = (i === 1 && isFirefox() ? changeItalic(metrics.font) : metrics.font);
-    context.fillText(i === 0 || isFirefox() ? charOrCodePoint : '\uFFFE', 0, metrics.ascent);
+    context.font = (i === 1 && firefox ? changeItalic(metrics.font) : metrics.font);
+    context.fillText(i === 0 || (firefox && i !== 2) ? charOrCodePoint : '\uFFFE', 0, metrics.fullAscent);
 
     pixmaps[i] = context.getImageData(0, 0, size, size).data;
   }
 
-  for (let i = 0; i < pixmaps[0].length; ++i) {
+  for (let i = 0; i < pixmaps[0].length; i += 4) {
     if (pixmaps[0][i] !== pixmaps[1][i])
       return true;
+  }
+
+  // Italic font trick doesn't always help with Firefox, so take the extra step of
+  // looking for box edges.
+  if (firefox) {
+    for (let i = 0; i < pixmaps[0].length; i += 4) {
+      const row = Math.floor(i / 4 / size);
+      const col = Math.floor(i / 4) % size;
+
+      if ((row < 2 || row === metrics.fullAscent - 1 || col < 2) && pixmaps[0][i] !== pixmaps[2][i])
+        return true;
+    }
   }
 
   return false;
@@ -424,12 +443,16 @@ export function isAndroid(): boolean {
 
 export function isChrome(): boolean {
   return navigator.vendor === 'Google Inc.' &&
-    ((/\bChrome\b/i.test(navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera()) ||
+    ((/\bChrome\b/i.test(navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera() && !isChromiumEdge()) ||
      /\bCriOS\b/.test(navigator.userAgent));
 }
 
 export function isChromium(): boolean {
-  return !!(window as any).chrome && !isIE();
+  return !!(window as any).chrome;
+}
+
+export function isChromiumEdge(): boolean {
+  return isChromium() && /\bedg\//i.test(navigator.userAgent) && isWindows();
 }
 
 export function isEdge(): boolean {
@@ -451,8 +474,12 @@ export function isEffectivelyFullScreen(): boolean {
     (window.innerWidth === window.screen?.width && window.innerHeight === window.screen?.height);
 }
 
+/**
+ * @deprecated Will always be false, as this code no longer runs in IE.
+ */
 export function isIE(): boolean {
-  return /(?:\b(MS)?IE\s+|\bTrident\/7\.0;.*\s+rv:)(\d+)/.test(navigator.userAgent);
+  // return /(?:\b(MS)?IE\s+|\bTrident\/7\.0;.*\s+rv:)(\d+)/.test(navigator.userAgent);
+  return false;
 }
 
 export function isIOS(): boolean {

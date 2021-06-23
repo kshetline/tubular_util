@@ -1,5 +1,6 @@
-import { max, min, round } from '@tubular/math';
 import { padLeft } from './string-util';
+
+const { max, min, round } = Math;
 
 export interface RGBA {
   r: number;

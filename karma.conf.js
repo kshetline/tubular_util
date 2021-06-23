@@ -1,21 +1,17 @@
 module.exports = function (config) {
   config.set({
-    frameworks: ['jasmine', 'karma-typescript'],
+    // logLevel: config.LOG_DEBUG,
+    frameworks: ['chai', 'karma-typescript', 'mocha'],
     files: [
       'src/**/*.ts'
     ],
     preprocessors: {
       'src/**/*.ts': 'karma-typescript'
     },
-    reporters: ['progress', 'karma-typescript', 'kjhtml'],
-    browsers: ['Chrome'], // , 'Firefox'],
+    reporters: ['progress', 'karma-typescript'],
+    browsers: ['ChromeHeadless', 'FirefoxHeadless'],
     karmaTypescriptConfig: {
-      bundlerOptions: {
-        transforms: [
-          require('karma-typescript-es6-transform')()
-        ]
-      },
       tsconfig: './tsconfig.karma.json'
-    }
+    },
   });
 };

@@ -1,5 +1,4 @@
-import { last } from './misc-util';
-
+let notLetterPattern: RegExp;
 let allUpperPattern: RegExp;
 let wordPattern: RegExp;
 
@@ -10,11 +9,13 @@ try {
   const u = String.fromCharCode(117);
   'm&m'.split(new RegExp('(?<!4)[^\\' + 'p{L}]+', u));
   // This line reached if Unicode character classes and lookbehind both work.
+  notLetterPattern = new RegExp('\\' + 'P{L}', 'g' + u);
   allUpperPattern = new RegExp('^\\' + 'p{Lu}+$', u);
   // eslint-disable-next-line no-misleading-character-class
   wordPattern = new RegExp(`(?:['’ʼ]|(?<=[-\\s,.:;"]|^))[\\` + `p{L}'’ʼ\\u0300-\\u036F]+\\b['’ʼ]?`, 'g' + u);
 }
 catch {
+  notLetterPattern = /[A-ZÀ-ÖØ-ÿ]/ig;
   allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
   // eslint-disable-next-line no-misleading-character-class
   wordPattern = /[A-Za-zÀ-ÖØ-ÿ'’ʼ\u0300-\u036F]+\b['’ʼ]?/g;
@@ -25,7 +26,7 @@ export function asLines(s: string, trimFinalBlankLines = false): string[] {
     const lines = s.split(/\r\n|\r|\n/);
 
     if (trimFinalBlankLines)
-      while (last(lines) === '')
+      while (lines[lines.length - 1] === '')
         lines.pop();
 
     return lines;
@@ -230,6 +231,10 @@ export function isAllUppercase(s: string): boolean {
   return s && allUpperPattern.test(s);
 }
 
+export function isAllUppercaseWords(s: string): boolean {
+  return s && allUpperPattern.test(s.replace(notLetterPattern, ''));
+}
+
 export function toMixedCase(s: string): string {
   return s.replace(wordPattern, word => capitalizeFirstLetter(word));
 }
@@ -407,4 +412,35 @@ const charsNeedingRegexEscape = /[-\[\]/{}()*+?.\\^$|]/g;
 
 export function regexEscape(s: string): string {
   return s.replace(charsNeedingRegexEscape, '\\$&');
+}
+
+export function convertDigitsToAscii(n: string, baseDigit?: string[]): string {
+  let base = '0';
+
+  const result = n
+    .replace(/[\u0660-\u0669]/g, ch => { base = '\u0660'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0630); })  // Arabic digits
+    .replace(/[\u06F0-\u06F9]/g, ch => { base = '\u06F0'; return String.fromCodePoint(ch.charCodeAt(0) - 0x06C0); })  // Urdu/Persian digits
+    .replace(/[\u0966-\u096F]/g, ch => { base = '\u0966'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0936); })  // Devanagari digits
+    .replace(/[\u09E6-\u09EF]/g, ch => { base = '\u09E6'; return String.fromCodePoint(ch.charCodeAt(0) - 0x09B6); })  // Bengali digits
+    .replace(/[\u0F20-\u0F29]/g, ch => { base = '\u0F20'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0EF0); })  // Tibetan digits
+    .replace(/[\u1040-\u1049]/g, ch => { base = '\u1040'; return String.fromCodePoint(ch.charCodeAt(0) - 0x1010); }); // Myanmarese digits
+
+  if (baseDigit)
+    baseDigit[0] = base;
+
+  return result;
+}
+
+export function convertDigits(n: string, baseDigit: string): string {
+  const base: string[] = [];
+
+  n = convertDigitsToAscii(n, base);
+
+  if (base[0] !== baseDigit) {
+    const delta = baseDigit.charCodeAt(0) - 48;
+
+    n = n.replace(/[0-9]/g, ch => String.fromCodePoint(ch.charCodeAt(0) + delta));
+  }
+
+  return n;
 }
