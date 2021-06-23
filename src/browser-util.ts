@@ -1,4 +1,3 @@
-import { floor } from '@tubular/math';
 import { forEach, isNumber, toInt } from './misc-util';
 
 export interface FontMetrics {
@@ -353,8 +352,8 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
   // looking for box edges.
   if (firefox) {
     for (let i = 0; i < pixmaps[0].length; i += 4) {
-      const row = floor(i / 4 / size);
-      const col = floor(i / 4) % size;
+      const row = Math.floor(i / 4 / size);
+      const col = Math.floor(i / 4) % size;
 
       if ((row < 2 || row === metrics.fullAscent - 1 || col < 2) && pixmaps[0][i] !== pixmaps[2][i])
         return true;

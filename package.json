@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "4.0.1-alpha.0",
+  "version": "4.0.1-alpha.1",
   "description": "Miscellaneous utility functions",
   "main": "dist/cjs/index.js",
   "module": "dist/fesm2015/index.js",
@@ -33,9 +33,6 @@
   ],
   "author": "Kerry Shetline <kerry@shetline.com>",
   "license": "MIT",
-  "dependencies": {
-    "@tubular/math": "^3.0.1-alpha.1"
-  },
   "devDependencies": {
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.5",
