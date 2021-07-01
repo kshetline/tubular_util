@@ -1,4 +1,6 @@
+import sourcemaps from 'rollup-plugin-sourcemaps';
 import { terser } from 'rollup-plugin-terser';
+import typescript from '@rollup/plugin-typescript';
 
 export default [
   {
@@ -14,7 +16,9 @@ export default [
       }
     ],
     plugins: [
-      terser({ output: { max_line_len: 511 } })
+      sourcemaps(),
+      terser({ output: { max_line_len: 511 } }),
+      typescript({ sourceMap: true, inlineSources: true })
     ]
   }
 ];

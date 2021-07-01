@@ -10,7 +10,7 @@ module.exports = env => {
     target: ['es6', 'web'],
     entry: './dist/index.js',
     output: {
-      path: resolve(__dirname, 'dist', 'web'),
+      path: resolve(__dirname, 'dist', 'umd'),
       filename: 'index.js',
       libraryTarget,
       library: 'tbUtil'
