@@ -1,6 +1,7 @@
 let notLetterPattern: RegExp;
 let allUpperPattern: RegExp;
 let wordPattern: RegExp;
+let digitPattern: RegExp;
 
 try {
   // I want these regexes to fail if not supported, so it takes a bit of obfuscation
@@ -10,12 +11,14 @@ try {
   'm&m'.split(new RegExp('(?<!4)[^\\' + 'p{L}]+', u));
   // This line reached if Unicode character classes and lookbehind both work.
   notLetterPattern = new RegExp('\\' + 'P{L}', 'g' + u);
+  digitPattern = new RegExp('^\\' + 'p{Nd}$', u);
   allUpperPattern = new RegExp('^\\' + 'p{Lu}+$', u);
   // eslint-disable-next-line no-misleading-character-class
   wordPattern = new RegExp(`(?:['’ʼ]|(?<=[-\\s,.:;"]|^))[\\` + `p{L}'’ʼ\\u0300-\\u036F]+\\b['’ʼ]?`, 'g' + u);
 }
 catch {
   notLetterPattern = /[A-ZÀ-ÖØ-ÿ]/ig;
+  digitPattern = /^\d$/;
   allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
   // eslint-disable-next-line no-misleading-character-class
   wordPattern = /[A-Za-zÀ-ÖØ-ÿ'’ʼ\u0300-\u036F]+\b['’ʼ]?/g;
@@ -414,19 +417,79 @@ export function regexEscape(s: string): string {
   return s.replace(charsNeedingRegexEscape, '\\$&');
 }
 
+const digitSystems: [number, string][] = [
+  [0x0660, 'Arabic'],
+  [0x06F0, 'Extended Arabic'],
+  [0x07C0, 'Nko'],
+  [0x0966, 'Devanagari'],
+  [0x09E6, 'Bengali'],
+  [0x0A66, 'Gurmukhi'],
+  [0x0AE6, 'Gujarati'],
+  [0x0B66, 'Oriya'],
+  [0x0BE6, 'Tamil'],
+  [0x0C66, 'Telugu'],
+  [0x0CE6, 'Kannada'],
+  [0x0D66, 'Malayalam'],
+  [0x0DE6, 'Sinhala Lith'],
+  [0x0E50, 'Thai'],
+  [0x0ED0, 'Lao'],
+  [0x0F20, 'Tibetan'],
+  [0x1040, 'Myanmar'],
+  [0x1090, 'Myanmar Shan'],
+  [0x17E0, 'Khmer'],
+  [0x1810, 'Mongolian'],
+  [0x1946, 'Limbu'],
+  [0x19D0, 'New Tai Lue'],
+  [0x1A80, 'Tai Tham Hora'],
+  [0x1A90, 'Tai Tham Tham'],
+  [0x1B50, 'Balinese'],
+  [0x1BB0, 'Sundanese'],
+  [0x1C40, 'Lepcha'],
+  [0x1C50, 'Ol Chiki'],
+  [0xA620, 'Vai'],
+  [0xA8D0, 'Saurashtra'],
+  [0xA900, 'Kayah Li'],
+  [0xA9D0, 'Javanese'],
+  [0xA9F0, 'Myanmar Tai Laing'],
+  [0xAA50, 'Cham'],
+  [0xABF0, 'Meetei Mayek'],
+];
+
+const digitValues: Record<string, string> = {};
+const digitBases: Record<string, string> = {};
+const digitScripts: Record<string, string> = {};
+
+for (const [base, script] of digitSystems) {
+  const zero = String.fromCodePoint(base);
+
+  for (let i = 0; i <= 9; ++i) {
+    const digit = String.fromCodePoint(base + i);
+
+    digitValues[digit] = String.fromCodePoint(0x30 + i);
+    digitBases[digit] = zero;
+    digitScripts[digit] = script;
+  }
+}
+
 export function convertDigitsToAscii(n: string, baseDigit?: string[]): string {
   let base = '0';
+  let script = 'ASCII';
 
-  const result = n
-    .replace(/[\u0660-\u0669]/g, ch => { base = '\u0660'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0630); })  // Arabic digits
-    .replace(/[\u06F0-\u06F9]/g, ch => { base = '\u06F0'; return String.fromCodePoint(ch.charCodeAt(0) - 0x06C0); })  // Urdu/Persian digits
-    .replace(/[\u0966-\u096F]/g, ch => { base = '\u0966'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0936); })  // Devanagari digits
-    .replace(/[\u09E6-\u09EF]/g, ch => { base = '\u09E6'; return String.fromCodePoint(ch.charCodeAt(0) - 0x09B6); })  // Bengali digits
-    .replace(/[\u0F20-\u0F29]/g, ch => { base = '\u0F20'; return String.fromCodePoint(ch.charCodeAt(0) - 0x0EF0); })  // Tibetan digits
-    .replace(/[\u1040-\u1049]/g, ch => { base = '\u1040'; return String.fromCodePoint(ch.charCodeAt(0) - 0x1010); }); // Myanmarese digits
+  const result = n.replace(/./g, match => {
+    if (digitValues[match]) {
+      base = digitBases[match];
+      script = digitScripts[match];
 
-  if (baseDigit)
+      return digitValues[match];
+    }
+
+    return match;
+  });
+
+  if (baseDigit) {
     baseDigit[0] = base;
+    baseDigit[1] = script;
+  }
 
   return result;
 }
@@ -443,4 +506,12 @@ export function convertDigits(n: string, baseDigit: string): string {
   }
 
   return n;
+}
+
+export function isDigit(ch: string): boolean {
+  return digitPattern.test(ch) || !!digitValues[ch];
+}
+
+export function digitScript(ch: string): string {
+  return digitScripts[ch] || (/^\d$/.test(ch) ? 'ASCII' : undefined);
 }
