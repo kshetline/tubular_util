@@ -1,5 +1,7 @@
 import { forEach, isNumber, toInt } from './misc-util';
 
+const { ceil, floor, max, min } = Math;
+
 export interface FontMetrics {
   font: string;
   lineHeight: number;
@@ -7,6 +9,9 @@ export interface FontMetrics {
   fullAscent: number;
   descent: number;
   leading: number;
+  extraAscent?: number;
+  extraDescent?: number;
+  extraLineHeight?: number;
 }
 
 interface FsDocument extends HTMLDocument {
@@ -196,15 +201,15 @@ export function getFont(element: Element): string {
 
 const cachedMetrics: {[font: string]: FontMetrics} = {};
 
-export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
+export function getFontMetrics(elementOrFont: Element | string, specificChar?: string): FontMetrics {
   let font;
 
   if (typeof elementOrFont === 'string')
-    font = <string> elementOrFont;
+    font = elementOrFont as string;
   else
-    font = getFont(<Element> elementOrFont);
+    font = getFont(elementOrFont as Element);
 
-  let metrics: FontMetrics = cachedMetrics[font];
+  let metrics: FontMetrics = !specificChar && cachedMetrics[font];
 
   if (metrics)
     return metrics;
@@ -221,12 +226,12 @@ export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
     testFont = fontParts[1] + testFontSize + fontParts[3];
   }
 
-  const PADDING = 50;
   const sampleText1 = 'Eg';
   const sampleText2 = 'ÅÊ';
 
   let lineHeight = fontSize * 1.2;
-  const heightDiv = <HTMLDivElement> <any> document.createElement('div');
+  const padding = min(50, lineHeight * 1.5);
+  const heightDiv = document.createElement('div');
 
   heightDiv.style.position = 'absolute';
   heightDiv.style.opacity = '0';
@@ -244,7 +249,7 @@ export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
   const canvas = (getFontMetrics as any).canvas || ((getFontMetrics as any).canvas =
                   document.createElement('canvas') as HTMLCanvasElement);
 
-  canvas.width = testFontSize * 2 + PADDING;
+  canvas.width = testFontSize * 2 + padding;
   canvas.height = testFontSize * 3;
   canvas.style.opacity = '1';
 
@@ -255,7 +260,7 @@ export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
   context.fillRect(-1, -1, w + 2, h + 2);
   context.fillStyle = 'black';
   context.font = testFont;
-  context.fillText(sampleText1, PADDING / 2, baseline);
+  context.fillText(sampleText1, padding / 2, baseline);
 
   let pixels = context.getImageData(0, 0, w, h).data;
   let i = 0;
@@ -263,37 +268,64 @@ export function getFontMetrics(elementOrFont: Element | string): FontMetrics {
 
   // Finding the ascent uses a normal, forward scanline
   while (++i < len && pixels[i] > 192) {}
-  let ascent = Math.floor(i / w4);
+  let ascent = baseline - floor(i / w4);
 
   // Finding the descent uses a reverse scanline
   i = len - 1;
   while (--i > 0 && pixels[i] > 192) {}
-  let descent = Math.floor(i / w4);
+  let descent = floor(i / w4) - baseline;
 
   context.fillStyle = 'white';
   context.fillRect(-1, -1, w + 2, h + 2);
   context.fillStyle = 'black';
-  context.fillText(sampleText2, PADDING / 2, baseline);
+  context.fillText(sampleText2, padding / 2, baseline);
   pixels = context.getImageData(0, 0, w, h).data;
 
-  // Finding the full ascent, including diacriticals.
+  // Find full ascent, including diacriticals.
   i = 0;
   while (++i < len && pixels[i] > 192) {}
-  let fullAscent = Math.floor(i / w4);
+  let fullAscent = baseline - floor(i / w4);
 
-  ascent = baseline - ascent;
-  fullAscent = baseline - fullAscent;
-  descent = descent - baseline;
+  let extraAscent = fullAscent;
+  let extraDescent = descent;
+
+  if (specificChar) {
+    context.fillStyle = 'white';
+    context.fillRect(-1, -1, w + 2, h + 2);
+    context.fillStyle = 'black';
+    context.fillText(specificChar, padding / 2, baseline);
+    pixels = context.getImageData(0, 0, w, h).data;
+
+    // Find ascent of specificChar.
+    i = 0;
+    while (++i < len && pixels[i] > 192) {}
+    extraAscent = max(floor(i / w4) - baseline, fullAscent);
+
+    // Find descent of specificChar.
+    i = len - 1;
+    while (--i > 0 && pixels[i] > 192) {}
+    extraDescent = max(floor(i / w4) - baseline, descent);
+  }
 
   if (testFontSize > fontSize) {
-    ascent = Math.ceil(ascent / 2);
-    fullAscent = Math.ceil(fullAscent / 2);
-    descent = Math.ceil(descent / 2);
+    ascent = ceil(ascent / 2);
+    fullAscent = ceil(fullAscent / 2);
+    descent = ceil(descent / 2);
+    extraAscent = ceil(extraAscent / 2);
+    extraDescent = ceil(extraDescent / 2);
   }
+
   const leading = lineHeight - fullAscent - descent;
 
-  metrics = { font: font, lineHeight: lineHeight, ascent: ascent, fullAscent: fullAscent, descent: descent, leading: leading };
-  cachedMetrics[font] = metrics;
+  metrics = { font, lineHeight, ascent, fullAscent, descent, leading };
+
+  if (!specificChar)
+    cachedMetrics[font] = metrics;
+  else {
+    metrics.extraAscent = extraAscent;
+    metrics.extraDescent = extraDescent;
+    metrics.extraLineHeight = max(extraAscent + extraDescent, lineHeight);
+  }
 
   return metrics;
 }
@@ -352,8 +384,8 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
   // looking for box edges.
   if (firefox) {
     for (let i = 0; i < pixmaps[0].length; i += 4) {
-      const row = Math.floor(i / 4 / size);
-      const col = Math.floor(i / 4) % size;
+      const row = floor(i / 4 / size);
+      const col = floor(i / 4) % size;
 
       if ((row < 2 || row === metrics.fullAscent - 1 || col < 2) && pixmaps[0][i] !== pixmaps[2][i])
         return true;
@@ -387,7 +419,7 @@ export function getTextWidth(items: string | string[], font: string | HTMLElemen
 
   for (const item of items) {
     const width = context.measureText(item).width;
-    maxWidth = Math.max(maxWidth, width);
+    maxWidth = max(maxWidth, width);
   }
 
   return maxWidth;

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { blendColors, parseColor } from './browser-graphics-util';
-import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
+import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, push, pushIf, repeat, sortObjectEntries,
@@ -490,5 +490,15 @@ describe('@tubular/util', () => {
     expect(digitScript('꩒')).to.equal('Cham');
     expect(digitScript('4')).to.equal('ASCII');
     expect(digitScript('foo')).to.be.undefined;
+  });
+
+  it('should determine font metrics correctly', () => {
+    if (typeof document === 'undefined') {
+      console.info('Test must be run in browser');
+      return;
+    }
+
+    expect(getFontMetrics('24px Arial').lineHeight).to.be.approximately(28, 1);
+    expect(getFontMetrics('24px Arial', '\u1B52').extraLineHeight).to.be.approximately(35, 1);
   });
 });

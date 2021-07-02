@@ -420,7 +420,7 @@ export function regexEscape(s: string): string {
 const digitSystems: [number, string][] = [
   [0x0660, 'Arabic'],
   [0x06F0, 'Extended Arabic'],
-  [0x07C0, 'Nko'],
+  [0x07C0, "N'Ko"],
   [0x0966, 'Devanagari'],
   [0x09E6, 'Bengali'],
   [0x0A66, 'Gurmukhi'],
