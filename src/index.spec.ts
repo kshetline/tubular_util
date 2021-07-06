@@ -477,7 +477,8 @@ describe('@tubular/util', () => {
 
     expect(result = convertDigitsToAscii('foo ٠١٢٣٤ bar', base)).to.equals('foo 01234 bar');
     expect(base[1]).to.equal('Arabic');
-    expect(convertDigits(result, base[0])).to.equals('foo ٠١٢٣٤ bar');
+    expect(result = convertDigits(result, base[0])).to.equals('foo ٠١٢٣٤ bar');
+    expect(convertDigits(result, '٠')).to.equals('foo ٠١٢٣٤ bar');
     expect(result = convertDigitsToAscii('baz ৫৬৭৮৯ qux', base)).to.equals('baz 56789 qux');
     expect(base[1]).to.equal('Bengali');
     expect(convertDigits(result, base[0])).to.equals('baz ৫৬৭৮৯ qux');

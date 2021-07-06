@@ -496,13 +496,12 @@ export function convertDigitsToAscii(n: string, baseDigit?: string[]): string {
 
 export function convertDigits(n: string, baseDigit: string): string {
   const base: string[] = [];
-
-  n = convertDigitsToAscii(n, base);
+  const latn = convertDigitsToAscii(n, base);
 
   if (base[0] !== baseDigit) {
     const delta = baseDigit.charCodeAt(0) - 48;
 
-    n = n.replace(/[0-9]/g, ch => String.fromCodePoint(ch.charCodeAt(0) + delta));
+    n = latn.replace(/[0-9]/g, ch => String.fromCodePoint(ch.charCodeAt(0) + delta));
   }
 
   return n;
