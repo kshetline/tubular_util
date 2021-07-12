@@ -470,13 +470,17 @@ export function htmlUnescape(s: string): string {
 }
 
 export function isAndroid(): boolean {
-  return navigator.userAgent.includes('Android');
+  return navigator.userAgent.includes('Android') || isSamsung();
 }
 
 export function isChrome(): boolean {
   return navigator.vendor === 'Google Inc.' &&
     ((/\bChrome\b/i.test(navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera() && !isChromiumEdge()) ||
      /\bCriOS\b/.test(navigator.userAgent));
+}
+
+export function isChromeOS(): boolean {
+  return navigator.vendor === 'Google Inc.' && /\bCrOS\b/i.test(navigator.userAgent);
 }
 
 export function isChromium(): boolean {
