@@ -161,7 +161,7 @@ export function toInt(value: any, defaultValue = 0, radix = 10): number {
     return defaultValue;
 }
 
-export function toNumber(value: any, defaultValue = 0): number {
+export function toNumber(value: unknown, defaultValue = 0): number {
   if (typeof value === 'number')
     return value;
   else if (typeof value === 'string') {
@@ -226,44 +226,44 @@ export function isArray(a: any): a is any[] {
 }
 
 /* eslint-disable no-prototype-builtins */
-export function isArrayLike(a: any): a is ArrayLike<any> {
+export function isArrayLike(a: unknown): a is ArrayLike<any> {
   return Array.isArray(a) || a instanceof Array || (isObject(a) && isNumber((a as any).length) &&
       (a as any).length >= 0 && (a as any).length <= Number.MAX_SAFE_INTEGER && (a as any).length === Math.floor((a as any).length));
 }
 
-export function isBigint(a: any): a is boolean {
+export function isBigint(a: unknown): a is boolean {
   return typeof a === 'bigint';
 }
 
-export function isBoolean(a: any): a is boolean {
+export function isBoolean(a: unknown): a is boolean {
   return typeof a === 'boolean';
 }
 
-export function isFunction(a: any): a is Function {
+export function isFunction(a: unknown): a is Function {
   return typeof a === 'function';
 }
 
-export function isNonFunctionObject(a: any): a is Exclude<Record<string | number | symbol, any>, Function> {
+export function isNonFunctionObject(a: unknown): a is Exclude<Record<string | number | symbol, any>, Function> {
   return a && typeof a === 'object';
 }
 
-export function isNumber(a: any): a is number {
+export function isNumber(a: unknown): a is number {
   return typeof a === 'number';
 }
 
-export function isObject(a: any): a is Record<string | number | symbol, any> {
+export function isObject(a: unknown): a is Record<string | number | symbol, any> {
   return a && (typeof a === 'function' || typeof a === 'object');
 }
 
-export function isString(a: any): a is string {
+export function isString(a: unknown): a is string {
   return typeof a === 'string';
 }
 
-export function isSymbol(a: any): a is symbol {
+export function isSymbol(a: unknown): a is symbol {
   return typeof a === 'symbol';
 }
 
-export function classOf(a: any, noClassResult = false): string {
+export function classOf(a: unknown, noClassResult = false): string {
   if (isObject(a)) {
     if (a.constructor?.name)
       return a.constructor.name;
