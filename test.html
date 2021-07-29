@@ -9,11 +9,19 @@
   <script src="dist/umd/index.js"></script>
   <style>
     body {
-      margin-right: 77px;
+      margin-right: calc(12px + 1em);
+      color: #123;
+    }
+
+    @media only screen {
+      span {
+        color: red;
+      }
     }
   </style>
 </head>
 <body>
+  <span id=foo></span>
   <script>
     document.write(navigator.userAgent + '<br>\n');
     document.write(navigator.platform + '<br><br>\n');
@@ -35,7 +43,9 @@
     document.write('isSamsung(): ' + tbUtil.isSamsung() + '<br>\n');
     document.write('isWindows(): ' + tbUtil.isWindows() + '<br><br>\n');
 
-    document.write('getCssRuleValue: ' + tbUtil.getCssRuleValue(document.body, 'margin-right') + '<br><br>\n');
+    document.write('margin-right: ' + tbUtil.getCssRuleValue(document.body, 'margin-right') + '<br>\n');
+    document.write('body color: ' + tbUtil.getCssRuleValue(document.body, 'color') + '<br>\n');
+    document.write('span color: ' + tbUtil.getCssRuleValue(document.getElementById('foo'), 'color') + '<br>\n');
   </script>
 </body>
 </html>

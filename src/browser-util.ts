@@ -166,10 +166,10 @@ export function getCssRuleValue(element: Element, property: string): string {
 }
 
 export function getCssRuleValues(element: Element, properties: string[]): string[] {
-  const stack = [];
+  const stack: CSSStyleDeclaration[] = [];
 
   function searchRules(rules: CSSRuleList) {
-    Array.from(rules).forEach(rule => {
+    Array.from(rules ?? []).forEach(rule => {
       if (rule instanceof CSSMediaRule && window.matchMedia(rule.conditionText).matches)
         searchRules(rule.cssRules);
       else if (rule instanceof CSSSupportsRule) {
@@ -189,7 +189,7 @@ export function getCssRuleValues(element: Element, properties: string[]): string
     });
   }
 
-  Array.from(document.styleSheets).forEach(sheet => searchRules(sheet.rules || sheet.cssRules));
+  Array.from(document.styleSheets ?? []).forEach(sheet => searchRules(sheet.rules || sheet.cssRules));
 
   const last = stack.pop();
 
