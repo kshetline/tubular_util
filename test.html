@@ -7,6 +7,11 @@
   <title>@tubular/util</title>
 
   <script src="dist/umd/index.js"></script>
+  <style>
+    body {
+      margin-right: 77px;
+    }
+  </style>
 </head>
 <body>
   <script>
@@ -28,7 +33,9 @@
     document.write('isRaspbian(): ' + tbUtil.isRaspbian() + '<br>\n');
     document.write('isSafari(): ' + tbUtil.isSafari() + '<br>\n');
     document.write('isSamsung(): ' + tbUtil.isSamsung() + '<br>\n');
-    document.write('isWindows(): ' + tbUtil.isWindows() + '<br>\n');
+    document.write('isWindows(): ' + tbUtil.isWindows() + '<br><br>\n');
+
+    document.write('getCssRuleValue: ' + tbUtil.getCssRuleValue(document.body, 'margin-right') + '<br><br>\n');
   </script>
 </body>
 </html>

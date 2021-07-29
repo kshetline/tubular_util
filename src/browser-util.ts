@@ -161,6 +161,44 @@ export function getCssValues(element: Element, properties: string[]): string[] {
   return properties.map(p => styles.getPropertyValue(p));
 }
 
+export function getCssRuleValue(element: Element, property: string): string {
+  return this.getCssRuleValues(element, [property])[0];
+}
+
+export function getCssRuleValues(element: Element, properties: string[]): string[] {
+  const stack = [];
+
+  function searchRules(rules: CSSRuleList) {
+    Array.from(rules).forEach(rule => {
+      if (rule instanceof CSSMediaRule && window.matchMedia(rule.conditionText).matches)
+        searchRules(rule.cssRules);
+      else if (rule instanceof CSSSupportsRule) {
+        try {
+          if (CSS.supports(rule.conditionText))
+            searchRules(rule.cssRules);
+        }
+        catch {}
+      }
+      else if (rule instanceof CSSStyleRule) {
+        try {
+          if (element.matches(rule.selectorText))
+            stack.push(rule.style);
+        }
+        catch {}
+      }
+    });
+  }
+
+  Array.from(document.styleSheets).forEach(sheet => searchRules(sheet.rules || sheet.cssRules));
+
+  const last = stack.pop();
+
+  if (last)
+    return properties.map(p => last[p]);
+  else
+    return undefined;
+}
+
 const fontStretches = {
   '50%': 'ultra-condensed',
   '62.5%': 'extra-condensed',
