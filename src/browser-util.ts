@@ -162,7 +162,7 @@ export function getCssValues(element: Element, properties: string[]): string[] {
 }
 
 export function getCssRuleValue(element: Element, property: string): string {
-  return this.getCssRuleValues(element, [property])[0];
+  return getCssRuleValues(element, [property])[0];
 }
 
 export function getCssRuleValues(element: Element, properties: string[]): string[] {
