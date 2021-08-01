@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import { blendColors, parseColor } from './browser-graphics-util';
-import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
+import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, push, pushIf, repeat, sortObjectEntries,
   toBoolean, toInt
 } from './misc-util';
 import {
-  asLines, convertDigits, convertDigitsToAscii, extendDelimited, isAllUppercase, isAllUppercaseWords, makePlainASCII, regexEscape,
+  asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII, regexEscape,
   stripLatinDiacriticals, toMixedCase, toTitleCase
 } from './string-util';
 
@@ -476,8 +476,30 @@ describe('@tubular/util', () => {
     const base: string[] = [];
 
     expect(result = convertDigitsToAscii('foo ٠١٢٣٤ bar', base)).to.equals('foo 01234 bar');
-    expect(convertDigits(result, base[0])).to.equals('foo ٠١٢٣٤ bar');
+    expect(base[1]).to.equal('Arabic');
+    expect(result = convertDigits(result, base[0])).to.equals('foo ٠١٢٣٤ bar');
+    expect(convertDigits(result, '٠')).to.equals('foo ٠١٢٣٤ bar');
     expect(result = convertDigitsToAscii('baz ৫৬৭৮৯ qux', base)).to.equals('baz 56789 qux');
+    expect(base[1]).to.equal('Bengali');
     expect(convertDigits(result, base[0])).to.equals('baz ৫৬৭৮৯ qux');
+    expect(convertDigitsToAscii('୦୨୧୩୪ send it to zoom', base)).to.equals('02134 send it to zoom');
+    expect(base[1]).to.equal('Oriya');
+    expect(isDigit('q')).to.be.false;
+    expect(isDigit('7')).to.be.true;
+    expect(isDigit('೫')).to.be.true;
+    expect(isDigit('ꮗ')).to.be.false;
+    expect(digitScript('꩒')).to.equal('Cham');
+    expect(digitScript('4')).to.equal('ASCII');
+    expect(digitScript('foo')).to.be.undefined;
+  });
+
+  it('should determine font metrics correctly', () => {
+    if (typeof document === 'undefined') {
+      console.info('Test must be run in browser');
+      return;
+    }
+
+    expect(getFontMetrics('24px Arial').lineHeight).to.be.approximately(28, 1);
+    expect(getFontMetrics('24px Arial', '\u1B52').extraLineHeight).to.be.approximately(35, 1);
   });
 });
