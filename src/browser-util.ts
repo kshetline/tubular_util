@@ -649,12 +649,18 @@ export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   return Promise.resolve();
 }
 
-export function urlEncodeParams(params: { [key: string]: string | number | boolean }): string {
+export function encodeForUri(s: string, spaceAsPlus = false): string {
+  s = encodeURIComponent(s).replace(/[!'()*]/g, m => '%' + m.charCodeAt(0).toString(16).toUpperCase());
+
+  return spaceAsPlus ? s.replace(/%20/g, '+') : s;
+}
+
+export function urlEncodeParams(params: Record<string, string | number | boolean>, spaceAsPlus = false): string {
   const result: string[] = [];
 
   forEach(params, (key, value) => {
     if (value != null)
-      result.push(key + '=' + encodeURIComponent(value.toString()));
+      result.push(encodeForUri(key) + '=' + encodeForUri(value.toString(), spaceAsPlus));
   });
 
   return result.join('&');
