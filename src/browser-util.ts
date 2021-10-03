@@ -1,4 +1,4 @@
-import { forEach, isNumber, toInt } from './misc-util';
+import { forEach, isNumber, toInt, toNumber } from './misc-util';
 
 const { ceil, floor, max, min } = Math;
 
@@ -558,6 +558,16 @@ export function isIE(): boolean {
 
 export function isIOS(): boolean {
   return /i(Pad|Pod|Phone)/i.test(navigator.platform) || (isMacOS() && isSafari() && navigator.maxTouchPoints > 1);
+}
+
+export function iosVersion(): number {
+  const $ = isIOS() && /(iPhone|iPad) OS\s+(\d+)/.exec(navigator.userAgent);
+
+  return $ ? 0 : toNumber($[2]);
+}
+
+export function isIOS14OrEarlier(): boolean {
+  return isIOS() && iosVersion() <= 14;
 }
 
 export function isMacOS(): boolean {
