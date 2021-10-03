@@ -563,7 +563,7 @@ export function isIOS(): boolean {
 export function iosVersion(): number {
   const $ = isIOS() && /(iPhone|iPad) OS\s+(\d+)/.exec(navigator.userAgent);
 
-  return $ ? 0 : toNumber($[2]);
+  return $ ? toNumber($[2]) : 0;
 }
 
 export function isIOS14OrEarlier(): boolean {
