@@ -1,4 +1,4 @@
-import { forEach, isNumber, toInt } from './misc-util';
+import { forEach, isNumber, toInt, toNumber } from './misc-util';
 
 const { ceil, floor, max, min } = Math;
 
@@ -560,6 +560,16 @@ export function isIOS(): boolean {
   return /i(Pad|Pod|Phone)/i.test(navigator.platform) || (isMacOS() && isSafari() && navigator.maxTouchPoints > 1);
 }
 
+export function iosVersion(): number {
+  const $ = isIOS() && /(iPhone|iPad) OS\s+(\d+)/.exec(navigator.userAgent);
+
+  return $ ? toNumber($[2]) : 0;
+}
+
+export function isIOS14OrEarlier(): boolean {
+  return isIOS() && iosVersion() <= 14;
+}
+
 export function isMacOS(): boolean {
   return navigator.platform.startsWith('Mac') || /\bMac OS X\b/i.test(navigator.userAgent);
 }
@@ -649,12 +659,18 @@ export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   return Promise.resolve();
 }
 
-export function urlEncodeParams(params: { [key: string]: string | number | boolean }): string {
+export function encodeForUri(s: string, spaceAsPlus = false): string {
+  s = encodeURIComponent(s).replace(/[!'()*]/g, m => '%' + m.charCodeAt(0).toString(16).toUpperCase());
+
+  return spaceAsPlus ? s.replace(/%20/g, '+') : s;
+}
+
+export function urlEncodeParams(params: Record<string, string | number | boolean>, spaceAsPlus = false): string {
   const result: string[] = [];
 
   forEach(params, (key, value) => {
     if (value != null)
-      result.push(key + '=' + encodeURIComponent(value.toString()));
+      result.push(encodeForUri(key) + '=' + encodeForUri(value.toString(), spaceAsPlus));
   });
 
   return result.join('&');

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { blendColors, parseColor } from './browser-graphics-util';
-import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
+import { doesCharacterGlyphExist, encodeForUri, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, push, pushIf, repeat, sortObjectEntries,
@@ -501,5 +501,17 @@ describe('@tubular/util', () => {
 
     expect(getFontMetrics('24px Arial').lineHeight).to.be.approximately(28, 1);
     expect(getFontMetrics('24px Arial', '\u1B52').extraLineHeight).to.be.approximately(35, 1);
+  });
+
+  it('encodeForUri', () => {
+    expect(encodeForUri("foo ;,/?:@&=+$#!'()* bar")).to.equal('foo%20%3B%2C%2F%3F%3A%40%26%3D%2B%24%23%21%27%28%29%2A%20bar');
+    expect(encodeForUri("foo ;,/?:@&=+$#!'()* bar", true)).to.equal('foo+%3B%2C%2F%3F%3A%40%26%3D%2B%24%23%21%27%28%29%2A+bar');
+  });
+
+  it('urlEncodeParams', () => {
+    const sample = { foo: 'bar bar;', baz: 5.7, qux: false };
+
+    expect(urlEncodeParams(sample)).to.equal('foo=bar%20bar%3B&baz=5.7&qux=false');
+    expect(urlEncodeParams(sample, true)).to.equal('foo=bar+bar%3B&baz=5.7&qux=false');
   });
 });
