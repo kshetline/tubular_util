@@ -1,14 +1,16 @@
 import { expect } from 'chai';
 import { blendColors, parseColor } from './browser-graphics-util';
-import { doesCharacterGlyphExist, encodeForUri, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
+import {
+  doesCharacterGlyphExist, encodeForUri, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams
+} from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, last, nth, processMillis, push, pushIf, repeat, sortObjectEntries,
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nth, processMillis, push, pushIf, repeat, sortObjectEntries,
   toBoolean, toInt
 } from './misc-util';
 import {
-  asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII, regexEscape,
-  stripLatinDiacriticals, toMixedCase, toTitleCase
+  asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
+  makePlainASCII_lc, makePlainASCII_UC, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase
 } from './string-util';
 
 class TestClass {
@@ -108,8 +110,11 @@ describe('@tubular/util', () => {
     expect(makePlainASCII('Þjóð')).to.equal('Thjodh');
     // noinspection SpellCheckingInspection
     expect(makePlainASCII('ÞJÓÐ')).to.equal('THJODH');
-    expect(makePlainASCII('[café*]')).to.equal('[cafe*]');
+    // noinspection SpellCheckingInspection
+    expect(makePlainASCII_lc('ÞJÓÐ')).to.equal('thjodh');
+    expect(makePlainASCII_UC('[café*]')).to.equal('[CAFE*]');
     expect(makePlainASCII('[café*]', true)).to.equal('(cafe-)');
+    expect(makePlainASCII_UC('[café*]', true)).to.equal('(CAFE-)');
   });
   /* cSpell:enable */
 
@@ -513,5 +518,10 @@ describe('@tubular/util', () => {
 
     expect(urlEncodeParams(sample)).to.equal('foo=bar%20bar%3B&baz=5.7&qux=false');
     expect(urlEncodeParams(sample, true)).to.equal('foo=bar+bar%3B&baz=5.7&qux=false');
+  });
+
+  it('isValidJson', () => {
+    expect(isValidJson('{"do":456,"re":"xyz","mi":null}')).to.be.true;
+    expect(isValidJson('{do":456,"re":"xyz","mi":null}')).to.be.false;
   });
 });
