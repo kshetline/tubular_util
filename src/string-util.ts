@@ -205,16 +205,16 @@ export function makePlainASCII(s: string, forFileName = false): string {
   return sb.join('');
 }
 
-export function makePlainASCII_lc(s: string): string {
+export function makePlainASCII_lc(s: string, forFileName = false): string {
   if (s)
-    return makePlainASCII(s).toLowerCase();
+    return makePlainASCII(s, forFileName).toLowerCase();
   else
     return s;
 }
 
-export function makePlainASCII_UC(s: string): string {
+export function makePlainASCII_UC(s: string, forFileName = false): string {
   if (s)
-    return makePlainASCII(s).toUpperCase();
+    return makePlainASCII(s, forFileName).toUpperCase();
   else
     return s;
 }
