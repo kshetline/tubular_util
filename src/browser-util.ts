@@ -552,14 +552,10 @@ export function isAndroid(): boolean {
   return _isAndroid;
 }
 
-const _isChrome = _navigator.vendor === 'Google Inc.' &&
-    ((/\bChrome\b/i.test(_navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera() && !isChromiumEdge()) ||
-     /\bCriOS\b/.test(_navigator.userAgent));
 export function isChrome(): boolean {
   return _isChrome;
 }
 
-const _isChromeOS = _navigator.vendor === 'Google Inc.' && /\bCrOS\b/i.test(_navigator.userAgent);
 export function isChromeOS(): boolean {
   return _isChromeOS;
 }
@@ -568,17 +564,14 @@ export function isChromium(): boolean {
   return _isChromium;
 }
 
-const _isChromiumEdge = isChromium() && /\bedg\//i.test(_navigator.userAgent) && isWindows();
 export function isChromiumEdge(): boolean {
   return _isChromiumEdge;
 }
 
-const _isEdge = /\bedge\b/i.test(_navigator.userAgent) && isWindows();
 export function isEdge(): boolean {
   return _isEdge;
 }
 
-const _isFirefox = /firefox/i.test(_navigator.userAgent) && !/seamonkey/i.test(_navigator.userAgent);
 export function isFirefox(): boolean {
   return _isFirefox;
 }
@@ -602,7 +595,6 @@ export function isIE(): boolean {
   return false;
 }
 
-const _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (isMacOS() && isSafari() && _navigator.maxTouchPoints > 1);
 export function isIOS(): boolean {
   return _isIOS;
 }
@@ -631,12 +623,10 @@ export function isOpera(): boolean {
   return _isOpera;
 }
 
-const _isRaspbian = _navigator.userAgent.includes('Raspbian') || _platform.includes('Linux armv');
 export function isRaspbian(): boolean {
   return _isRaspbian;
 }
 
-const _isSafari = /^((?!chrome|android).)*safari/i.test(_navigator.userAgent) && !isEdge();
 export function isSafari(): boolean {
   return _isSafari;
 }
@@ -645,7 +635,6 @@ export function isSamsung(): boolean {
   return _isSamsung;
 }
 
-const _isWindows = _navigator.appVersion?.includes('Windows') || _platform.startsWith('Win');
 export function isWindows(): boolean {
   return _isWindows;
 }
