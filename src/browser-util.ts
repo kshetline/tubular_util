@@ -2,6 +2,27 @@ import { forEach, isNumber, toInt, toNumber } from './misc-util';
 
 const { ceil, floor, max, min } = Math;
 
+let _navigator: typeof navigator;
+
+try {
+  if (typeof navigator !== 'undefined')
+    _navigator = navigator;
+}
+catch {}
+
+if (!_navigator)
+  _navigator = { appVersion: '?', maxTouchPoints: 0, platform: '?', userAgent: '?', vendor: '?' } as typeof navigator;
+
+const _platform = (_navigator as any).userAgentData?.platform || _navigator.platform || '?';
+
+let _window: typeof window;
+
+try {
+  if (typeof window !== 'undefined')
+    _window = window;
+}
+catch {}
+
 export interface FontMetrics {
   font: string;
   lineHeight: number;
@@ -30,7 +51,10 @@ interface FsDocumentElement extends HTMLElement {
 }
 
 export function beep(): void {
-  const audioContext = new ((window as any).AudioContext)() as AudioContext;
+  if (!_window)
+    return;
+
+  const audioContext = new ((_window as any).AudioContext)() as AudioContext;
   const oscillator = audioContext.createOscillator();
   const gain = audioContext.createGain();
 
@@ -170,7 +194,7 @@ export function getCssRuleValues(element: Element, properties: string[]): string
 
   function searchRules(rules: CSSRuleList) {
     Array.from(rules ?? []).forEach(rule => {
-      if (rule instanceof CSSMediaRule && window.matchMedia(rule.conditionText).matches)
+      if (rule instanceof CSSMediaRule && _window?.matchMedia(rule.conditionText).matches)
         searchRules(rule.cssRules);
       else if (rule instanceof CSSSupportsRule) {
         try {
@@ -507,34 +531,42 @@ export function htmlUnescape(s: string): string {
   return s;
 }
 
+const _isMacOS = _platform.startsWith('Mac') || /\bMac OS X\b/i.test(_navigator.userAgent);
+const _isSamsung = /\bSamsungBrowser\b/i.test(_navigator.userAgent);
+const _isAndroid = _navigator.userAgent.includes('Android') || isSamsung();
 export function isAndroid(): boolean {
-  return navigator.userAgent.includes('Android') || isSamsung();
+  return _isAndroid;
 }
 
+const _isChrome = _navigator.vendor === 'Google Inc.' &&
+    ((/\bChrome\b/i.test(_navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera() && !isChromiumEdge()) ||
+     /\bCriOS\b/.test(_navigator.userAgent));
 export function isChrome(): boolean {
-  return navigator.vendor === 'Google Inc.' &&
-    ((/\bChrome\b/i.test(navigator.userAgent) && !isEdge() && !isSamsung() && !isOpera() && !isChromiumEdge()) ||
-     /\bCriOS\b/.test(navigator.userAgent));
+  return _isChrome;
 }
 
+const _isChromeOS = _navigator.vendor === 'Google Inc.' && /\bCrOS\b/i.test(_navigator.userAgent);
 export function isChromeOS(): boolean {
-  return navigator.vendor === 'Google Inc.' && /\bCrOS\b/i.test(navigator.userAgent);
+  return _isChromeOS;
 }
 
 export function isChromium(): boolean {
-  return !!(window as any).chrome;
+  return !!(_window as any)?.chrome;
 }
 
+const _isChromiumEdge = isChromium() && /\bedg\//i.test(_navigator.userAgent) && isWindows();
 export function isChromiumEdge(): boolean {
-  return isChromium() && /\bedg\//i.test(navigator.userAgent) && isWindows();
+  return _isChromiumEdge;
 }
 
+const _isEdge = /\bedge\b/i.test(_navigator.userAgent) && isWindows();
 export function isEdge(): boolean {
-  return /\bedge\b/i.test(navigator.userAgent) && isWindows();
+  return _isEdge;
 }
 
+const _isFirefox = /firefox/i.test(_navigator.userAgent) && !/seamonkey/i.test(_navigator.userAgent);
 export function isFirefox(): boolean {
-  return /firefox/i.test(navigator.userAgent) && !/seamonkey/i.test(navigator.userAgent);
+  return _isFirefox;
 }
 
 export function isFullScreen(): boolean {
@@ -545,53 +577,63 @@ export function isFullScreen(): boolean {
 
 export function isEffectivelyFullScreen(): boolean {
   return isFullScreen() ||
-    (window.innerWidth === window.screen?.width && window.innerHeight === window.screen?.height);
+    (_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
 }
 
 /**
  * @deprecated Will always be false, as this code no longer runs in IE.
  */
 export function isIE(): boolean {
-  // return /(?:\b(MS)?IE\s+|\bTrident\/7\.0;.*\s+rv:)(\d+)/.test(navigator.userAgent);
+  // return /(?:\b(MS)?IE\s+|\bTrident\/7\.0;.*\s+rv:)(\d+)/.test(_navigator.userAgent);
   return false;
 }
 
+const _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (isMacOS() && isSafari() && _navigator.maxTouchPoints > 1);
 export function isIOS(): boolean {
-  return /i(Pad|Pod|Phone)/i.test(navigator.platform) || (isMacOS() && isSafari() && navigator.maxTouchPoints > 1);
+  return _isIOS;
 }
 
+const _iosVersion = toNumber((((isIOS() || null) && /(iPhone|iPad) OS\s+(\d+)/.exec(_navigator.userAgent)) ?? [])[2]);
 export function iosVersion(): number {
-  const $ = isIOS() && /(iPhone|iPad) OS\s+(\d+)/.exec(navigator.userAgent);
-
-  return $ ? toNumber($[2]) : 0;
+  return _iosVersion;
 }
 
+const _isIOS14OrEarlier = isIOS() && iosVersion() <= 14;
 export function isIOS14OrEarlier(): boolean {
-  return isIOS() && iosVersion() <= 14;
+  return _isIOS14OrEarlier;
+}
+
+const _isLikelyMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(_navigator.userAgent) ||
+  _window?.matchMedia('only screen and (max-width: 760px)').matches;
+export function isLikelyMobile(): boolean {
+  return _isLikelyMobile;
 }
 
 export function isMacOS(): boolean {
-  return navigator.platform.startsWith('Mac') || /\bMac OS X\b/i.test(navigator.userAgent);
+  return _isMacOS;
 }
 
 export function isOpera(): boolean {
-  return typeof (window as any).opr !== 'undefined';
+  return typeof (_window as any)?.opr !== 'undefined';
 }
 
+const _isRaspbian = _navigator.userAgent.includes('Raspbian') || _platform.includes('Linux armv');
 export function isRaspbian(): boolean {
-  return navigator.userAgent.includes('Raspbian') || navigator.platform.includes('Linux armv');
+  return _isRaspbian;
 }
 
+const _isSafari = /^((?!chrome|android).)*safari/i.test(_navigator.userAgent) && !isEdge();
 export function isSafari(): boolean {
-  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !isEdge();
+  return _isSafari;
 }
 
 export function isSamsung(): boolean {
-  return /\bSamsungBrowser\b/i.test(navigator.userAgent);
+  return _isSamsung;
 }
 
+const _isWindows = _navigator.appVersion?.includes('Windows') || _platform.startsWith('Win');
 export function isWindows(): boolean {
-  return navigator.appVersion.includes('Windows') || navigator.platform.startsWith('Win');
+  return _isWindows;
 }
 
 export function restrictPixelWidth(text: string, font: string | HTMLElement, maxWidth: number, clipString = '\u2026'): string {
