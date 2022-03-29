@@ -50,7 +50,7 @@ interface FsDocumentElement extends HTMLElement {
   webkitRequestFullscreen?: () => void;
 }
 
-export function beep(): void {
+export function beep(frequency = 440, gainValue = 0.025): void {
   if (!_window)
     return;
 
@@ -59,9 +59,9 @@ export function beep(): void {
   const gain = audioContext.createGain();
 
   oscillator.type = 'square';
-  oscillator.frequency.value = 440;
+  oscillator.frequency.value = frequency;
   oscillator.connect(gain);
-  gain.gain.value = 0.025;
+  gain.gain.value = gainValue;
   gain.connect(audioContext.destination);
 
   oscillator.start();
