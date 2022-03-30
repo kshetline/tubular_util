@@ -13,7 +13,7 @@ catch {}
 if (!_navigator)
   _navigator = { appVersion: '?', maxTouchPoints: 0, platform: '?', userAgent: '?', vendor: '?' } as typeof navigator;
 
-const _platform = (_navigator as any).userAgentData?.platform || _navigator.platform || '?';
+const _platform = _navigator.platform || (_navigator as any).userAgentData?.platform || '?';
 
 let _window: typeof window;
 
