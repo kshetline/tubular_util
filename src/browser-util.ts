@@ -600,7 +600,7 @@ export function isIOS(): boolean {
   return _isIOS;
 }
 
-const _iosVersion = toNumber((((isIOS() || null) && /(iPhone|iPad) OS\s+(\d+)/.exec(_navigator.userAgent)) ?? [])[2]);
+const _iosVersion = toNumber((((isIOS() || null) && /(((iPhone|iPad).+?OS\s+)|(Version\/))(\d+)/i.exec(_navigator.userAgent)) ?? [])[5]);
 export function iosVersion(): number {
   return _iosVersion;
 }
@@ -610,7 +610,8 @@ export function isIOS14OrEarlier(): boolean {
   return _isIOS14OrEarlier;
 }
 
-const _isLikelyMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(_navigator.userAgent) ||
+const _isLikelyMobile = _isIOS ||
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|\bmobile\b/i.test(_navigator.userAgent) ||
   _window?.matchMedia('only screen and (max-width: 760px)').matches;
 export function isLikelyMobile(): boolean {
   return _isLikelyMobile;
