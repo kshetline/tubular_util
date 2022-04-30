@@ -531,7 +531,8 @@ export function htmlUnescape(s: string): string {
   return s;
 }
 
-const _isMacOS = _platform.startsWith('Mac') || /\bMac OS X\b/i.test(_navigator.userAgent);
+const _isMacOS_ish = _platform.startsWith('Mac') || /\bMac OS X\b/i.test(_navigator.userAgent);
+const _isMacOS = _isMacOS_ish && !/\bmobile\b/i.test(_navigator.userAgent);
 const _isSamsung = /\bSamsungBrowser\b/i.test(_navigator.userAgent);
 const _isWindows = _navigator.appVersion?.includes('Windows') || _platform.startsWith('Win');
 const _isEdge = /\bedge\b/i.test(_navigator.userAgent) && _isWindows;
@@ -546,7 +547,7 @@ const _isChromeOS = _navigator.vendor === 'Google Inc.' && /\bCrOS\b/i.test(_nav
 const _isRaspbian = _navigator.userAgent.includes('Raspbian') || _platform.includes('Linux armv');
 const _isFirefox = /firefox/i.test(_navigator.userAgent) && !/seamonkey/i.test(_navigator.userAgent);
 const _isSafari = /^((?!chrome|android).)*safari/i.test(_navigator.userAgent) && !_isEdge;
-const _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (_isMacOS && _isSafari && _navigator.maxTouchPoints > 1);
+const _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (_isMacOS_ish && _isSafari && _navigator.maxTouchPoints > 1);
 
 export function isAndroid(): boolean {
   return _isAndroid;

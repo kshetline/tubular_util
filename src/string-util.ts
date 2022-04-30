@@ -67,6 +67,7 @@ export function extendDelimited(base: string, newItem: string, delimiter = ', ')
     return base + delimiter + newItem;
 }
 
+// noinspection SpellCheckingInspection
 const diacriticals = '\u00C0\u00C1\u00C2\u00C3\u00C4\u00C5\u00C7\u00C8\u00C9\u00CA\u00CB\u00CC' +
                      '\u00CD\u00CE\u00CF\u00D1\u00D2\u00D3\u00D4\u00D5\u00D6\u00D8\u00D9\u00DA' +
                      '\u00DB\u00DC\u00DD\u00E0\u00E1\u00E2\u00E3\u00E4\u00E5\u00E7\u00E8\u00E9' +
@@ -402,6 +403,28 @@ export function stripLatinDiacriticals_UC(s: string): string {
     return s;
 }
 
+export function stripDiacriticals(s: string): string {
+  if (s)
+    // eslint-disable-next-line no-misleading-character-class
+    return s.normalize('NFD').replace(/[\u0300-\u036F\u1AB0-\u1AFF\u1DC0-\u1DFF]/g, '').replace(/Ø/g, 'O').replace(/ø/g, 'o');
+  else
+    return s;
+}
+
+export function stripDiacriticals_lc(s: string): string {
+  if (s)
+    return stripDiacriticals(s).toLowerCase();
+  else
+    return s;
+}
+
+export function stripDiacriticals_UC(s: string): string {
+  if (s)
+    return stripDiacriticals(s).toUpperCase();
+  else
+    return s;
+}
+
 export function zeroPad(n: number | string, digits: number): string {
   const s = n.toString();
 
@@ -501,7 +524,7 @@ export function convertDigits(n: string, baseDigit: string): string {
   if (base[0] !== baseDigit) {
     const delta = baseDigit.charCodeAt(0) - 48;
 
-    n = latn.replace(/[0-9]/g, ch => String.fromCodePoint(ch.charCodeAt(0) + delta));
+    n = latn.replace(/\d/g, ch => String.fromCodePoint(ch.charCodeAt(0) + delta));
   }
 
   return n;
@@ -513,4 +536,12 @@ export function isDigit(ch: string): boolean {
 
 export function digitScript(ch: string): string {
   return digitScripts[ch] || (/^\d$/.test(ch) ? 'ASCII' : undefined);
+}
+
+export function toMaxFixed(n: number, maximumFractionDigits: number, locale?: string, useGrouping = false): string {
+  return new Intl.NumberFormat(locale || 'en-US', { maximumFractionDigits, useGrouping }).format(n);
+}
+
+export function toMaxSignificant(n: number, maximumSignificantDigits: number, locale?: string, useGrouping = false): string {
+  return new Intl.NumberFormat(locale || 'en-US', { maximumSignificantDigits, useGrouping }).format(n);
 }

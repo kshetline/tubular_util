@@ -10,7 +10,7 @@ import {
 } from './misc-util';
 import {
   asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
-  makePlainASCII_lc, makePlainASCII_UC, regexEscape, stripLatinDiacriticals, toMixedCase, toTitleCase
+  makePlainASCII_lc, makePlainASCII_UC, regexEscape, stripDiacriticals, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
 } from './string-util';
 
 class TestClass {
@@ -96,13 +96,19 @@ describe('@tubular/util', () => {
   });
 
   /* cSpell:disable */
-  it('should strip diacritical marks from latin characters', () => {
+  it('should strip diacritical marks from Latin characters', () => {
     // noinspection SpellCheckingInspection
     expect(stripLatinDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
       .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþy');
   });
 
-  it('should simplify symbols and latin characters to plain ASCII', () => {
+  it('should strip diacritical marks from Latin and non-Latin characters', () => {
+    // noinspection SpellCheckingInspection
+    expect(stripDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿΆΈΪΫάέήίΰϊϋόύώϔӐӑӒӓӖӗЀйѐёіїќ'))
+      .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþyΑΕΙΥαεηιυιυουωϒАаАаЕеЕиееіік');
+  });
+
+  it('should simplify symbols and Latin characters to plain ASCII', () => {
     // noinspection SpellCheckingInspection
     expect(makePlainASCII('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
       .to.equal('AAAAAAAeCEEEEIIIIDhNOOOOO_OUUUUYThssaaaaaaaeceeeeiiiidhnooooo_ouuuuythy');
@@ -112,8 +118,11 @@ describe('@tubular/util', () => {
     expect(makePlainASCII('ÞJÓÐ')).to.equal('THJODH');
     // noinspection SpellCheckingInspection
     expect(makePlainASCII_lc('ÞJÓÐ')).to.equal('thjodh');
+    // noinspection SpellCheckingInspection
     expect(makePlainASCII_UC('[café*]')).to.equal('[CAFE*]');
+    // noinspection SpellCheckingInspection
     expect(makePlainASCII('[café*]', true)).to.equal('(cafe-)');
+    // noinspection SpellCheckingInspection
     expect(makePlainASCII_UC('[café*]', true)).to.equal('(CAFE-)');
   });
   /* cSpell:enable */
@@ -523,5 +532,22 @@ describe('@tubular/util', () => {
   it('isValidJson', () => {
     expect(isValidJson('{"do":456,"re":"xyz","mi":null}')).to.be.true;
     expect(isValidJson('{do":456,"re":"xyz","mi":null}')).to.be.false;
+  });
+
+  it('toMaxFixed', () => {
+    expect(toMaxFixed(Math.PI, 2)).to.equal('3.14');
+    expect(toMaxFixed(Math.PI, 3)).to.equal('3.142');
+    expect(toMaxFixed(Math.PI, 3, 'fr')).to.equal('3,142');
+    expect(toMaxFixed(-1.1, 5)).to.equal('-1.1');
+  });
+
+  it('toMaxSignificant', () => {
+    expect(toMaxSignificant(Math.PI, 2)).to.equal('3.1');
+    expect(toMaxSignificant(Math.PI, 3)).to.equal('3.14');
+    expect(toMaxSignificant(Math.PI, 3, 'fr')).to.equal('3,14');
+    expect(toMaxSignificant(-1234567, 3)).to.equal('-1230000');
+    expect(toMaxSignificant(-1234567, 3, null, true)).to.equal('-1,230,000');
+    expect(toMaxSignificant(-1234567, 3, 'es-ES', true)).to.equal('-1.230.000');
+    expect(toMaxSignificant(-1234567, 4)).to.equal('-1235000');
   });
 });
