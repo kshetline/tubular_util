@@ -13,7 +13,7 @@ catch {}
 if (!_navigator)
   _navigator = { appVersion: '?', maxTouchPoints: 0, platform: '?', userAgent: '?', vendor: '?' } as typeof navigator;
 
-const _platform = (_navigator as any).userAgentData?.platform || _navigator.platform || '?';
+const _platform = _navigator.platform || (_navigator as any).userAgentData?.platform || '?';
 
 let _window: typeof window;
 
@@ -50,7 +50,7 @@ interface FsDocumentElement extends HTMLElement {
   webkitRequestFullscreen?: () => void;
 }
 
-export function beep(): void {
+export function beep(frequency = 440, gainValue = 0.025): void {
   if (!_window)
     return;
 
@@ -59,9 +59,9 @@ export function beep(): void {
   const gain = audioContext.createGain();
 
   oscillator.type = 'square';
-  oscillator.frequency.value = 440;
+  oscillator.frequency.value = frequency;
   oscillator.connect(gain);
-  gain.gain.value = 0.025;
+  gain.gain.value = gainValue;
   gain.connect(audioContext.destination);
 
   oscillator.start();
@@ -531,7 +531,8 @@ export function htmlUnescape(s: string): string {
   return s;
 }
 
-const _isMacOS = _platform.startsWith('Mac') || /\bMac OS X\b/i.test(_navigator.userAgent);
+const _isMacOS_ish = _platform.startsWith('Mac') || /\bMac OS X\b/i.test(_navigator.userAgent);
+const _isMacOS = _isMacOS_ish && !/\bmobile\b/i.test(_navigator.userAgent);
 const _isSamsung = /\bSamsungBrowser\b/i.test(_navigator.userAgent);
 const _isWindows = _navigator.appVersion?.includes('Windows') || _platform.startsWith('Win');
 const _isEdge = /\bedge\b/i.test(_navigator.userAgent) && _isWindows;
@@ -546,7 +547,7 @@ const _isChromeOS = _navigator.vendor === 'Google Inc.' && /\bCrOS\b/i.test(_nav
 const _isRaspbian = _navigator.userAgent.includes('Raspbian') || _platform.includes('Linux armv');
 const _isFirefox = /firefox/i.test(_navigator.userAgent) && !/seamonkey/i.test(_navigator.userAgent);
 const _isSafari = /^((?!chrome|android).)*safari/i.test(_navigator.userAgent) && !_isEdge;
-const _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (_isMacOS && _isSafari && _navigator.maxTouchPoints > 1);
+const _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (_isMacOS_ish && _isSafari && _navigator.maxTouchPoints > 1);
 
 export function isAndroid(): boolean {
   return _isAndroid;
@@ -599,7 +600,7 @@ export function isIOS(): boolean {
   return _isIOS;
 }
 
-const _iosVersion = toNumber((((isIOS() || null) && /(iPhone|iPad) OS\s+(\d+)/.exec(_navigator.userAgent)) ?? [])[2]);
+const _iosVersion = toNumber((((isIOS() || null) && /(((iPhone|iPad).+?OS\s+)|(Version\/))(\d+)/i.exec(_navigator.userAgent)) ?? [])[5]);
 export function iosVersion(): number {
   return _iosVersion;
 }
@@ -609,7 +610,8 @@ export function isIOS14OrEarlier(): boolean {
   return _isIOS14OrEarlier;
 }
 
-const _isLikelyMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(_navigator.userAgent) ||
+const _isLikelyMobile = _isIOS ||
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|\bmobile\b/i.test(_navigator.userAgent) ||
   _window?.matchMedia('only screen and (max-width: 760px)').matches;
 export function isLikelyMobile(): boolean {
   return _isLikelyMobile;
