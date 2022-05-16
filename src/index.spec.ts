@@ -280,14 +280,15 @@ describe('@tubular/util', () => {
   it('should properly convert strings to mixed case', () => {
     expect(toMixedCase("isn't this working?")).to.equal("Isn't This Working?");
     expect(toMixedCase('ISN’T THIS WORKING?')).to.equal('Isn’t This Working?');
-    expect(toMixedCase('one two-three 4x j99')).to.equal('One Two-Three 4x j99');
+    expect(toMixedCase('one two-three 4x j99')).to.equal('One Two-Three 4X J99');
   });
 
   it('should properly convert strings to title case', () => {
-    expect(toTitleCase("isn't this working?")).to.equal("Isn't This Working?");
-    expect(toTitleCase('ISN’T THIS WORKING?')).to.equal('Isn’t This Working?');
+    expect(toTitleCase("isn't this (working)?")).to.equal("Isn't This (Working)?");
+    /* cspell:disable-next-line */ // noinspection SpellCheckingInspection
+    expect(toTitleCase('íSN’T THIS WÖRKING?')).to.equal('Ísn’t This Wörking?');
     expect(toTitleCase('read ’em and weep', { shortSmall: ["'em"] })).to.equal('Read ’em and Weep');
-    expect(toTitleCase('from the ëarth to the moon')).to.equal('From the Ëarth to the Moon');
+    expect(toTitleCase('from the ’ëarth to the moon')).to.equal('From the ’Ëarth to the Moon');
     expect(toTitleCase('YOUR NEW IPHONE')).to.equal('Your New iPhone');
     expect(toTitleCase('born in the usa', { special: ['USA'] })).to.equal('Born in the USA');
     expect(toTitleCase('born in the USA', { keepAllCaps: true })).to.equal('Born in the USA');

@@ -14,14 +14,14 @@ try {
   digitPattern = new RegExp('^\\' + 'p{Nd}$', u);
   allUpperPattern = new RegExp('^\\' + 'p{Lu}+$', u);
   // eslint-disable-next-line no-misleading-character-class
-  wordPattern = new RegExp(`(?:['’ʼ]|(?<=[-\\s,.:;"]|^))[\\` + `p{L}'’ʼ\\u0300-\\u036F]+\\b['’ʼ]?`, 'g' + u);
+  wordPattern = new RegExp(String.raw`(?<=^|[^\p{L}])['’ʼ]?[` + '\\' + String.raw`p{L}'’ʼ\u0300-\u036F]+['’ʼ]?(?=[^\p{L}]|$)`, 'g' + u);
 }
 catch {
   notLetterPattern = /[A-ZÀ-ÖØ-ÿ]/ig;
   digitPattern = /^\d$/;
   allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
   // eslint-disable-next-line no-misleading-character-class
-  wordPattern = /[A-Za-zÀ-ÖØ-ÿ'’ʼ\u0300-\u036F]+\b['’ʼ]?/g;
+  wordPattern = /['’ʼ]?\b[A-Za-zÀ-ÖØ-ÿ'’ʼ\u0300-\u036F]+\b['’ʼ]?/g;
 }
 
 export function asLines(s: string, trimFinalBlankLines = false): string[] {
@@ -67,7 +67,7 @@ export function extendDelimited(base: string, newItem: string, delimiter = ', ')
     return base + delimiter + newItem;
 }
 
-// noinspection SpellCheckingInspection
+/* cspell:disable */ // noinspection SpellCheckingInspection
 const diacriticals = '\u00C0\u00C1\u00C2\u00C3\u00C4\u00C5\u00C7\u00C8\u00C9\u00CA\u00CB\u00CC' +
                      '\u00CD\u00CE\u00CF\u00D1\u00D2\u00D3\u00D4\u00D5\u00D6\u00D8\u00D9\u00DA' +
                      '\u00DB\u00DC\u00DD\u00E0\u00E1\u00E2\u00E3\u00E4\u00E5\u00E7\u00E8\u00E9' +
@@ -93,7 +93,7 @@ const plainChars = 'AAAAAACEEEEI' +
                    '<>/';
 const latinExtendedASubstitutions = 'AaAaAaCcCcCcCcDdDdEeEeEeEeEeGgGgGgGgHhHhIiIiIiIiIi--JjKkkLlLlLlL' +
                                     'lLlNnNnNnn--OoOoOo--RrRrRrSsSsSsSsTtTtTtUuUuUuUuUuUuWwYyYZzZzZzs';
-// inspection SpellCheckingInspection
+/* cspell:enable */
 
 export function makePlainASCII(s: string, forFileName = false): string {
   if (!s)
@@ -243,8 +243,8 @@ export function toMixedCase(s: string): string {
   return s.replace(wordPattern, word => capitalizeFirstLetter(word));
 }
 
-const defaultShortSmalls = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'by', 'de', 'for', 'for', 'from',
-  'in', 'into', 'near', 'nor', 'of', 'on', 'onto', 'or', 'the', 'to', 'with']);
+const defaultShortSmalls = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'de', 'del', 'for', 'for', 'from',
+  'in', 'into', 'la', 'le', 'near', 'nor', 'of', 'on', 'onto', 'or', 'the', 'to', 'with']);
 const specialsRaw = ['eBay', 'FedEx', 'iCloud', 'iMac', 'iOS', 'iPad', 'iPhone', 'MacBook', 'macOS', 'PepsiCo', 'watchOS'];
 const defaultSpecials = new Map<string, string>();
 
