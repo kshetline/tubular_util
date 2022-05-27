@@ -24,13 +24,16 @@ catch {
   wordPattern = /['’ʼ]?\b[A-Za-zÀ-ÖØ-ÿ'’ʼ\u0300-\u036F]+\b['’ʼ]?/g;
 }
 
-export function asLines(s: string, trimFinalBlankLines = false): string[] {
+export function asLines(s: string, trimFinalBlankLines = false, trimEachLine = false): string[] {
   if (s) {
-    const lines = s.split(/\r\n|\r|\n/);
+    let lines = s.split(/\r\n|\r|\n/);
 
     if (trimFinalBlankLines)
       while (lines[lines.length - 1] === '')
         lines.pop();
+
+    if (trimEachLine)
+      lines = lines.map(line => line.trim());
 
     return lines;
   }
@@ -308,6 +311,9 @@ export function toTitleCase(s: string, options?: TitleCaseOptions): string {
   return s.replace(wordPattern, wordHandler);
 }
 
+/**
+ * @deprecated String.padStart() now available.
+ */
 export function padLeft(item: string | number, length: number, padChar = ' '): string {
   let sign = '';
 
@@ -325,6 +331,9 @@ export function padLeft(item: string | number, length: number, padChar = ' '): s
   return sign + result;
 }
 
+/**
+ * @deprecated String.padEnd() now available.
+ */
 export function padRight(item: string, length: number, padChar?: string): string {
   if (!padChar)
     padChar = ' ';
