@@ -461,3 +461,7 @@ export function isValidJson(s: string): boolean {
 
   return false;
 }
+
+export function keyCount(obj: any): number {
+  return obj ? Object.keys(obj).length : 0;
+}

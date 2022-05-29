@@ -94,6 +94,10 @@ export function fillEllipse(context: CanvasRenderingContext2D, cx: number, cy: n
   context.fill();
 }
 
+export function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: number, r): void {
+  fillEllipse(context, cx, cy, r, r);
+}
+
 export function getPixel(imageData: ImageData, x: number, y: number): number {
   if (x < 0 || y < 0 || x >= imageData.width || y >= imageData.height)
     return 0;
