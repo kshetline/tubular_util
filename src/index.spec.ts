@@ -5,7 +5,7 @@ import {
 } from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nth, processMillis, push, pushIf, repeat, sortObjectEntries,
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nth, processMillis, push, pushIf, regex, repeat, sortObjectEntries,
   toBoolean, toInt
 } from './misc-util';
 import {
@@ -550,5 +550,11 @@ describe('@tubular/util', () => {
     expect(toMaxSignificant(-1234567, 3, null, true)).to.equal('-1,230,000');
     expect(toMaxSignificant(-1234567, 3, 'es-ES', true)).to.equal('-1.230.000');
     expect(toMaxSignificant(-1234567, 4)).to.equal('-1235000');
+  });
+
+  it('regex tag function', () => {
+    expect((regex`\d+
+    // Second part
+    -\d+${'i'}`).toString()).to.equal(String.raw`/\d+-\d+/i`);
   });
 });

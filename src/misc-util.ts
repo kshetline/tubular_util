@@ -1,4 +1,4 @@
-import { compareStrings, zeroPad } from './string-util';
+import { asLines, compareStrings, zeroPad } from './string-util';
 
 export function processMillis(): number {
   if (typeof performance !== 'undefined')
@@ -464,4 +464,11 @@ export function isValidJson(s: string): boolean {
 
 export function keyCount(obj: any): number {
   return obj ? Object.keys(obj).length : 0;
+}
+
+// Mainly intended to be used as a tag function.
+export function regex(main: TemplateStringsArray, flags?: string): RegExp {
+  const parts = asLines(main.raw[0] || '', true, true).filter(line => !line.startsWith('//'));
+
+  return new RegExp(parts.join(''), flags);
 }
