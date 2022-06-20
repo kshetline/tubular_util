@@ -6,7 +6,7 @@ import {
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nth, processMillis, push, pushIf, regex, repeat, sortObjectEntries,
-  toBoolean, toInt
+  toBoolean, toInt, toNumber, toValidInt, toValidNumber
 } from './misc-util';
 import {
   asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
@@ -556,5 +556,38 @@ describe('@tubular/util', () => {
     expect((regex`\d+
     // Second part
     -\d+${'i'}`).toString()).to.equal(String.raw`/\d+-\d+/i`);
+  });
+
+  it('toNumber, toValidNumber, toInt, toValidInt', () => {
+    expect(toNumber('3.4')).to.equal(3.4);
+    expect(toNumber(3.4)).to.equal(3.4);
+    expect(toNumber('!3.4')).to.equal(0);
+    expect(toNumber('!3.4', 7)).to.equal(7);
+    expect(toNumber('!3.4', null)).to.equal(null);
+    expect(toNumber(NaN)).to.be.NaN;
+    expect(toNumber(1 / 0)).to.not.be.finite;
+    expect(toValidNumber('3.4')).to.equal(3.4);
+    expect(toValidNumber(3.4)).to.equal(3.4);
+    expect(toValidNumber('!3.4')).to.equal(0);
+    expect(toValidNumber('!3.4', 7)).to.equal(7);
+    expect(toValidNumber('!3.4', null)).to.equal(null);
+    expect(toValidNumber(NaN)).to.equal(0);
+    expect(toValidNumber(1 / 0)).to.equal(0);
+    expect(toInt('123')).to.equal(123);
+    expect(toInt('g', 0, 30)).to.equal(16);
+    expect(toInt(123.4)).to.equal(123);
+    expect(toInt('!123')).to.equal(0);
+    expect(toInt('!123', 7)).to.equal(7);
+    expect(toInt('!123', null)).to.equal(null);
+    expect(toInt(NaN)).to.be.NaN;
+    expect(toInt(1 / 0)).to.not.be.finite;
+    expect(toValidInt('123')).to.equal(123);
+    expect(toValidInt('g', 0, 30)).to.equal(16);
+    expect(toValidInt(123.4)).to.equal(123);
+    expect(toValidInt('!123')).to.equal(0);
+    expect(toValidInt('!123', 7)).to.equal(7);
+    expect(toValidInt('!123', null)).to.equal(null);
+    expect(toValidInt(NaN)).to.equal(0);
+    expect(toValidInt(1 / 0)).to.equal(0);
   });
 });

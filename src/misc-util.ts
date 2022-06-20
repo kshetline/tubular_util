@@ -132,7 +132,9 @@ for (let radix = 2; radix <= 36; ++radix) {
     digitMatchers[radix] = new RegExp('^[-+]?[0-9A-' + String.fromCharCode(54 + radix) + ']+$', 'i');
 }
 
-export function toInt(value: any, defaultValue = 0, radix = 10): number {
+export function toInt(value: any, defaultValue?: number, radix?: number): number;
+export function toInt(value: any, defaultValue: null, radix?: number): number | null;
+export function toInt(value: any, defaultValue: number | null = 0, radix = 10): number | null {
   if (typeof value === 'number')
     return Math.floor(value);
   else if (typeof value === 'string') {
@@ -161,7 +163,18 @@ export function toInt(value: any, defaultValue = 0, radix = 10): number {
     return defaultValue;
 }
 
-export function toNumber(value: unknown, defaultValue = 0): number {
+export function toValidInt(value: any, defaultValue?: number, radix?: number): number;
+export function toValidInt(value: any, defaultValue: null, radix?: number): number | null;
+export function toValidInt(value: any, defaultValue: number | null = 0, radix = 10): number | null {
+  if (typeof value === 'number' && (isNaN(value) || !isFinite(value)))
+    return defaultValue;
+  else
+    return toInt(value, defaultValue, radix);
+}
+
+export function toNumber(value: any, defaultValue?: number): number;
+export function toNumber(value: any, defaultValue: null): number | null;
+export function toNumber(value: unknown, defaultValue: number | null = 0): number | null {
   if (typeof value === 'number')
     return value;
   else if (typeof value === 'string') {
@@ -182,6 +195,15 @@ export function toNumber(value: unknown, defaultValue = 0): number {
   }
   else
     return defaultValue;
+}
+
+export function toValidNumber(value: any, defaultValue?: number): number;
+export function toValidNumber(value: any, defaultValue: null): number | null;
+export function toValidNumber(value: any, defaultValue: number | null = 0): number | null {
+  if (typeof value === 'number' && (isNaN(value) || !isFinite(value)))
+    return defaultValue;
+  else
+    return toNumber(value, defaultValue);
 }
 
 export function first<T>(array: ArrayLike<T>): T {
