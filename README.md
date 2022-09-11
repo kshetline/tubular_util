@@ -207,7 +207,7 @@ function isDigit(ch: string): boolean;
 Returns `true` if `ch` is recognized as a Unicode digit.
 
 ```typescript
-function digitScript(ch: string): string;
+function digitScript(ch: string | null | undefined): string | undefined;
 ```
 
 Returns the name of the script for the digit contained in first character of `ch`, or `undefined`.
@@ -221,7 +221,7 @@ Using `Intl.NumberFormat`, this returns a number as a string with a given `maxim
 If `useGrouping` is true, locale-specific grouping with be performed, such as the commas added to "12,345,678.9012" in the 'en-US' locale.
 
 ```typescript
-function toMaxSignificant(n: number, maximumSignificantDigits: number, locale?: string, useGrouping = false): string;
+function toMaxSignificant(n: number, maximumSignificantDigits: number, locale?: string | null, useGrouping = false): string;
 ```
 
 Using `Intl.NumberFormat`, this returns a number as a string with a given `maximumSignificantDigits`, using an optional `locale` (defaults to "en-US"). Unlike `toPrecision`, formatting does not switch to scientific notation when more than `maximumSignificantDigits` are needed for the integer portion of a value.
@@ -291,17 +291,17 @@ Converts any `value` of any type to a integer `number` (or possibly `null`, if `
 * Any other type of `value` results in `defaultValue`.
 
 ```typescript
-function toValidInt(value: any, defaultValue = 0, radix = 10): number | null;
+function toValidInt(value: any, defaultValue = 0, radix = 10): number;
 ```
 
 This function returns the same results as `toInt` unless `value` is `NaN` or an infinite, in which case a non-null `defaultValue` is returned.
 
 ```typescript
-function toNumber(value: any, defaultValue?: number | null): number;
-function toNumber(value: any, defaultValue: null | undefined): number | null;
+function toNumber(value: any, defaultValue?: number): number;
+function toNumber(value: any, defaultValue: null): number | null;
 ```
 
-Converts any `value` of any type to a `number`.
+Converts any `value` of any type to a `number` (or possibly `null`, if `defaultValue` is `null`).
 
 * Any `value` of type `number` is returned as itself.
 * `null`, `undefined`, or `NaN` becomes `defaultValue` (the default `defaultValue` is 0).
@@ -310,9 +310,7 @@ Converts any `value` of any type to a `number`.
 * Any other type of `value` results in `defaultValue`.
 
 ```typescript
-function toNumber(value: any, defaultValue?: number | null): number;
-function toNumber(value: any, defaultValue: null | undefined): number | null;
-function toNumber(value: any, defaultValue: number | null | undefined = 0): number | null;
+function toValidNumber(value: any, defaultValue = 0): number
 ```
 
 This function returns the same results as `toNumber` unless `value` is `NaN` or an infinite, in which case `defaultValue` is returned.
@@ -322,7 +320,7 @@ function first<T>(array: ArrayLike<T> | null | undefined): T | undefined
 ```
 
 ```typescript
-function nth<T>(array: ArrayLike<T> | null | undefined, index: number): T | undefined;
+function nth<T>(array: ArrayLike<T> | null | undefined, index: number): T | undefined
 ```
 
 ```typescript
@@ -330,19 +328,19 @@ function last<T>(array: ArrayLike<T> | null | undefined): T | undefined;
 ```
 
 ```typescript
-function push<T>(array: T[] | null | undefined, ...items): T[];
+function push<T>(array: T[] | null | undefined, ...items: any[]): T[];
 ```
 
 ```typescript
-function pushIf<T>(condition: boolean, array: T[], ...items): T[];
+function pushIf<T>(condition: boolean, array: T[] | null | undefined, ...items: any[]): T[];
 ```
 
 ```typescript
-function forEach<T>(obj: { [key: string]: T }, callback: (key: string, value: T) => void): void;
+function forEach<T>(obj: Record<string, T> | null | undefined, callback: (key: string, value: T) => void): void;
 ```
 
 ```typescript
-function isArray(a: any): a is any[];
+function isArray(a: unknown): a is any[];
 ```
 
 ```typescript
@@ -380,7 +378,7 @@ function isSymbol(a: unknown): a is symbol;
 ```
 
 ```typescript
-function classOf(a: unknown, noClassResult = false): string;
+function classOf(a: unknown, noClassResult = false): string | null;
 ```
 
 ```typescript
@@ -458,11 +456,11 @@ function getCssValues(element: Element, properties: string[]): string[];
 ```
 
 ```typescript
-function getCssRuleValue(element: Element, property: string): string;
+function getCssRuleValue(element: Element, property: string): string | undefined;
 ```
 
 ```typescript
-function getCssRuleValues(element: Element, properties: string[]): string[];
+function getCssRuleValues(element: Element, properties: string[]): string[] | undefined;
 ```
 
 ```typescript
@@ -595,7 +593,7 @@ function encodeForUri(s: string, spaceAsPlus = false): string;
 ```
 
 ```typescript
-function urlEncodeParams(params: Record<string, string | number | boolean>, spaceAsPlus = false): string;
+function urlEncodeParams(params: Record<string, string | number | boolean | null>, spaceAsPlus = false): string;
 ```
 
 ```typescript
@@ -624,7 +622,7 @@ function fillEllipse(context: CanvasRenderingContext2D, cx: number, cy: number, 
 ```
 
 ```typescript
-function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: number, r): void;
+function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: number, r: number): void ;
 ```
 
 ```typescript

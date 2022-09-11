@@ -175,9 +175,9 @@ export function toValidInt(value: any, defaultValue = 0, radix = 10): number {
     return toInt(value, defaultValue, radix);
 }
 
-export function toNumber(value: any, defaultValue?: number | null): number;
-export function toNumber(value: any, defaultValue: null | undefined): number | null;
-export function toNumber(value: any, defaultValue: number | null | undefined = 0): number | null {
+export function toNumber(value: any, defaultValue?: number): number;
+export function toNumber(value: any, defaultValue: null): number | null;
+export function toNumber<T>(value: any, defaultValue: number | T | undefined = 0): number | T {
   if (typeof value === 'number')
     return value;
   else if (typeof value === 'string') {
@@ -200,9 +200,7 @@ export function toNumber(value: any, defaultValue: number | null | undefined = 0
     return defaultValue;
 }
 
-export function toValidNumber(value: any, defaultValue?: number): number;
-export function toValidNumber(value: any, defaultValue: null): number | null;
-export function toValidNumber(value: any, defaultValue: number | null = 0): number | null {
+export function toValidNumber(value: any, defaultValue = 0): number {
   if (typeof value === 'number' && (isNaN(value) || !isFinite(value)))
     return defaultValue;
   else
