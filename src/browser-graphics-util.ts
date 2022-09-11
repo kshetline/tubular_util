@@ -94,7 +94,7 @@ export function fillEllipse(context: CanvasRenderingContext2D, cx: number, cy: n
   context.fill();
 }
 
-export function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: number, r): void {
+export function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: number, r: number): void {
   fillEllipse(context, cx, cy, r, r);
 }
 
@@ -117,7 +117,7 @@ export function parseColor(color: string): RGBA {
   if (match) {
     if (!utilContext) {
       const canvas = document.createElement('canvas') as HTMLCanvasElement;
-      utilContext = canvas.getContext('2d');
+      utilContext = canvas.getContext('2d')!;
     }
 
     utilContext.fillStyle = color; // Let the context parse the color name.

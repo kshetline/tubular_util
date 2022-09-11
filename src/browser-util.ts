@@ -2,7 +2,7 @@ import { forEach, isNumber, toInt, toNumber } from './misc-util';
 
 const { ceil, floor, max, min } = Math;
 
-let _navigator: typeof navigator;
+let _navigator: typeof navigator | undefined;
 
 try {
   if (typeof navigator !== 'undefined')
@@ -15,7 +15,7 @@ if (!_navigator)
 
 const _platform = _navigator.platform || (_navigator as any).userAgentData?.platform || '?';
 
-let _window: typeof window;
+let _window: typeof window | undefined;
 
 try {
   if (typeof window !== 'undefined')
@@ -35,7 +35,7 @@ export interface FontMetrics {
   extraLineHeight?: number;
 }
 
-interface FsDocument extends HTMLDocument {
+interface FsDocument extends Document {
   mozFullScreenElement?: Element;
   msFullscreenElement?: Element;
   msExitFullscreen?: () => void;
@@ -176,20 +176,20 @@ export function eventToKey(event: KeyboardEvent): string {
 }
 
 export function getCssValue(element: Element, property: string): string {
-  return document.defaultView.getComputedStyle(element, null).getPropertyValue(property);
+  return document.defaultView!.getComputedStyle(element, null).getPropertyValue(property);
 }
 
 export function getCssValues(element: Element, properties: string[]): string[] {
-  const styles = document.defaultView.getComputedStyle(element, null);
+  const styles = document.defaultView!.getComputedStyle(element, null);
 
   return properties.map(p => styles.getPropertyValue(p));
 }
 
-export function getCssRuleValue(element: Element, property: string): string {
-  return getCssRuleValues(element, [property])[0];
+export function getCssRuleValue(element: Element, property: string): string | undefined {
+  return (getCssRuleValues(element, [property]) || [])[0];
 }
 
-export function getCssRuleValues(element: Element, properties: string[]): string[] {
+export function getCssRuleValues(element: Element, properties: string[]): string[] | undefined {
   const stack: CSSStyleDeclaration[] = [];
 
   function searchRules(rules: CSSRuleList) {
@@ -218,12 +218,12 @@ export function getCssRuleValues(element: Element, properties: string[]): string
   const last = stack.pop();
 
   if (last)
-    return properties.map(p => last[p]);
+    return properties.map(p => last[p as any]);
   else
     return undefined;
 }
 
-const fontStretches = {
+const fontStretches: Record<string, string> = {
   '50%': 'ultra-condensed',
   '62.5%': 'extra-condensed',
   '75%': 'condensed',
@@ -236,7 +236,7 @@ const fontStretches = {
 };
 
 export function getFont(element: Element): string {
-  const style = document.defaultView.getComputedStyle(element, null);
+  const style = document.defaultView!.getComputedStyle(element, null);
   let font = style.getPropertyValue('font');
 
   if (!font) {
@@ -271,7 +271,7 @@ export function getFontMetrics(elementOrFont: Element | string, specificChar?: s
   else
     font = getFont(elementOrFont as Element);
 
-  let metrics: FontMetrics = !specificChar && cachedMetrics[font];
+  let metrics: FontMetrics | false = !specificChar && cachedMetrics[font];
 
   if (metrics)
     return metrics;
@@ -413,7 +413,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
   const canvas1 = self.canvas1 || (self.canvas1 = document.createElement('canvas') as HTMLCanvasElement);
   const canvas2 = self.canvas2 || (self.canvas2 = firefox && document.createElement('canvas') as HTMLCanvasElement);
   const canvases = [canvas0, canvas1, canvas2];
-  const pixmaps = [];
+  const pixmaps: any[] = [];
 
   for (let i = 0; i < (firefox ? 3 : 2); ++i) {
     const canvas = canvases[i];
@@ -460,7 +460,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
 export function getTextWidth(items: string | string[], font: string | HTMLElement, fallbackFont?: string): number {
   const canvas = ((getTextWidth as any).canvas as HTMLCanvasElement ||
                   ((getTextWidth as any).canvas = document.createElement('canvas') as HTMLCanvasElement));
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d')!;
   let maxWidth = 0;
   let elementFont;
 
@@ -487,7 +487,7 @@ export function getTextWidth(items: string | string[], font: string | HTMLElemen
   return maxWidth;
 }
 
-const escapeLookup = {
+const escapeLookup: Record<string, string> = {
   '<': '&lt;',
   '>': '&gt;',
   '&': '&amp;',
@@ -508,7 +508,7 @@ export function htmlUnescape(s: string): string {
 
     if (!replacement) {
       let base = 10;
-      let digits: RegExpMatchArray;
+      let digits: RegExpMatchArray | null | undefined;
 
       if (/^&#x/i.test(entity)) {
         base = 16;
@@ -585,11 +585,11 @@ export function isFullScreen(): boolean {
 
 export function isEffectivelyFullScreen(): boolean {
   return isFullScreen() ||
-    (_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
+    (!!_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
 }
 
 /**
- * @deprecated Will always be false, as this code no longer runs in IE.
+ * @deprecated will always be false as this code no longer supports IE.
  */
 export function isIE(): boolean {
   // return /(?:\b(MS)?IE\s+|\bTrident\/7\.0;.*\s+rv:)(\d+)/.test(_navigator.userAgent);
@@ -712,7 +712,7 @@ export function encodeForUri(s: string, spaceAsPlus = false): string {
   return spaceAsPlus ? s.replace(/%20/g, '+') : s;
 }
 
-export function urlEncodeParams(params: Record<string, string | number | boolean>, spaceAsPlus = false): string {
+export function urlEncodeParams(params: Record<string, string | number | boolean | null>, spaceAsPlus = false): string {
   const result: string[] = [];
 
   forEach(params, (key, value) => {

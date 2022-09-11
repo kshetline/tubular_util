@@ -235,11 +235,11 @@ function toCanonicalLowercase(s: string): string {
 }
 
 export function isAllUppercase(s: string): boolean {
-  return s && allUpperPattern.test(s);
+  return !!s && allUpperPattern.test(s);
 }
 
 export function isAllUppercaseWords(s: string): boolean {
-  return s && allUpperPattern.test(s.replace(notLetterPattern, ''));
+  return !!s && allUpperPattern.test(s.replace(notLetterPattern, ''));
 }
 
 export function toMixedCase(s: string): string {
@@ -264,8 +264,8 @@ export function toTitleCase(s: string, options?: TitleCaseOptions): string {
 
   let shortSmalls = defaultShortSmalls;
   let specials = defaultSpecials;
-  const firstNonSpaceIndex = /^\s*/.exec(s)[0].length;
-  const lastNonSpaceIndex = s.length - /\s*$/.exec(s)[0].length;
+  const firstNonSpaceIndex = (/^\s*/.exec(s) || [])[0]?.length;
+  const lastNonSpaceIndex = s.length - (/\s*$/.exec(s) || [])[0]?.length;
 
   if (options.shortSmall) {
     shortSmalls = new Set(shortSmalls);
@@ -290,13 +290,13 @@ export function toTitleCase(s: string, options?: TitleCaseOptions): string {
   }
 
   const wordHandler = (word: string, offset: number): string => {
-    if (options.keepAllCaps && isAllUppercase(word))
+    if (options?.keepAllCaps && isAllUppercase(word))
       return word;
 
     const lcWord = toCanonicalLowercase(word);
 
     if (specials.has(lcWord))
-      return specials.get(lcWord);
+      return specials.get(lcWord) as string;
 
     word = capitalizeFirstLetter(word);
 
@@ -346,7 +346,7 @@ export function padRight(item: string, length: number, padChar?: string): string
 
 export function replace(str: string, searchStr: string, replaceStr: string, caseInsensitive = false): string {
   // escape regexp special characters in search string
-  searchStr = searchStr.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+  searchStr = regexEscape(searchStr);
 
   return str.replace(new RegExp(searchStr, 'g' + (caseInsensitive ? 'i' : '')), replaceStr);
 }
@@ -540,17 +540,21 @@ export function convertDigits(n: string, baseDigit: string): string {
 }
 
 export function isDigit(ch: string): boolean {
+  ch = ch?.charAt(0);
+
   return digitPattern.test(ch) || !!digitValues[ch];
 }
 
-export function digitScript(ch: string): string {
-  return digitScripts[ch] || (/^\d$/.test(ch) ? 'ASCII' : undefined);
+export function digitScript(ch: string | null | undefined): string | undefined {
+  ch = ch?.charAt(0);
+
+  return digitScripts[ch ?? ''] || (/^\d$/.test(ch ?? '') ? 'ASCII' : undefined);
 }
 
 export function toMaxFixed(n: number, maximumFractionDigits: number, locale?: string, useGrouping = false): string {
   return new Intl.NumberFormat(locale || 'en-US', { maximumFractionDigits, useGrouping }).format(n);
 }
 
-export function toMaxSignificant(n: number, maximumSignificantDigits: number, locale?: string, useGrouping = false): string {
+export function toMaxSignificant(n: number, maximumSignificantDigits: number, locale?: string | null, useGrouping = false): string {
   return new Intl.NumberFormat(locale || 'en-US', { maximumSignificantDigits, useGrouping }).format(n);
 }

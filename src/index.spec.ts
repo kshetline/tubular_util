@@ -12,6 +12,9 @@ import {
   asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
   makePlainASCII_lc, makePlainASCII_UC, regexEscape, stripDiacriticals, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
 } from './string-util';
+import * as util from './index';
+
+(globalThis as any).util = util;
 
 class TestClass {
   array: number[];
@@ -92,6 +95,10 @@ describe('@tubular/util', () => {
     expect(new Date('2019-06-08 01:18:36.890Z').getTime()).to.equal(1559956716890);
     expect(formatDateTime(1559956716890,
       [DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z])).to.equal('2019-06-08 01:18:36.890Z');
+    expect(formatDateTime(1559956716890,
+      DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z)).to.equal('2019-06-08 01:18:36.890Z');
+    expect(formatDateTime(1559956716890,
+      DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_T, DateTimeOptions.USE_Z)).to.equal('2019-06-08T01:18:36.890Z');
     expect(formatDateTime([DateTimeOptions.TIME_ONLY])).to.match(/\d\d:\d\d:\d\d [-+]\d{4}/);
   });
 
@@ -212,6 +219,7 @@ describe('@tubular/util', () => {
     expect(toBoolean('?', true)).to.equal(true);
     expect(toBoolean('?', false)).to.equal(false);
     expect(toBoolean('?')).to.equal(false);
+    expect(toBoolean('?', null)).to.equal(null);
     expect(toBoolean(null, true)).to.equal(true);
     expect(toBoolean(undefined, true)).to.equal(true);
     expect(toBoolean('')).to.equal(false);
@@ -251,9 +259,9 @@ describe('@tubular/util', () => {
     elem.appendChild(document.createElement('script'));
 
     expect(last(null)).to.equal(undefined);
-    expect(first(elem.children).outerHTML).to.equal('<p></p>');
-    expect(last(elem.children).outerHTML).to.equal('<script></script>');
-    expect(nth(elem.children, 1).outerHTML).to.equal('<span></span>');
+    expect(first(elem.children)!.outerHTML).to.equal('<p></p>');
+    expect(last(elem.children)!.outerHTML).to.equal('<script></script>');
+    expect(nth(elem.children, 1)!.outerHTML).to.equal('<span></span>');
   });
 
   it('should split string into lines', () => {
@@ -539,6 +547,11 @@ describe('@tubular/util', () => {
     expect(toMaxFixed(Math.PI, 2)).to.equal('3.14');
     expect(toMaxFixed(Math.PI, 3)).to.equal('3.142');
     expect(toMaxFixed(Math.PI, 3, 'fr')).to.equal('3,142');
+    expect(toMaxFixed(1.23, 3)).to.equal('1.23');
+    expect(toMaxFixed(1.234, 3)).to.equal('1.234');
+    expect(toMaxFixed(1.2345, 3)).to.equal('1.235');
+    expect(toMaxFixed(78901.23456789, 6, undefined, true)).to.equal('78,901.234568');
+    expect(toMaxFixed(78901.23456789, 6, 'es', true)).to.equal('78.901,234568');
     expect(toMaxFixed(-1.1, 5)).to.equal('-1.1');
   });
 
@@ -546,6 +559,7 @@ describe('@tubular/util', () => {
     expect(toMaxSignificant(Math.PI, 2)).to.equal('3.1');
     expect(toMaxSignificant(Math.PI, 3)).to.equal('3.14');
     expect(toMaxSignificant(Math.PI, 3, 'fr')).to.equal('3,14');
+    expect(toMaxSignificant(1.23, 4)).to.equal('1.23');
     expect(toMaxSignificant(-1234567, 3)).to.equal('-1230000');
     expect(toMaxSignificant(-1234567, 3, null, true)).to.equal('-1,230,000');
     expect(toMaxSignificant(-1234567, 3, 'es-ES', true)).to.equal('-1.230.000');
@@ -586,7 +600,6 @@ describe('@tubular/util', () => {
     expect(toValidInt(123.4)).to.equal(123);
     expect(toValidInt('!123')).to.equal(0);
     expect(toValidInt('!123', 7)).to.equal(7);
-    expect(toValidInt('!123', null)).to.equal(null);
     expect(toValidInt(NaN)).to.equal(0);
     expect(toValidInt(1 / 0)).to.equal(0);
   });

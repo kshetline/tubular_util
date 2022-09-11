@@ -19,9 +19,10 @@ export function processMillis(): number {
 export enum DateTimeOptions { DATE_ONLY, NO_SECONDS, NO_ZONE, TIME_ONLY, UTC, USE_T, USE_Z, WITH_MILLIS }
 
 export function formatDateTime(options?: DateTimeOptions[]): string;
+export function formatDateTime(date: Date | number | string, ...options: DateTimeOptions[]): string;
 export function formatDateTime(date: Date | number | string, options?: DateTimeOptions[]): string;
-export function formatDateTime(dateOrOptions: Date | number | string | DateTimeOptions[], options?: DateTimeOptions[]): string {
-  let date: Date;
+export function formatDateTime(dateOrOptions: Date | number | string | DateTimeOptions[] | null | undefined, finalArg?: any): string {
+  let date: Date | undefined;
   let dateOnly = false;
   let timeOnly = false;
   let noSeconds = false;
@@ -30,17 +31,19 @@ export function formatDateTime(dateOrOptions: Date | number | string | DateTimeO
   let useT = false;
   let useZ = false;
   let withMillis = false;
+  let options: DateTimeOptions[] | undefined;
 
-  if (!dateOrOptions)
-    date = new Date();
-  else if (Array.isArray(dateOrOptions)) {
-    date = new Date();
+  if (Array.isArray(dateOrOptions))
     options = dateOrOptions;
-  }
-  else if (typeof dateOrOptions === 'number' || typeof dateOrOptions === 'string')
+  else if (arguments.length > 1 && isNumber(finalArg))
+    options = Array.from(arguments).slice(1); // eslint-disable-line prefer-rest-params
+  else if (isArray(finalArg))
+    options = finalArg;
+
+  if (typeof dateOrOptions === 'number' || typeof dateOrOptions === 'string')
     date = new Date(dateOrOptions);
-  else
-    date = dateOrOptions;
+
+  date = date ?? new Date();
 
   if (options) {
     options.forEach(option => {
@@ -70,7 +73,7 @@ export function formatDateTime(dateOrOptions: Date | number | string | DateTimeO
   const m = zeroPad(utc ? date.getMinutes() : date.getUTCMinutes(), 2);
   const s = ':' + zeroPad(utc ? date.getUTCSeconds() : date.getSeconds(), 2);
   const x = '.' + zeroPad(utc ? date.getUTCMilliseconds() : date.getMilliseconds(), 3);
-  const zoneMinutes = date.getTimezoneOffset();
+  const zoneMinutes = utc ? 0 : date.getTimezoneOffset();
   const z = useZ ? 'Z' :
     ' ' + (zoneMinutes > 0 ? '-' : '+') + zeroPad(Math.floor(Math.abs(zoneMinutes) / 60), 2) + zeroPad(Math.floor(Math.abs(zoneMinutes) % 60), 2);
   let timeStr = `${h}:${m}`;
@@ -102,7 +105,9 @@ export function toDefaultLocaleFixed(n: number, minFracDigits?: number, maxFracD
   return n.toLocaleString(undefined, options);
 }
 
-export function toBoolean(value, defaultValue = false, forHtmlAttribute = false): boolean {
+export function toBoolean(value: any, defaultValue?: boolean, forHtmlAttribute?: boolean): boolean;
+export function toBoolean(value: any, defaultValue: null, forHtmlAttribute?: boolean): boolean | null;
+export function toBoolean<T>(value: any, defaultValue: boolean | T = false, forHtmlAttribute = false): boolean | T {
   if (typeof value === 'boolean')
     return value;
   else if (value == null)
@@ -113,7 +118,7 @@ export function toBoolean(value, defaultValue = false, forHtmlAttribute = false)
     return !!value;
   else if (forHtmlAttribute && value === '')
     return true;
-  else if (/^(true|t|yes|y)$/i.test(value) || defaultValue && value === '')
+  else if (/^(true|t|yes|y)$/i.test(value) || (defaultValue && value === ''))
     return true;
   else if (/^(false|f|no|n)$/i.test(value))
     return false;
@@ -133,8 +138,8 @@ for (let radix = 2; radix <= 36; ++radix) {
 }
 
 export function toInt(value: any, defaultValue?: number, radix?: number): number;
-export function toInt(value: any, defaultValue: null, radix?: number): number | null;
-export function toInt(value: any, defaultValue: number | null = 0, radix = 10): number | null {
+export function toInt(value: any, defaultValue: null, radix?: number): null;
+export function toInt<T>(value: any, defaultValue: number | T = 0, radix = 10): number | T {
   if (typeof value === 'number')
     return Math.floor(value);
   else if (typeof value === 'string') {
@@ -163,18 +168,16 @@ export function toInt(value: any, defaultValue: number | null = 0, radix = 10): 
     return defaultValue;
 }
 
-export function toValidInt(value: any, defaultValue?: number, radix?: number): number;
-export function toValidInt(value: any, defaultValue: null, radix?: number): number | null;
-export function toValidInt(value: any, defaultValue: number | null = 0, radix = 10): number | null {
+export function toValidInt(value: any, defaultValue = 0, radix = 10): number {
   if (typeof value === 'number' && (isNaN(value) || !isFinite(value)))
     return defaultValue;
   else
     return toInt(value, defaultValue, radix);
 }
 
-export function toNumber(value: any, defaultValue?: number): number;
-export function toNumber(value: any, defaultValue: null): number | null;
-export function toNumber(value: unknown, defaultValue: number | null = 0): number | null {
+export function toNumber(value: any, defaultValue?: number | null): number;
+export function toNumber(value: any, defaultValue: null | undefined): number | null;
+export function toNumber(value: any, defaultValue: number | null | undefined = 0): number | null {
   if (typeof value === 'number')
     return value;
   else if (typeof value === 'string') {
@@ -206,44 +209,50 @@ export function toValidNumber(value: any, defaultValue: number | null = 0): numb
     return toNumber(value, defaultValue);
 }
 
-export function first<T>(array: ArrayLike<T>): T {
+export function first<T>(array: ArrayLike<T> | null | undefined): T | undefined {
   if (isArrayLike(array) && array.length > 0)
     return array[0];
   else
     return undefined;
 }
 
-export function nth<T>(array: ArrayLike<T>, index: number): T {
+export function nth<T>(array: ArrayLike<T> | null | undefined, index: number): T | undefined {
   if (isArrayLike(array) && array.length > index)
     return array[index];
   else
     return undefined;
 }
 
-export function last<T>(array: ArrayLike<T>): T {
+export function last<T>(array: ArrayLike<T> | null | undefined): T | undefined {
   if (isArrayLike(array) && array.length > 0)
     return array[array.length - 1];
   else
     return undefined;
 }
 
-export function push<T>(array: T[], ...items): T[] {
+export function push<T>(array: T[] | null | undefined, ...items: any[]): T[] {
+  if (!array)
+    array = [];
+
   array.push(...items);
   return array;
 }
 
-export function pushIf<T>(condition: boolean, array: T[], ...items): T[] {
+export function pushIf<T>(condition: boolean, array: T[] | null | undefined, ...items: any[]): T[] {
+  if (!array)
+    array = [];
+
   if (condition)
     array.push(...items);
 
   return array;
 }
 
-export function forEach<T>(obj: { [key: string]: T }, callback: (key: string, value: T) => void): void {
-  Object.keys(obj).forEach(key => callback(key, obj[key]));
+export function forEach<T>(obj: Record<string, T> | null | undefined, callback: (key: string, value: T) => void): void {
+  Object.keys(obj ?? {}).forEach(key => callback(key, obj![key]));
 }
 
-export function isArray(a: any): a is any[] {
+export function isArray(a: unknown): a is any[] {
   return Array.isArray(a);
 }
 
@@ -253,7 +262,7 @@ export function isArrayLike(a: unknown): a is ArrayLike<any> {
       (a as any).length >= 0 && (a as any).length <= Number.MAX_SAFE_INTEGER && (a as any).length === Math.floor((a as any).length));
 }
 
-export function isBigint(a: unknown): a is boolean {
+export function isBigint(a: unknown): a is bigint {
   return typeof a === 'bigint';
 }
 
@@ -266,7 +275,7 @@ export function isFunction(a: unknown): a is Function {
 }
 
 export function isNonFunctionObject(a: unknown): a is Exclude<Record<string | number | symbol, any>, Function> {
-  return a && typeof a === 'object';
+  return !!a && typeof a === 'object';
 }
 
 export function isNumber(a: unknown): a is number {
@@ -274,7 +283,7 @@ export function isNumber(a: unknown): a is number {
 }
 
 export function isObject(a: unknown): a is Record<string | number | symbol, any> {
-  return a && (typeof a === 'function' || typeof a === 'object');
+  return !!a && (typeof a === 'function' || typeof a === 'object');
 }
 
 export function isString(a: unknown): a is string {
@@ -285,7 +294,7 @@ export function isSymbol(a: unknown): a is symbol {
   return typeof a === 'symbol';
 }
 
-export function classOf(a: unknown, noClassResult = false): string {
+export function classOf(a: unknown, noClassResult = false): string | null {
   if (isObject(a)) {
     if (a.constructor?.name)
       return a.constructor.name;
@@ -386,7 +395,7 @@ function cloneAux<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth:
   const keys = Object.keys(orig);
 
   for (const key of keys)
-    theClone[key] = cloneAux(orig[key], shallow, depth + 1, hash);
+    theClone[key] = cloneAux((orig as any)[key], shallow, depth + 1, hash);
 
   return theClone;
 }
@@ -451,7 +460,7 @@ type EntrySorter = (a: [number | string | symbol, any], b: [number | string | sy
 const defaultSorter: EntrySorter = (a, b) => compareStrings(a[0].toString(), b[0].toString());
 
 export function sortObjectEntries<T>(obj: T, inPlace?: boolean): T;
-export function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boolean);
+export function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boolean): T;
 export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySorter, inPlace = false): T {
   const sorter = isFunction(sorterOrInPlace) ? sorterOrInPlace : undefined;
   let result: T = {} as any;
@@ -461,11 +470,11 @@ export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySo
   entries.sort(sorter ?? defaultSorter);
 
   if (inPlace) {
-    Object.keys(obj).forEach(key => delete obj[key]);
+    Object.keys(obj).forEach(key => delete (obj as any)[key]);
     result = obj;
   }
 
-  entries.forEach(entry => result[entry[0]] = entry[1]);
+  entries.forEach(entry => (result as any)[entry[0]] = entry[1]);
 
   return result;
 }
