@@ -247,7 +247,11 @@ export function pushIf<T>(condition: boolean, array: T[] | null | undefined, ...
 }
 
 export function forEach<T>(obj: Record<string, T> | null | undefined, callback: (key: string, value: T) => void): void {
-  Object.keys(obj ?? {}).forEach(key => callback(key, obj![key]));
+  Object.keys(isObject(obj) ? obj : {}).forEach(key => callback(key, obj![key]));
+}
+
+export function forEach2<T>(obj: Record<string | symbol, T> | null | undefined, callback: (key: string | symbol, value: T) => void): void {
+  Reflect.ownKeys(isObject(obj) ? obj : {}).forEach(key => callback(key, obj![key]));
 }
 
 export function isArray(a: unknown): a is any[] {
@@ -307,7 +311,7 @@ export function clone<T>(orig: T, shallow: boolean | Set<any> | ((value: any, de
   return cloneAux(orig, shallow, 0, new WeakMap<any, any>());
 }
 
-function cloneAux<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth: number) => boolean), depth: number,
+function cloneAux<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, depth: number) => boolean), depth: number,
                      hash: WeakMap<any, any>): T {
   if (isFunction(orig) || !isObject(orig) || (shallow === true && depth > 0))
     return orig;
@@ -390,7 +394,7 @@ function cloneAux<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth:
 
   hash.set(orig, theClone);
 
-  const keys = Object.keys(orig);
+  const keys = Reflect.ownKeys(orig as any);
 
   for (const key of keys)
     theClone[key] = cloneAux((orig as any)[key], shallow, depth + 1, hash);
@@ -401,25 +405,15 @@ function cloneAux<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth:
 export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
   if (a === b || Object.is(a, b))
     return true;
-  else if (typeof a !== typeof b || isArray(a) !== isArray(b))
+  else if (typeof a !== typeof b || isArray(a) !== isArray(b) || (isArray(a) && a.length !== b.length))
     return false;
   else if (mustBeSameClass && (!a.constructor !== !b.constructor || a.constructor !== b.constructor))
     return false;
-  else if (isArray(a) && a.length === b.length) {
-    for (let i = 0; i < a.length; ++i) {
-      if (a.hasOwnProperty(i)) {
-        if (!b.hasOwnProperty(i) || !isEqual(a[i], b[i], mustBeSameClass))
-          return false;
-      }
-      else if (b.hasOwnProperty(i))
-        return false;
-    }
-  }
   else if (!isObject(a) || !isObject(b))
     return false;
   else {
-    const keys = Object.keys(a);
-    const keysB = new Set(Object.keys(b));
+    const keys = Reflect.ownKeys(a);
+    const keysB = new Set(Reflect.ownKeys(b));
 
     for (const key of keys) {
       keysB.delete(key);
@@ -454,7 +448,7 @@ export function flattenDeep(a: any[]): any[] {
   return _flatten([], a, Number.MAX_SAFE_INTEGER);
 }
 
-type EntrySorter = (a: [number | string | symbol, any], b: [number | string | symbol, any]) => number;
+export type EntrySorter = (a: [string | symbol, any], b: [string | symbol, any]) => number;
 const defaultSorter: EntrySorter = (a, b) => compareStrings(a[0].toString(), b[0].toString());
 
 export function sortObjectEntries<T>(obj: T, inPlace?: boolean): T;
@@ -492,12 +486,12 @@ export function isValidJson(s: string): boolean {
 }
 
 export function keyCount(obj: any): number {
-  return obj ? Object.keys(obj).length : 0;
+  return obj ? Reflect.ownKeys(obj).length : 0;
 }
 
-// Mainly intended to be used as a tag function.
+// Intended to be used as a tag function.
 export function regex(main: TemplateStringsArray, flags?: string): RegExp {
-  const parts = asLines(main.raw[0] || '', true, true).filter(line => !line.startsWith('//'));
+  const parts = asLines(main.raw[0] || '', true, true).filter(line => !line.startsWith('//')).map(line => line.replace(/\s\/\/\s.*$/, ''));
 
   return new RegExp(parts.join(''), flags);
 }

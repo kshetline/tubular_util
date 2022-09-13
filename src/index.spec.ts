@@ -438,6 +438,12 @@ describe('@tubular/util', () => {
     expect(isEqual([1, 2, [3, 4]], [1, 2, [3, 4]])).to.be.true;
     expect(isEqual([], [0])).to.be.false;
     expect(isEqual([0], [1])).to.be.false;
+    // noinspection JSConsecutiveCommasInArrayLiteral
+    expect(isEqual([1, , 3], [1, undefined, 3])).to.be.false; // eslint-disable-line no-sparse-arrays
+    const a = [1, 2, 3];
+    expect(isEqual(a, [1, 2, 3])).to.be.true;
+    (a as any).foo = -7;
+    expect(isEqual(a, [1, 2, 3])).to.be.false;
 
     expect(isEqual(5, -7)).to.be.false;
     expect(isEqual('it', 'not it')).to.be.false;
@@ -570,6 +576,16 @@ describe('@tubular/util', () => {
     expect((regex`\d+
     // Second part
     -\d+${'i'}`).toString()).to.equal(String.raw`/\d+-\d+/i`);
+    expect((regex`^\s*(\d{5,6}) // Modified Julian Date
+       \s+(\d\d-\d\d-\d\d) // date, YY-MM-DD
+       \s+(\d\d:\d\d:\d\d) // time, HH:mm:ss
+       \s+(\d\d) // ST/DST code
+       \s+(\d) // leap second
+       \s+(\d) // DUT1
+       \s+([\d.]+) // msADV
+       \s+UTC\(NIST\) // label
+       \s+\*(\s*)$ // On-Time Marker (OTM)
+       `).toString()).to.equal(String.raw`/^\s*(\d{5,6})\s+(\d\d-\d\d-\d\d)\s+(\d\d:\d\d:\d\d)\s+(\d\d)\s+(\d)\s+(\d)\s+([\d.]+)\s+UTC\(NIST\)\s+\*(\s*)$/`);
   });
 
   it('toNumber, toValidNumber, toInt, toValidInt', () => {
@@ -584,7 +600,6 @@ describe('@tubular/util', () => {
     expect(toValidNumber(3.4)).to.equal(3.4);
     expect(toValidNumber('!3.4')).to.equal(0);
     expect(toValidNumber('!3.4', 7)).to.equal(7);
-    expect(toValidNumber('!3.4', null)).to.equal(null);
     expect(toValidNumber(NaN)).to.equal(0);
     expect(toValidNumber(1 / 0)).to.equal(0);
     expect(toInt('123')).to.equal(123);

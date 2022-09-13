@@ -319,113 +319,225 @@ This function returns the same results as `toNumber` unless `value` is `NaN` or 
 function first<T>(array: ArrayLike<T> | null | undefined): T | undefined
 ```
 
+Returns first element of an array, or `undefined` if appropriate.
+
 ```typescript
 function nth<T>(array: ArrayLike<T> | null | undefined, index: number): T | undefined
 ```
+
+Returns `index` element of an array, or `undefined` if appropriate.
 
 ```typescript
 function last<T>(array: ArrayLike<T> | null | undefined): T | undefined;
 ```
 
+Returns last element of an array, or `undefined` if appropriate.
+
 ```typescript
 function push<T>(array: T[] | null | undefined, ...items: any[]): T[];
 ```
+
+This is a form of `push` designed for chained operations, returning the array which has been modified. If `array` is `null` or `undefined` a new empty array is created and returns with the pushed `items`.
 
 ```typescript
 function pushIf<T>(condition: boolean, array: T[] | null | undefined, ...items: any[]): T[];
 ```
 
+The same as `push` above, except that `items` are pushed conditionally.
+
 ```typescript
 function forEach<T>(obj: Record<string, T> | null | undefined, callback: (key: string, value: T) => void): void;
 ```
+
+Iterate over all string key/value pairs in `obj`.
+
+```typescript
+function forEach2<T>(obj: Record<string | symbol, T> | null | undefined, callback: (key: string | symbol, value: T) => void): void;
+```
+
+Iterate over all key/value pairs in `obj`, including `symbol` keys.
+
 
 ```typescript
 function isArray(a: unknown): a is any[];
 ```
 
+Returns `true` if `a` is an array.
+
 ```typescript
 function isArrayLike(a: unknown): a is ArrayLike<any>;
 ```
+
+Returns `true` if `a` is array-like.
 
 ```typescript
 function isBigint(a: unknown): a is bigint;
 ```
 
+Returns `true` if `a` is a `bigint` value.
+
 ```typescript
 function isBoolean(a: unknown): a is boolean
+```
 
+Returns `true` if `a` is a `boolean` value.
+
+```typescript
 function isFunction(a: unknown): a is Function;
 ```
+
+Returns `true` if `a` is a function.
 
 ```typescript
 function isNonFunctionObject(a: unknown): a is Exclude<Record<string | number | symbol, any>, Function>;
 ```
 
+Returns `true` if `a` is a object which is not a function.
+
 ```typescript
 function isNumber(a: unknown): a is number;
 ```
+
+Returns `true` if `a` is a `number` value.
 
 ```typescript
 function isObject(a: unknown): a is Record<string | number | symbol, any>;
 ```
 
+Returns `true` if `a` is a an object. Unlike `typeof a === 'object'`, `isObject(null)` returns `false`.
+
 ```typescript
 function isString(a: unknown): a is string;
 ```
+
+Returns `true` if `a` is a `string` value.
 
 ```typescript
 function isSymbol(a: unknown): a is symbol;
 ```
 
+Returns `true` if `a` is a `symbol` value.
+
 ```typescript
 function classOf(a: unknown, noClassResult = false): string | null;
 ```
 
+If `a` is an instance of a class, the name of the class is returned. Otherwise `null` is returned.
+
 ```typescript
-function clone<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth: number) => boolean) = false): T;
+function clone<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, depth: number) => boolean) = false): T;
 ```
+
+This function clones a value or object. Any primitive `orig` value will simply be return as-is.
+
+The `shallow` parameter controls which children of an object are either cloned or used as-is.
+
+* When `shallow` is **`true`**: Only the root object will be converted into a new object reference. All descendant objects will retain their original reference values.
+* When `shallow` is **`false`**: All objects, root and descendants, will be converted into a new object references.
+* When `shallow` is a **`Set`**: All objects, root and descendants, will be converted into a new object references except for class instances of classes contained in `shallow`.
+* When `shallow` is a **function**: The root object is always converted into a new object, but descendants are only cloned when the callback function, provided with the descendant `value` and its `depth` in object tree, returns `false`.
 
 ```typescript
 function isEqual(a: any, b: any, mustBeSameClass = false): boolean;
 ```
 
+This function determines if two values `a` and `b` are equal to each other, by deep comparison when necessary.
+
+* As a first check, `a` and `b` are equal considered equal if `a === b || Object.is(a, b)` is `true`. Please note:
+  | Equal?            | a = 0, b = -0 | a = NaN, b = NaN |
+  | ----------------- | ------------- | ---------------- |
+  | `a === b`         | true          | false            |
+  | `Object.is(a, b)` | false         | true             |
+  | `isEqual(a, b)`   | true          | true             |
+* If `a` and `b` are not the same type (as determined by `typeof`), they are not considered equal.
+* If one of `a` and `b` is an array, and the other is not, they are not considered equal.
+* If `a` and `b` are both arrays, but of unequal length, they are not considered equal.
+* If the `mustBeSameClass` is `true`, `a` and `b` must either be instances of the same class, or both must not be an instance of any class, otherwise they are not considered equal.
+* Otherwise all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal, and neither `a` nor `b` can own a property or index that the other does not have. For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
+
 ```typescript
 function flatten(a: any[]): any[];
 ```
+
+This function “flattens” an array by replacing any arrays within an array with the children of that inner array. For example:
+
+`flatten([1, [2, 3], 4]))` returns `[1, 2, 3, 4]`.
+
+The original array is not altered.
 
 ```typescript
 function flattenDeep(a: any[]): any[];
 ```
 
-```typescript
-function sortObjectEntries<T>(obj: T, inPlace?: boolean): T;
-```
+Same as `flatten`, except flattening is recursive. For example:
+
+`flattenDeep([1, [2, [3, 4]], 5]))` returns `1, 2, 3, 4, 5]`.
 
 ```typescript
+type EntrySorter = (a: [string | symbol, any], b: [string | symbol, any]) => number;
+
+function sortObjectEntries<T>(obj: T, inPlace?: boolean): T;
 function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boolean);
 ```
 
+JavaScript objects function as *ordered* maps, with a consistently-maintained ordering of object properties. This function allows you to sort that order. By default, that sorting is ascending alphabetical using JavaScript default string collation. You can supply your own `sorter` to control how properties are ordered.
+
+If `inPlace` is `true` (the default is `false`) `obj` itself will be returned by the function, modified by the sorting. Otherwise a new object with sorted properties is returned.
+
 ```typescript
-function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySorter, inPlace = false): T;
+const noop = (..._args: any[]): void => {};
 ```
 
+A function that does nothing, useful as a no-operation function parameter.
 
-const noop = (..._args: any[]): void => {};
 
+```typescript
 const repeat = (n: number, f: (n?: number) => any): void => { while (n-- > 0) f(n); };
+```
+
+A function that calls function `f` `n` times.
 
 ```typescript
 function isValidJson(s: string): boolean;
 ```
 
+Determines if `s` contains valid JSON by attempting to parse it, and returning `true` if parsing is successful.
+
 ```typescript
 function keyCount(obj: any): number;
 ```
+
+A convenience function equivalent to `Reflect.ownKeys(obj).length`.
 
 ```typescript
 function regex(main: TemplateStringsArray, flags?: string): RegExp;
 ```
 
+Used as a tag function, `regex` provides a way to format complicated regular expressions with line breaks, indentation, and `//`-style comments, where the formatting and comments will be filtered out of the regular expression which is returned.
+
+For example, this complex pattern:
+
+```
+/^\s*(\d{5,6})\s+(\d\d-\d\d-\d\d)\s+(\d\d:\d\d:\d\d)\s+(\d\d)\s+(\d)\s+(\d)\s+([\d.]+)\s+UTC\(NIST\)\s+\*(\s*)$/
+```
+
+...can be represented like this:
+
+```typescript
+// Automated Computer Time Service (ACTS) format
+regex`^\s*(\d{5,6}) // Modified Julian Date
+       \s+(\d\d-\d\d-\d\d) // date, YY-MM-DD
+       \s+(\d\d:\d\d:\d\d) // time, HH:mm:ss
+       \s+(\d\d) // ST/DST code
+       \s+(\d) // leap second
+       \s+(\d) // DUT1
+       \s+([\d.]+) // msADV
+       \s+UTC\(NIST\) // label
+       \s+\*(\s*)$/ // On-Time Marker (OTM)
+       ${'i'}`
+```
+
+The final `${'i'}` above is an example of the format for optionally passing regular expression flags.
 
 interface FontMetrics {
   font: string;
