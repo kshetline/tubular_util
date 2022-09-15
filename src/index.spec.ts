@@ -56,20 +56,17 @@ describe('@tubular/util', () => {
       return;
     }
 
-    let rgba = parseColor('yellow');
-    expect(rgba.r).to.equal(255);
-    expect(rgba.g).to.equal(255);
-    expect(rgba.b).to.equal(0);
+    function fixAlphaRounding(color: any): any {
+      color.alpha = Math.round(color.alpha * 10) / 10;
+      return color;
+    }
 
-    rgba = parseColor('#9CF');
-    expect(rgba.r).to.equal(153);
-    expect(rgba.g).to.equal(204);
-    expect(rgba.b).to.equal(255);
-
-    rgba = parseColor('#8090a0');
-    expect(rgba.r).to.equal(128);
-    expect(rgba.g).to.equal(144);
-    expect(rgba.b).to.equal(160);
+    expect(parseColor('yellow')).to.deep.equal({ r: 255, g: 255, b: 0, alpha: 1 });
+    expect(parseColor('#9CF')).to.deep.equal({ r: 153, g: 204, b: 255, alpha: 1 });
+    expect(parseColor('#8090a0')).to.deep.equal({ r: 128, g: 144, b: 160, alpha: 1 });
+    expect(parseColor('SteelBlue')).to.deep.equal({ r: 70, g: 130, b: 180, alpha: 1 });
+    expect(parseColor('transparent')).to.deep.equal({ r: 0, g: 0, b: 0, alpha: 0 });
+    expect(fixAlphaRounding(parseColor('rgba(20, 30, 44, 0.5)'))).to.deep.equal({ r: 20, g: 30, b: 44, alpha: 0.5 });
   });
 
   it('should blend colors correctly', () => {

@@ -533,31 +533,33 @@ regex`^\s*(\d{5,6}) // Modified Julian Date
        \s+(\d) // DUT1
        \s+([\d.]+) // msADV
        \s+UTC\(NIST\) // label
-       \s+\*(\s*)$/ // On-Time Marker (OTM)
+       \s+\*(\s*)$ // On-Time Marker (OTM)
        ${'i'}`
 ```
 
-The final `${'i'}` above is an example of the format for optionally passing regular expression flags.
+The final `${'i'}` above is an example of the format for optionally passing regular expression flags, like the `i` for case-insensitive. The `//` for a comment, if not on a line by itself, must be preceded and followed by at least one space.
 
-interface FontMetrics {
-  font: string;
-  lineHeight: number;
-  ascent: number;
-  fullAscent: number;
-  descent: number;
-  leading: number;
-  extraAscent?: number;
-  extraDescent?: number;
-  extraLineHeight?: number;
-}
+## Browser-oriented functions
 
 ```typescript
-function beep(frequency = 440, gainValue = 0.025): void;
+function beep(frequency = 440, gainValue = 0.025, duration = 100): void;
 ```
+
+Plays a simple square-wave tone at the specified `frequency` and `gainValue` for a `duration` in given in milliseconds.
+
+```typescript
+async function beepPromise(frequency = 440, gainValue = 0.025, duration = 100): Promise<void>;
+```
+
+Same as `beep`, except that you can `await` the completion of the sound.
 
 ```typescript
 function eventToKey(event: KeyboardEvent): string;
 ```
+
+Turns keyboard events into consistent, browser-independent key codes.
+
+In many circumstances, especially with up-to-date browsers, this function is redundant, returning the same value as `event.key`. But for cases where `event.key` is not provided and `event.charCode`, `event.keyCode`, or `event.which` need to be examined, or when `event.key` contains a non-standard value such as `'UIKeyInputLeftArrow'` instead of `'ArrowLeft'`, `eventToKey` helps provide a consistent result.
 
 ```typescript
 function getCssValue(element: Element, property: string): string;
@@ -580,6 +582,18 @@ function getFont(element: Element): string;
 ```
 
 ```typescript
+interface FontMetrics {
+  font: string;
+  lineHeight: number;
+  ascent: number;
+  fullAscent: number;
+  descent: number;
+  leading: number;
+  extraAscent?: number;
+  extraDescent?: number;
+  extraLineHeight?: number;
+}
+
 function getFontMetrics(elementOrFont: Element | string, specificChar?: string): FontMetrics;
 ```
 
@@ -605,143 +619,138 @@ function isAndroid(): boolean;
 
 ```typescript
 function isChrome(): boolean;
-```
-
-```typescript
 function isChromeOS(): boolean;
-```
-
-```typescript
 function isChromium(): boolean;
-```
-
-```typescript
 function isChromiumEdge(): boolean;
-```
-
-```typescript
 function isEdge(): boolean;
+function isFirefox(): boolean;
+function isIE(): boolean; // @deprecated, always false now since IE is not supported.
+function isIOS(): boolean;
+function iosVersion(): number; // Integer value, not boolean, major version only.
+function isIOS14OrEarlier(): boolean;
+function isLikelyMobile(): boolean;
+function isMacOS(): boolean;
+function isOpera(): boolean;
+function isRaspbian(): boolean;
+function isSafari(): boolean;
+function isSamsung(): boolean;
+function isWindows(): boolean;
 ```
 
-```typescript
-function isFirefox(): boolean;
-```
+The above functions test browser types, platforms, and OS environments.
+
+Developers should depend mostly on feature testing rather than detection of browser types. Nevertheless, browser information is sometimes useful, or even necessary to work around particular browser bugs and quirks.
 
 ```typescript
 function isFullScreen(): boolean;
 ```
 
+Returns `true` if the programmatic full-screen is activated. Note that it is possible for a browser to be in full-screen mode by means that are not directly detectable.
+
 ```typescript
 function isEffectivelyFullScreen(): boolean;
 ```
 
-```typescript
-function isIE(): boolean;
-```
- // @deprecated
-
-```typescript
-function isIOS(): boolean;
-```
-
-```typescript
-function iosVersion(): number;
-```
-
-```typescript
-function isIOS14OrEarlier(): boolean;
-```
-
-```typescript
-function isLikelyMobile(): boolean;
-```
-
-```typescript
-function isMacOS(): boolean;
-```
-
-```typescript
-function isOpera(): boolean;
-```
-
-```typescript
-function isRaspbian(): boolean;
-```
-
-```typescript
-function isSafari(): boolean;
-```
-
-```typescript
-function isSamsung(): boolean;
-```
-
-```typescript
-function isWindows(): boolean;
-```
+Returns `true` if the browser window's inner width and height match the host computer screen's width and height.
 
 ```typescript
 function restrictPixelWidth(text: string, font: string | HTMLElement, maxWidth: number, clipString = '\u2026'): string;
 ```
 
+Returns a string derived from `text`, truncated if necessary, such that the pixel width of the resulting string, as rendered in the given `font`, is equal to or less than `maxWidth`.
+
+If `text` is truncated, it is done by removing characters from the end of the string, with `clipString` (default `…`) appended.
+
 ```typescript
 function setFullScreen(full: boolean): void;
 ```
+
+Put the web browser in full-screen mode if `full` is true, end full-screen mode if `full` is `false`. Failure is ignored.
 
 ```typescript
 function setFullScreenAsync(full: boolean, throwImmediate = false): Promise<void>;
 ```
 
+Put the web browser in full-screen mode if `full` is true, end full-screen mode if `full` is `false`. Failure can be detected either immediately or asynchronously.
+
 ```typescript
 function toggleFullScreen(): void;
 ```
+
+Toggle full-screen mode. Failure is ignored.
 
 ```typescript
 function toggleFullScreenAsync(throwImmediate = false): Promise<void>;
 ```
 
+Toggle full-screen mode. Failure can be detected either immediately or asynchronously.
+
 ```typescript
 function encodeForUri(s: string, spaceAsPlus = false): string;
 ```
+
+Similar to `encodeURIComponent`, except the characters `!'()*` are also %-encoded, and spaces can optionally be encoded as `+` instead of `%20`.
 
 ```typescript
 function urlEncodeParams(params: Record<string, string | number | boolean | null>, spaceAsPlus = false): string;
 ```
 
+This function turns the name/value pairs from `params` into a URL parameter list, with each value encoded using `urlEncodeParams`.
+
+For example, `{ name: 'John Doe', points: 250, foo: null }` becomes `'name=John%20Doe&points=250'`.
+
 ```typescript
 function blendColors(color1: string, color2: string, portion1 = 0.5): string;
 ```
+
+Blends two CSS-style colors, in even proportions by default, using a weighted average of their respective RGBA components.
 
 ```typescript
 function colorFrom24BitInt(i: number, alpha = 1.0): string;
 ```
 
+Turns a numerically-encoded RGB color value `i` (in the form 0xRRGGBB) into a CSS color string in the form `'#RRGGBB'`, or, if `alpha` has a non-1 value, a color string in the form `'rgba(r, g, b, alpha)'`, where `r`, `g`, and `b` are the decimal equivalents of `RR`, `GG`, and `BB`
+
 ```typescript
-function colorFromByteArray(array: number[], offset: number): string;
+function colorFromByteArray(array: number[], offset = 0): string;
 ```
+
+Uses values from `array`, starting at the optional `offset`, to create a CSS color string. Values should be in the integer range 0-255, in the order red, green, blue, optionally followed by an integer 0-255 alpha value.
 
 ```typescript
 function colorFromRGB(r: number, g: number, b: number, alpha = 1.0): string;
 ```
 
-```typescript
-function drawOutlinedText(context: CanvasRenderingContext2D, text: string, x: number, y: number,
-                                 outlineStyle?: string, fillStyle?: string): void;
-```
+Returns a CSS color string based on integer `r`, `g`, and `b` values from 0-255, and an optional `alpha` value from 0-1.
 
 ```typescript
-function fillEllipse(context: CanvasRenderingContext2D, cx: number, cy: number, rx: number, ry: number): void;
+function drawOutlinedText(context: CanvasRenderingContext2D, text: string, x: number, y: number,
+                          outlineStyle?: string, fillStyle?: string, strokeWidth = 4): void;
 ```
+
+Draws outlined `text` at location `x`, `y` using the styles (usually simply colors) `outlineStyle` and `fillStyle`, which default to the current `strokeStyle` and `fillStyle`, respectively, if not specified.
+
+Note that the `strokeWidth` (default value 4) determines the pixel width of the outline stroke, but that only about half of that width will be visible after filled text is drawn on top of the stroked text.
 
 ```typescript
 function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: number, r: number): void ;
 ```
 
+A method for drawing filled circles which is more convenient than using the standard `CanvasRenderingContext2D` arc and path methods.
+
+```typescript
+function fillEllipse(context: CanvasRenderingContext2D, cx: number, cy: number, rx: number, ry: number): void;
+```
+
+A method for drawing filled ellipses which is more convenient than using the standard `CanvasRenderingContext2D` arc and path methods.
+
 ```typescript
 function getPixel(imageData: ImageData, x: number, y: number): number;
 ```
 
+Extract the pixel value at `x`, `y` from `imageData`.
 
+```typescript
 export interface RGBA {
   r: number;
   g: number;
@@ -749,36 +758,39 @@ export interface RGBA {
   alpha: number;
 }
 
-```typescript
 function parseColor(color: string): RGBA;
 ```
+
+Parse a CSS color string (including commonly recognized color names such as "orange" and "SteelBlue") and return the individual color components.
 
 ```typescript
 function replaceAlpha(color: string, newAlpha: number): string;
 ```
 
+Return a CSS color string equivalent to the originally provided `color`, but with its alpha value replaced with `newValue`.
+
 ```typescript
 function setPixel(imageData: ImageData, x: number, y: number, pixel: number): void;
 ```
 
+Set the pixel value at `x`, `y` in `imageData` to `pixel`.
+
 ```typescript
 function strokeCircle(context: CanvasRenderingContext2D, cx: number, cy: number, radius: number): void;
 ```
+A method for drawing circles which is more convenient than using the standard `CanvasRenderingContext2D` arc and path methods.
 
 ```typescript
 function strokeEllipse(context: CanvasRenderingContext2D, cx: number, cy: number, rx: number, ry: number): void;
 ```
 
+A method for drawing ellipses which is more convenient than using the standard `CanvasRenderingContext2D` arc and path methods.
+
 ```typescript
 function strokeLine(context: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number): void;
 ```
 
-
-
-
-
-
-
+Draw a line from `x0`, `y0` to `x1`, `y1`.
 
 ## Deprecated functions
 
@@ -786,8 +798,11 @@ function strokeLine(context: CanvasRenderingContext2D, x0: number, y0: number, x
 function padLeft(item: string | number, length: number, padChar = ' '): string;
 ```
 
+Equivalent to the now-preferred `String.prototype.padStart` method.
+
 ```typescript
 function padRight(item: string, length: number, padChar?: string): string;
 ```
 
+Equivalent to the now-preferred `String.prototype.padEnd` method.
 

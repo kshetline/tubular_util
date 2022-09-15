@@ -1,5 +1,3 @@
-import { padLeft } from './string-util';
-
 const { max, min, round } = Math;
 
 export interface RGBA {
@@ -42,11 +40,11 @@ export function colorFrom24BitInt(i: number, alpha = 1.0): string {
   return colorFromRGB(r, g, b, alpha);
 }
 
-export function colorFromByteArray(array: number[], offset: number): string {
-  const r = array[offset];
-  const g = array[offset + 1];
-  const b = array[offset + 2];
-  const alpha = array[offset + 4] / 255;
+export function colorFromByteArray(array: number[], offset = 0): string {
+  const r = array[offset] || 0;
+  const g = array[offset + 1] || 0;
+  const b = array[offset + 2] || 0;
+  const alpha = (array[offset + 4] ?? 255) / 255;
 
   return colorFromRGB(r, g, b, alpha);
 }
@@ -58,17 +56,17 @@ export function colorFromRGB(r: number, g: number, b: number, alpha = 1.0): stri
   const a = min(max(alpha, 0), 1).toFixed(4).replace(/([01]).0000/, '$1').replace(/([^0])0+$/, '$1');
 
   if (a === '1')
-    return ('#' + padLeft(r.toString(16), 2, '0')
-                + padLeft(g.toString(16), 2, '0')
-                + padLeft(b.toString(16), 2, '0')).toUpperCase();
+    return ('#' + r.toString(16).padStart(2, '0')
+                + g.toString(16).padStart(2, '0')
+                + b.toString(16).padStart(2, '0')).toUpperCase();
   else
     return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 export function drawOutlinedText(context: CanvasRenderingContext2D, text: string, x: number, y: number,
-                                 outlineStyle?: string, fillStyle?: string): void {
+                                 outlineStyle?: string, fillStyle?: string, strokeWidth = 4): void {
   context.save();
-  context.lineWidth = 4;
+  context.lineWidth = strokeWidth;
   context.lineJoin = 'round';
 
   if (outlineStyle)
@@ -90,6 +88,7 @@ export function fillEllipse(context: CanvasRenderingContext2D, cx: number, cy: n
   context.scale(rx, ry);
   context.arc(1, 1, 1, 0, Math.PI * 2, false);
 
+  context.closePath();
   context.restore();
   context.fill();
 }

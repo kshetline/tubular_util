@@ -50,29 +50,36 @@ interface FsDocumentElement extends HTMLElement {
   webkitRequestFullscreen?: () => void;
 }
 
-export function beep(frequency = 440, gainValue = 0.025): void {
+export function beep(frequency = 440, gainValue = 0.025, duration = 100): void {
+  beepPromise(frequency, gainValue, duration).finally();
+}
+
+export async function beepPromise(frequency = 440, gainValue = 0.025, duration = 100): Promise<void> {
   if (!_window)
     return;
 
-  const audioContext = new ((_window as any).AudioContext)() as AudioContext;
-  const oscillator = audioContext.createOscillator();
-  const gain = audioContext.createGain();
+  return new Promise(resolve => {
+    const audioContext = new ((_window as any).AudioContext)() as AudioContext;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
 
-  oscillator.type = 'square';
-  oscillator.frequency.value = frequency;
-  oscillator.connect(gain);
-  gain.gain.value = gainValue;
-  gain.connect(audioContext.destination);
+    oscillator.type = 'square';
+    oscillator.frequency.value = frequency;
+    oscillator.connect(gain);
+    gain.gain.value = gainValue;
+    gain.connect(audioContext.destination);
 
-  oscillator.start();
+    oscillator.start();
 
-  setTimeout(() => {
-    oscillator.stop();
-    oscillator.disconnect();
-    gain.disconnect();
-    // noinspection JSIgnoredPromiseFromCall
-    audioContext.close();
-  }, 100);
+    setTimeout(() => {
+      oscillator.stop();
+      oscillator.disconnect();
+      gain.disconnect();
+      // noinspection JSIgnoredPromiseFromCall
+      audioContext.close();
+      resolve();
+    }, duration);
+  });
 }
 
 export function eventToKey(event: KeyboardEvent): string {
