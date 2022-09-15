@@ -276,7 +276,7 @@ export function isFunction(a: unknown): a is Function {
   return typeof a === 'function';
 }
 
-export function isNonFunctionObject(a: unknown): a is Exclude<Record<string | number | symbol, any>, Function> {
+export function isNonFunctionObject(a: unknown): a is Exclude<Record<string | symbol, any>, Function> {
   return !!a && typeof a === 'object';
 }
 
@@ -284,7 +284,7 @@ export function isNumber(a: unknown): a is number {
   return typeof a === 'number';
 }
 
-export function isObject(a: unknown): a is Record<string | number | symbol, any> {
+export function isObject(a: unknown): a is Record<string | symbol, any> {
   return !!a && (typeof a === 'function' || typeof a === 'object');
 }
 

@@ -10,7 +10,7 @@ import {
 } from './misc-util';
 import {
   asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
-  makePlainASCII_lc, makePlainASCII_UC, regexEscape, stripDiacriticals, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
+  makePlainASCII_lc, makePlainASCII_UC, padLeft, regexEscape, stripDiacriticals, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
 } from './string-util';
 import * as util from './index';
 
@@ -308,6 +308,12 @@ describe('@tubular/util', () => {
     expect(isAllUppercaseWords('FOOBAR')).to.be.true;
     expect(isAllUppercaseWords('FOO BAR BAZ, 123')).to.be.true;
     expect(isAllUppercaseWords('FOO BaR BAZ, 123')).to.be.false;
+  });
+
+  it('should pad numbers properly', () => {
+    expect(padLeft(-5, 4)).to.equal('  -5');
+    expect(padLeft(5, 4)).to.equal('   5');
+    expect(padLeft(-5, 4, '0')).to.equal('-005');
   });
 
   it('should properly recognize data types', () => {

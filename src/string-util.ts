@@ -311,13 +311,15 @@ export function toTitleCase(s: string, options?: TitleCaseOptions): string {
   return s.replace(wordPattern, wordHandler);
 }
 
+export function padLeft(item: number, length: number, padChar?: string): string;
 /**
  * @deprecated String.padStart() now available.
  */
+export function padLeft(item: string, length: number, padChar?: string): string;
 export function padLeft(item: string | number, length: number, padChar = ' '): string {
   let sign = '';
 
-  if (typeof item === 'number' && (item as number) < 0 && padChar === '0') {
+  if (!/^\s$/.test(padChar) && typeof item === 'number' && (item as number) < 0 && padChar === '0') {
     sign = '-';
     item = -item;
     --length;

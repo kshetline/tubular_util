@@ -229,11 +229,16 @@ Using `Intl.NumberFormat`, this returns a number as a string with a given `maxim
 If `useGrouping` is true, locale-specific grouping with be performed, such as the commas added to "12,345,700" in the 'en-US' locale.
 
 ```typescript
+function padLeft(item: number, length: number, padChar = ' '): string;
+```
+
+Similar to `item.toString().padStart(...)`, but if `item` is negative, and `padChar` is a whitespace character, then the first character of the result will remain `-`, with padding characters inserted between the sign and the digits.
+
+```typescript
 function processMillis(): number;
 ```
 
 This is a platform-neutral method to return the current process running time, returning `performance.now()` in a web browser environment, or `process.hrtime()`, converted into milliseconds (and derived from the `bigint` form if available) in a Node.js environment. The function falls back on `Date.now()` if neither of the previous options are available.
-
 
 ```typescript
 export function formatDateTime(options?: DateTimeOptions[]): string;
@@ -255,7 +260,6 @@ The following options can be applied either as an array of options, or as a vari
 * `WITH_MILLIS`: Add milliseconds, e.g. `2022-08-07 16:12:43.095 -0400`.
 
 > `enum DateTimeOptions { DATE_ONLY, NO_SECONDS, NO_ZONE, TIME_ONLY, UTC, USE_T, USE_Z, WITH_MILLIS }`
-
 
 ```typescript
 function toDefaultLocaleFixed(n: number, minFracDigits?: number, maxFracDigits?: number): string;
@@ -389,7 +393,7 @@ function isFunction(a: unknown): a is Function;
 Returns `true` if `a` is a function.
 
 ```typescript
-function isNonFunctionObject(a: unknown): a is Exclude<Record<string | number | symbol, any>, Function>;
+function isNonFunctionObject(a: unknown): a is Exclude<Record<string | symbol, any>, Function>;
 ```
 
 Returns `true` if `a` is a object which is not a function.
@@ -401,7 +405,7 @@ function isNumber(a: unknown): a is number;
 Returns `true` if `a` is a `number` value.
 
 ```typescript
-function isObject(a: unknown): a is Record<string | number | symbol, any>;
+function isObject(a: unknown): a is Record<string | symbol, any>;
 ```
 
 Returns `true` if `a` is a an object. Unlike `typeof a === 'object'`, `isObject(null)` returns `false`.
@@ -692,7 +696,7 @@ function encodeForUri(s: string, spaceAsPlus = false): string;
 Similar to `encodeURIComponent`, except the characters `!'()*` are also %-encoded, and spaces can optionally be encoded as `+` instead of `%20`.
 
 ```typescript
-function urlEncodeParams(params: Record<string, string | number | boolean | null>, spaceAsPlus = false): string;
+function urlEncodeParams(params: Record<string, string | number | boolean | bigint | null>, spaceAsPlus = false): string;
 ```
 
 This function turns the name/value pairs from `params` into a URL parameter list, with each value encoded using `urlEncodeParams`.
@@ -795,14 +799,15 @@ Draw a line from `x0`, `y0` to `x1`, `y1`.
 ## Deprecated functions
 
 ```typescript
-function padLeft(item: string | number, length: number, padChar = ' '): string;
+function padLeft(item: string, length: number, padChar = ' '): string;
 ```
 
 Equivalent to the now-preferred `String.prototype.padStart` method.
+
+_Note: The form of `padLeft` which takes a `number` as the first argument is **not** deprecated._
 
 ```typescript
 function padRight(item: string, length: number, padChar?: string): string;
 ```
 
 Equivalent to the now-preferred `String.prototype.padEnd` method.
-

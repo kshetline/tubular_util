@@ -719,7 +719,7 @@ export function encodeForUri(s: string, spaceAsPlus = false): string {
   return spaceAsPlus ? s.replace(/%20/g, '+') : s;
 }
 
-export function urlEncodeParams(params: Record<string, string | number | boolean | null>, spaceAsPlus = false): string {
+export function urlEncodeParams(params: Record<string, string | number | boolean | bigint | null>, spaceAsPlus = false): string {
   const result: string[] = [];
 
   forEach(params, (key, value) => {
