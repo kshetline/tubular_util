@@ -397,17 +397,17 @@ Capitalizes the first letter in each word in `s`, converting all other letters t
 function toTitleCase(s: string, options?: TitleCaseOptions): string;
 ```
 
-This function works much like `toMixedCase`, but also makes a _simplified_ attempt to follow English capitalization rules for titles, leaving short words (which are neither the first word nor the last word) in lowercase, such as "and", "or", "to", "the", etc.
+This function works much like `toMixedCase`, but also makes a _simplified_ attempt to follow English capitalization rules for titles, leaving short words (which are neither the first word nor the last word) in lowercase, such as “and”, “or”, “to”, “the”, etc.
 
 These options are available:
 
 > `interface TitleCaseOptions {`<br>&#x2003;&#x2003;`keepAllCaps?: boolean;`<br>&#x2003;&#x2003;`shortSmall?: string[];`<br>&#x2003;&#x2003;`special?: string[];`<br>`}`
 
-If `keepAllCaps` is `true`, any word that is originally fully capitalized remains fully capitalized, such as "USA".
+If `keepAllCaps` is `true`, any word that is originally fully capitalized remains fully capitalized, such as “USA”.
 
-`shortSmall` is a list of additional words that you wish not to have capitalized, in additions to the built-in list. You can also delete words from the built-in list by including them here with a leading dash, e.g. "-and" to allow the word "and" to be capitalized even when it is not the first or last word of a title.
+`shortSmall` is a list of additional words that you wish not to have capitalized, in additions to the built-in list. You can also delete words from the built-in list by including them here with a leading dash, e.g. “-and” to allow the word “and” to be capitalized even when it is not the first or last word of a title.
 
-`special` is a list of words that you wish to provide special capitalization rules for, such as "CinemaScope" or "MacDougall". Some of these are built in, such as "FedEx" and "iOS".
+`special` is a list of words that you wish to provide special capitalization rules for, such as “CinemaScope” or “MacDougall”. Some of these are built in, such as “FedEx” and “iOS”.
 
 ## Date and number formatting
 
@@ -427,7 +427,7 @@ If the optional array `baseDigit` is passed, `baseDigit[0]` will be modified to 
 
 These scripts are supported:
 
-> Arabic, ASCII, Balinese, Bengali, Cham, Devanagari, Extended Arabic, Gujarati, Gurmukhi, Javanese, Kannada, Kayah Li, Khmer, Lao, Lepcha, Limbu, Malayalam, Meetei Mayek, Mongolian, Myanmar, Myanmar Shan, Myanmar Tai Laing, N'Ko, New Tai Lue, Ol Chiki, Oriya, Saurashtra, Sinhala Lith, Sundanese, Tai Tham Hora, Tai Tham Tham, Tamil, Telugu, Thai, Tibetan, Vai
+> Arabic, ASCII, Balinese, Bengali, Cham, Devanagari, Extended Arabic, Gujarati, Gurmukhi, Javanese, Kannada, Kayah Li, Khmer, Lao, Lepcha, Limbu, Malayalam, Meetei Mayek, Mongolian, Myanmar, Myanmar Shan, Myanmar Tai Laing, N’Ko, New Tai Lue, Ol Chiki, Oriya, Saurashtra, Sinhala Lith, Sundanese, Tai Tham Hora, Tai Tham Tham, Tamil, Telugu, Thai, Tibetan, Vai
 
 ```typescript
 function digitScript(ch: string | null | undefined): string | undefined;
@@ -475,17 +475,17 @@ Converts a number to a formatted string, using localized rules for decimal marks
 function toMaxFixed(n: number, maximumFractionDigits: number, locale?: string, useGrouping = false): string;
 ```
 
-Using `Intl.NumberFormat`, this returns a number as a string with a given `maximumFractionDigits`, using an optional `locale` (defaults to "en-US"). Unlike `toFixed`, fractional digits are not padded with trailing zeros.
+Using `Intl.NumberFormat`, this returns a number as a string with a given `maximumFractionDigits`, using an optional `locale` (defaults to 'en-US'). Unlike `toFixed`, fractional digits are not padded with trailing zeros.
 
-If `useGrouping` is true, locale-specific grouping with be performed, such as the commas added to "12,345,678.9012" in the 'en-US' locale.
+If `useGrouping` is true, locale-specific grouping with be performed, such as the commas added to “12,345,678.9012” in the 'en-US' locale.
 
 ```typescript
 function toMaxSignificant(n: number, maximumSignificantDigits: number, locale?: string | null, useGrouping = false): string;
 ```
 
-Using `Intl.NumberFormat`, this returns a number as a string with a given `maximumSignificantDigits`, using an optional `locale` (defaults to "en-US"). Unlike `toPrecision`, formatting does not switch to scientific notation when more than `maximumSignificantDigits` are needed for the integer portion of a value.
+Using `Intl.NumberFormat`, this returns a number as a string with a given `maximumSignificantDigits`, using an optional `locale` (defaults to 'en-US'). Unlike `toPrecision`, formatting does not switch to scientific notation when more than `maximumSignificantDigits` are needed for the integer portion of a value.
 
-If `useGrouping` is true, locale-specific grouping with be performed, such as the commas added to "12,345,700" in the 'en-US' locale.
+If `useGrouping` is true, locale-specific grouping with be performed, such as the commas added to “12,345,700” in the 'en-US' locale.
 
 ```typescript
 function zeroPad(n: number | string, digits: number): string;
@@ -737,7 +737,7 @@ export interface RGBA {
 function parseColor(color: string): RGBA;
 ```
 
-Parse a CSS color string (including commonly recognized color names such as "orange" and "SteelBlue") and return the individual color components.
+Parse a CSS color string (including commonly recognized color names such as “orange” and “SteelBlue”) and return the individual color components.
 
 ```typescript
 function replaceAlpha(color: string, newAlpha: number): string;
