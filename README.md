@@ -1,14 +1,14 @@
 <!-- omit in toc -->
 # @tubular/util
 
-An assortment of general-purpose utility functions, including string manipulation, non-exception-throwing safe string-to-number conversions, array functions, object cloning, web browser graphics and CSS support, and more.
+An assortment of general-purpose utility functions, including string manipulation, non-exception-throwing safe string-to-number conversions, array functions, object cloning, web browser graphics, CSS support, and more.
 
 - [Installation](#installation)
   - [Via npm](#via-npm)
   - [Via `<script>` tag](#via-script-tag)
 - [Type conversions](#type-conversions)
 - [Type/class checking](#typeclass-checking)
-- [Array/object comparison/manipulation](#arrayobject-comparisonmanipulation)
+- [Array/object comparison and manipulation](#arrayobject-comparison-and-manipulation)
 - [String functions](#string-functions)
 - [Date and number formatting](#date-and-number-formatting)
 - [Browser-oriented functions](#browser-oriented-functions)
@@ -29,7 +29,7 @@ An assortment of general-purpose utility functions, including string manipulatio
 
 `const { toBoolean, toNumber, compareCaseSecondary`...`} = require('@tubular/time/cjs'); // CommonJS`
 
-Documentation examples will assume **@tubular/util** has been imported as above.
+_Documentation examples will assume **@tubular/util** has been imported as above._
 
 ### Via `<script>` tag
 
@@ -51,7 +51,7 @@ For the old-fashioned UMD approach:
 <script src="https://unpkg.com/@tubular/util/dist/umd/index.js"></script>
 ```
 
-The **@tubular/util** package will be available via the global variable `tbUtil`. Functions, classes, and constants will also be available on this variable, such as `tbUtil.toBoolean`, `tbUtil.toNumber`, `tbUtil.compareCaseSecondary`, etc.
+The **@tubular/util** package will be made available via the global variable `tbUtil`. Functions, classes, and constants will also be available via this variable, such as `tbUtil.toBoolean`, `tbUtil.toNumber`, `tbUtil.compareCaseSecondary`, etc.
 
 ## Type conversions
 
@@ -73,10 +73,10 @@ function toInt(value: any, defaultValue?: number, radix?: number): number;
 function toInt(value: any, defaultValue: null, radix?: number): null;
 ```
 
-Converts any `value` of any type to a integer `number` (or possibly `null`, if `defaultValue` is `null`).
+Converts a `value` of any type to an integer `number` (or possibly `null`, if `defaultValue` is `null`).
 
 * Any `value` of type `number` is returned as `Math.floor(value)`.
-* `null`, `undefined`, or `NaN` becomes `defaultValue` (the default `defaultValue` is 0).
+* `null`, `undefined`, or `NaN` become `defaultValue` (the default `defaultValue` is 0).
 * Any `value` of type `string` _composed completely of valid digits_ for the given `radix` (default 10) is returned as `parseInt(value, radix)`, unless the result of `parseInt` is `NaN` or an infinite value, in which case `defaultValue` is returned.
 * Any other `string` value results in `defaultValue`.
 * Any `value` of type `bigint` is returned as `Number(value)`, unless the result of `Number` is `NaN` or an infinite value, in which case `defaultValue` is returned.
@@ -87,10 +87,10 @@ function toNumber(value: any, defaultValue?: number): number;
 function toNumber(value: any, defaultValue: null): number | null;
 ```
 
-Converts any `value` of any type to a `number` (or possibly `null`, if `defaultValue` is `null`).
+Converts a `value` of any type to a `number` (or possibly `null`, if `defaultValue` is `null`).
 
 * Any `value` of type `number` is returned as itself.
-* `null`, `undefined`, or `NaN` becomes `defaultValue` (the default `defaultValue` is 0).
+* `null` or `undefined` become `defaultValue` (the default `defaultValue` is 0).
 * Any `value` of type `string` is returned as `parseFloat(value)`, unless the result of `parseFloat` is `NaN` or an infinite value, in which case `defaultValue` is returned.
 * Any `value` of type `bigint` is returned as `Number(value)`, unless the result of `Number` is `NaN` or an infinite value, in which case `defaultValue` is returned.
 * Any other type of `value` results in `defaultValue`.
@@ -113,7 +113,7 @@ This function returns the same results as `toNumber` unless `value` is `NaN` or 
 function classOf(a: unknown, noClassResult = false): string | null;
 ```
 
-If `a` is an instance of a class, the name of the class is returned. Otherwise `null` is returned, or, if `noClassResult` is `true`, the string `'no-class:object'` is returned.
+If `a` is an instance of a class, the name of the class is returned. Otherwise `null` is returned, or, if `noClassResult` is `true`, the string `'no-class:`_type_`'` is returned.
 
 ```typescript
 function isArray(a: unknown): a is any[];
@@ -175,7 +175,7 @@ function isSymbol(a: unknown): a is symbol;
 
 Returns `true` if `a` is a `symbol` value.
 
-## Array/object comparison/manipulation
+## Array/object comparison and manipulation
 
 ```typescript
 function clone<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, depth: number) => boolean) = false): T;
@@ -183,10 +183,10 @@ function clone<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, dept
 
 This function clones a value, array, or object. Any primitive `orig` value will simply be return as-is.
 
-The `shallow` parameter controls which children of an object are either cloned or used as-is.
+The `shallow` parameter controls which children of an object are either cloned or retained as-is.
 
-* When `shallow` is **`true`**: Only the root array or object will be converted into a new array or object reference. All descendant objects will retain their original reference values.
-* When `shallow` is **`false`**: All objects, root and descendants, will be converted into a new object references.
+* When `shallow` is **`true`**: Only the root array or object will be converted into a new array or object reference. All descendant arrays and objects will retain their original reference values.
+* When `shallow` is **`false`** (the default): All objects, root and descendants, will be converted into a new object references.
 * When `shallow` is a **`Set`**: All objects, root and descendants, will be converted into a new object references except for class instances of classes contained in `shallow`.
 * When `shallow` is a **function**: The root object is always converted into a new object, but descendants are only cloned when the callback function, provided with the descendant `value` and its `depth` in object tree, returns `false`.
 
@@ -194,13 +194,13 @@ The `shallow` parameter controls which children of an object are either cloned o
 function first<T>(array: ArrayLike<T> | null | undefined): T | undefined
 ```
 
-Returns first element of an array, or `undefined` if appropriate.
+Returns the first element of an array, or `undefined` if appropriate.
 
 ```typescript
 function flatten(a: any[]): any[];
 ```
 
-This function “flattens” an array by replacing any arrays within an array with the children of that inner array. For example:
+This function “flattens” an array by replacing any arrays within the array with the children of the inner array. For example:
 
 `flatten([1, [2, 3], 4]))` returns `[1, 2, 3, 4]`.
 
@@ -220,7 +220,7 @@ function isEqual(a: any, b: any, mustBeSameClass = false): boolean;
 
 This function determines if two values `a` and `b` are equal to each other, by deep comparison when necessary.
 
-* As a first check, `a` and `b` are equal considered equal if `a === b || Object.is(a, b)` is `true`. Please note:
+* As a first check, `a` and `b` are equal considered equal if `a === b` or `Object.is(a, b)` is `true`. Please note:
   | Equal?            | a = 0, b = -0 | a = NaN, b = NaN |
   | ----------------- | ------------- | ---------------- |
   | `a === b`         | true          | false            |
@@ -229,14 +229,14 @@ This function determines if two values `a` and `b` are equal to each other, by d
 * If `a` and `b` are not the same type (as determined by `typeof`), they are not considered equal.
 * If one of `a` and `b` is an array, and the other is not, they are not considered equal.
 * If `a` and `b` are both arrays, but of unequal length, they are not considered equal.
-* If the `mustBeSameClass` is `true`, `a` and `b` must either be instances of the same class, or both must not be an instance of any class, otherwise they are not considered equal.
-* Otherwise all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal, and neither `a` nor `b` can own a property or index that the other does not have. For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
+* If `mustBeSameClass` is `true`, `a` and `b` must either be instances of the same class, or both must not be an instance of any class, otherwise they are not considered equal.
+* Otherwise all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
 
 ```typescript
 function last<T>(array: ArrayLike<T> | null | undefined): T | undefined;
 ```
 
-Returns last element of an array, or `undefined` if appropriate.
+Returns the last element of an array, or `undefined` if appropriate.
 
 ```typescript
 function nth<T>(array: ArrayLike<T> | null | undefined, index: number): T | undefined
@@ -248,7 +248,7 @@ Returns `index` element of an array, or `undefined` if appropriate.
 function push<T>(array: T[] | null | undefined, ...items: any[]): T[];
 ```
 
-This is a form of `push` designed for chained operations, returning the array which has been modified. If `array` is `null` or `undefined` a new empty array is created and returns with the pushed `items`.
+This is a form of `push` designed for chained operations, returning the array which has been modified. If `array` is `null` or `undefined` a new empty array is created and returns containing the pushed `items`.
 
 ```typescript
 function pushIf<T>(condition: boolean, array: T[] | null | undefined, ...items: any[]): T[];
@@ -263,7 +263,9 @@ function sortObjectEntries<T>(obj: T, inPlace?: boolean): T;
 function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boolean);
 ```
 
-JavaScript objects function as *ordered* maps, with a consistently-maintained ordering of object properties. This function allows you to sort that order. By default, that sorting is ascending alphabetical using JavaScript default string collation. You can supply your own `sorter` to control how properties are ordered.
+JavaScript objects function as *ordered* maps, with a consistently-maintained ordering of object properties. This function allows you to sort that order.
+
+By default, sorting is done in ascending alphabetical order using JavaScript’s default string collation. You can supply your own `sorter` to control how properties are ordered.
 
 If `inPlace` is `true` (the default is `false`) `obj` itself will be returned by the function, modified by the sorting. Otherwise a new object with sorted properties is returned.
 
@@ -297,7 +299,7 @@ Compares two strings, returning a less-than-zero value if `a` is less than `b`, 
 function extendDelimited(base: string, newItem: string, delimiter = ', '): string;
 ```
 
-Appends one string to another string, inserting a `delimiter` in between if the first string in not an empty string.
+Appends one string to another string, inserting a `delimiter` in between the strings if the first string in not an empty string.
 
 ```typescript
 function isAllUppercase(s: string): boolean;
@@ -337,17 +339,10 @@ function makePlainASCII_UC(s: string, forFileName = false): string;
 Same as `makePlainASCII`, but also converted to uppercase.
 
 ```typescript
-function padLeft(item: number, length: number, padChar = ' '): string;
-```
-
-Similar to `item.toString().padStart(...)`, but if `item` is negative, and `padChar` is a whitespace character, then the first character of the result will remain `-`, with padding characters inserted between the sign and the digits.
-
-
-```typescript
 function regexEscape(s: string): string;
 ```
 
-Returns a representation of `s` which can be used by `RegExp`, automatically escaped so that all characters are interpreted as literal characters, not regex syntax.
+Returns a representation of `s` which can be used by `RegExp`, automatically escaped so that all characters are interpreted as literal characters, not as regex syntax.
 
 ```typescript
 function replace(str: string, searchStr: string, replaceStr: string, caseInsensitive = false): string;
@@ -406,15 +401,11 @@ This function works much like `toMixedCase`, but also makes a _simplified_ attem
 
 These options are available:
 
-> `interface TitleCaseOptions {`<br>
-`  keepAllCaps?: boolean;`<br>
-`  shortSmall?: string[];`<br>
-`  special?: string[];`<br>
-`}`
+> `interface TitleCaseOptions {`<br>&#x2003;&#x2003;`keepAllCaps?: boolean;`<br>&#x2003;&#x2003;`shortSmall?: string[];`<br>&#x2003;&#x2003;`special?: string[];`<br>`}`
 
 If `keepAllCaps` is `true`, any word that is originally fully capitalized remains fully capitalized, such as "USA".
 
-`shortSmall` is a list of additional words that you wish not to be capitalized, in additions to the built-in list. You can also delete words from the built-in list by including them here with a leading dash, e.g. "-and" to allow the word "and" to be capitalized even when it is not the first or last word of a title.
+`shortSmall` is a list of additional words that you wish not to have capitalized, in additions to the built-in list. You can also delete words from the built-in list by including them here with a leading dash, e.g. "-and" to allow the word "and" to be capitalized even when it is not the first or last word of a title.
 
 `special` is a list of words that you wish to provide special capitalization rules for, such as "CinemaScope" or "MacDougall". Some of these are built in, such as "FedEx" and "iOS".
 
@@ -432,7 +423,7 @@ function convertDigitsToAscii(n: string, baseDigit?: string[]): string;
 
 Converts decimal digits in various scripts (Arabic, Devanagari, Mongolian, etc.) into ASCII digits.
 
-If the optional array `baseDigit` is passed, `baseDigit[0]` will be modified to contain the 0 digit for the last script detected, and `baseDigit[0]` will be modified to contain the name of that script.
+If the optional array `baseDigit` is passed, `baseDigit[0]` will be modified to contain the 0-value digit for the last script detected, and `baseDigit[1]` will be modified to contain the name of that script.
 
 These scripts are supported:
 
@@ -450,7 +441,9 @@ export function formatDateTime(date: Date | number | string, ...options: DateTim
 export function formatDateTime(date: Date | number | string, options?: DateTimeOptions[]): string;
 ```
 
-This function returns date/time strings in basic ISO 8601 format, for either the local time zone or for UTC. The default time value is the current time. The default format is date and time at one-second resolution, with UTC offset included, e.g. `2022-08-07 16:12:43 -0400`.
+> `enum DateTimeOptions { DATE_ONLY, NO_SECONDS, NO_ZONE, TIME_ONLY, UTC, USE_T, USE_Z, WITH_MILLIS }`
+
+This function returns date/time strings in basic ISO 8601 format, for either the default local time zone or for UTC. The default time value is the current time. The default format is date and time at one-second resolution, with UTC offset included, e.g. `2022-08-07 16:12:43 -0400`.
 
 The following options can be applied either as an array of options, or as a variable list of parameters after the `date` parameter:
 
@@ -463,15 +456,20 @@ The following options can be applied either as an array of options, or as a vari
 * `USE_Z`: Use `Z` to indicate UTC time and drop timezone offset, e.g. `2022-08-07 20:12:43Z`. Implies `UTC` option.
 * `WITH_MILLIS`: Add milliseconds, e.g. `2022-08-07 16:12:43.095 -0400`.
 
-> `enum DateTimeOptions { DATE_ONLY, NO_SECONDS, NO_ZONE, TIME_ONLY, UTC, USE_T, USE_Z, WITH_MILLIS }`
-
 _For far more flexible, full-featured date/time formatting and other date/time functionality, please see the [@tubular/time](https://github.com/kshetline/tubular_time) package._
+
+```typescript
+function padLeft(item: number, length: number, padChar = ' '): string;
+```
+
+Similar to `padStart(...)`, but operates on numbers. If `item` is negative, and `padChar` is a whitespace character, then the first character of the result will remain `-`, with padding characters inserted between the sign and the digits.
+
 
 ```typescript
 function toDefaultLocaleFixed(n: number, minFracDigits?: number, maxFracDigits?: number): string;
 ```
 
-Converts a number to a formatted string, using localized rules for decimal marks and grouping (such as `1,234,567.89` vs `1 234 567,89`), with an optional minimum and maximum numbers of fractional digits.
+Converts a number to a formatted string, using localized rules for decimal marks and grouping (such as `1,234,567.89` vs `1 234 567,89`), with optional minimum and maximum numbers of fractional digits.
 
 ```typescript
 function toMaxFixed(n: number, maximumFractionDigits: number, locale?: string, useGrouping = false): string;
@@ -501,7 +499,7 @@ Taking either a number or a string for `n`, a string is returned with `digits` d
 function beep(frequency = 440, gainValue = 0.025, duration = 100): void;
 ```
 
-Plays a simple square-wave tone at the specified `frequency` and `gainValue` for a `duration` in given in milliseconds.
+Play a simple square-wave tone at the specified `frequency` and `gainValue` for a `duration` in given in milliseconds.
 
 ```typescript
 async function beepPromise(frequency = 440, gainValue = 0.025, duration = 100): Promise<void>;
@@ -513,7 +511,7 @@ Same as `beep`, except that you can `await` the completion of the sound.
 function eventToKey(event: KeyboardEvent): string;
 ```
 
-Turns keyboard events into consistent, browser-independent key codes.
+Turn keyboard events into consistent, browser-independent key codes.
 
 In many circumstances, especially with up-to-date browsers, this function is redundant, returning the same value as `event.key`. But for cases where `event.key` is not provided and `event.charCode`, `event.keyCode`, or `event.which` need to be examined, or when `event.key` contains a non-standard value such as `'UIKeyInputLeftArrow'` instead of `'ArrowLeft'`, `eventToKey` helps provide a consistent result.
 
@@ -521,21 +519,30 @@ In many circumstances, especially with up-to-date browsers, this function is red
 function getCssValue(element: Element, property: string): string;
 ```
 
+Return the value of a CSS `property` for the given `element`, as either set directly on that element, or as inherited by that element.
+
 ```typescript
 function getCssValues(element: Element, properties: string[]): string[];
 ```
+
+Same as `getCssValue`, except an array of CSS values is returned for the array of `properties`. This is more efficient than querying multiple properties one at a time.
 
 ```typescript
 function getCssRuleValue(element: Element, property: string): string | undefined;
 ```
 
+Same as `getCssValue`, except the property value will be returned in the same form as it was defined in the applicable CSS rules. For example, if the rules stated `1em`, this function returns `1em`, rather than converting this value into a `px` value as `getCssValue` will do.
+
 ```typescript
 function getCssRuleValues(element: Element, properties: string[]): string[] | undefined;
 ```
+Same as `getCssRuleValue`, except an array of CSS values is returned for the array of `properties`. This is more efficient than querying multiple properties one at a time.
 
 ```typescript
 function getFont(element: Element): string;
 ```
+
+Returns the font active on the given `element`.
 
 ```typescript
 interface FontMetrics {
@@ -577,19 +584,19 @@ Convert `s` into a form compatible with HTML text content, replacing the ASCII c
 function htmlUnescape(s: string): string;
 ```
 
-Parse HTML entities embedded in `s` to return the original unencoded text represented by `s'.
+Parse HTML entities embedded in `s` to return the original unencoded text represented by `s`.
 
 ```typescript
 function isFullScreen(): boolean;
 ```
 
-Return `true` if the programmatic full-screen is activated. Note that it is possible for a browser to be in full-screen mode by means that are not directly detectable.
+Return `true` if the programmatic full-screen feature is activated. _Note that it is possible for a browser to be in full-screen mode by means that are not directly detectable by this function._
 
 ```typescript
 function isEffectivelyFullScreen(): boolean;
 ```
 
-Return `true` if the browser window's inner width and height match the host computer screen's width and height.
+Return `true` if the browser window’s inner width and height match the host computer screen’s width and height.
 
 ```typescript
 function restrictPixelWidth(text: string, font: string | HTMLElement, maxWidth: number, clipString = '\u2026'): string;
@@ -597,7 +604,7 @@ function restrictPixelWidth(text: string, font: string | HTMLElement, maxWidth: 
 
 Return a string derived from `text`, truncated if necessary, such that the pixel width of the resulting string, as rendered in the given `font`, is equal to or less than `maxWidth`.
 
-If `text` is truncated, it is done by removing characters from the end of the string, with `clipString` (default `…`) appended.
+If `text` is truncated, it is done by removing characters from the end of the string, with `clipString` (default `…`) appended, e.g. `'Long and winding road'` shortened to `'Long and wi…'`.
 
 ```typescript
 function setFullScreen(full: boolean): void;
@@ -660,42 +667,44 @@ function isSamsung(): boolean;
 function isWindows(): boolean;
 ```
 
-## Browser graphics
-
 The above functions test browser types, platforms, and OS environments.
 
-Developers should depend mostly on feature testing rather than detection of browser types. Nevertheless, browser information is sometimes useful, or even necessary to work around particular browser bugs and quirks.
+Developers should depend mainly on feature testing rather than browser detection. Nevertheless, browser detection is sometimes useful, or even necessary, to work around particular browser bugs and quirks.
+
+_Note: If you want to give up gracefully on making your code run on old buggy and/or feature-lacking web browsers, [@tubular/browser-check](https://github.com/kshetline/tubular_browser-check) might suit your needs._
+
+## Browser graphics
 
 ```typescript
 function blendColors(color1: string, color2: string, portion1 = 0.5): string;
 ```
 
-Blends two CSS-style colors, in even proportions by default, using a weighted average of their respective RGBA components.
+Blend two CSS-style colors, in even proportions by default, using a weighted average of their respective RGBA components.
 
 ```typescript
 function colorFrom24BitInt(i: number, alpha = 1.0): string;
 ```
 
-Turns a numerically-encoded RGB color value `i` (in the form 0xRRGGBB) into a CSS color string in the form `'#RRGGBB'`, or, if `alpha` has a non-1 value, a color string in the form `'rgba(r, g, b, alpha)'`, where `r`, `g`, and `b` are the decimal equivalents of `RR`, `GG`, and `BB`
+Turn a numerically-encoded RGB color value `i` (in the form 0xRRGGBB) into a CSS color string in the form `'#RRGGBB'`, or, if `alpha` has a non-1 value, a color string in the form `'rgba(r, g, b, alpha)'`, where `r`, `g`, and `b` are the decimal equivalents of `RR`, `GG`, and `BB`
 
 ```typescript
 function colorFromByteArray(array: number[], offset = 0): string;
 ```
 
-Uses values from `array`, starting at the optional `offset`, to create a CSS color string. Values should be in the integer range 0-255, in the order red, green, blue, optionally followed by an integer 0-255 alpha value.
+Use values from `array`, starting at the optional `offset`, to create a CSS color string. Values should be in the integer range 0-255, in the order red, green, blue, optionally followed by an integer 0-255 alpha value.
 
 ```typescript
 function colorFromRGB(r: number, g: number, b: number, alpha = 1.0): string;
 ```
 
-Returns a CSS color string based on integer `r`, `g`, and `b` values from 0-255, and an optional `alpha` value from 0-1.
+Return a CSS color string based on integer `r`, `g`, and `b` values from 0-255, and an optional `alpha` value from 0-1.
 
 ```typescript
 function drawOutlinedText(context: CanvasRenderingContext2D, text: string, x: number, y: number,
                           outlineStyle?: string, fillStyle?: string, strokeWidth = 4): void;
 ```
 
-Draws outlined `text` at location `x`, `y` using the styles (usually simply colors) `outlineStyle` and `fillStyle`, which default to the current `strokeStyle` and `fillStyle`, respectively, if not specified.
+Draw outlined `text` at location `x`, `y` using the styles (usually simply colors) `outlineStyle` and `fillStyle`, which default to the current `strokeStyle` and `fillStyle`, respectively, if not specified.
 
 Note that the `strokeWidth` (default value 4) determines the pixel width of the outline stroke, but that only about half of that width will be visible after filled text is drawn on top of the stroked text.
 
@@ -777,7 +786,7 @@ Iterate over all key/value pairs in `obj`, including `symbol` keys.
 function isValidJson(s: string): boolean;
 ```
 
-Determines if `s` contains valid JSON by attempting to parse it, and returning `true` if parsing is successful.
+Determines if `s` contains valid JSON by attempting to parse the string, returning `true` if parsing is successful.
 
 ```typescript
 function keyCount(obj: any): number;
