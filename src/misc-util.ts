@@ -138,7 +138,7 @@ for (let radix = 2; radix <= 36; ++radix) {
 }
 
 export function toInt(value: any, defaultValue?: number, radix?: number): number;
-export function toInt(value: any, defaultValue: null, radix?: number): null;
+export function toInt(value: any, defaultValue: null, radix?: number): number | null;
 export function toInt<T>(value: any, defaultValue: number | T = 0, radix = 10): number | T {
   if (typeof value === 'number')
     return Math.floor(value);

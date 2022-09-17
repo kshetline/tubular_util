@@ -70,7 +70,7 @@ Converts a `value` of any type to a `boolean` value (or possibly `null`, if `def
 
 ```typescript
 function toInt(value: any, defaultValue?: number, radix?: number): number;
-function toInt(value: any, defaultValue: null, radix?: number): null;
+function toInt(value: any, defaultValue: null, radix?: number): number | null;
 ```
 
 Converts a `value` of any type to an integer `number` (or possibly `null`, if `defaultValue` is `null`).
@@ -149,7 +149,7 @@ Returns `true` if `a` is a function.
 function isNonFunctionObject(a: unknown): a is Exclude<Record<string | symbol, any>, Function>;
 ```
 
-Returns `true` if `a` is a object which is not a function.
+Returns `true` if `a` is an object which is not a function.
 
 ```typescript
 function isNumber(a: unknown): a is number;
@@ -161,7 +161,7 @@ Returns `true` if `a` is a `number` value.
 function isObject(a: unknown): a is Record<string | symbol, any>;
 ```
 
-Returns `true` if `a` is a an object. Unlike `typeof a === 'object'`, `isObject(null)` returns `false`.
+Returns `true` if `a` is an object. Unlike `typeof a === 'object'`, `isObject(null)` returns `false`.
 
 ```typescript
 function isString(a: unknown): a is string;
@@ -230,7 +230,7 @@ This function determines if two values `a` and `b` are equal to each other, by d
 * If one of `a` and `b` is an array, and the other is not, they are not considered equal.
 * If `a` and `b` are both arrays, but of unequal length, they are not considered equal.
 * If `mustBeSameClass` is `true`, `a` and `b` must either be instances of the same class, or both must not be an instance of any class, otherwise they are not considered equal.
-* Otherwise all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
+* Otherwise, all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
 
 ```typescript
 function last<T>(array: ArrayLike<T> | null | undefined): T | undefined;
@@ -267,7 +267,7 @@ JavaScript objects function as *ordered* maps, with a consistently-maintained or
 
 By default, sorting is done in ascending alphabetical order using JavaScript’s default string collation. You can supply your own `sorter` to control how properties are ordered.
 
-If `inPlace` is `true` (the default is `false`) `obj` itself will be returned by the function, modified by the sorting. Otherwise a new object with sorted properties is returned.
+If `inPlace` is `true` (the default is `false`) `obj` itself will be returned by the function, modified by the sorting. Otherwise, a new object with sorted properties is returned.
 
 ## String functions
 
