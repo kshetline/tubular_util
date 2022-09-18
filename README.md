@@ -183,7 +183,7 @@ function clone<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, dept
 
 This function clones a value, array, or object. Any primitive `orig` value will simply be return as-is.
 
-The `shallow` parameter controls which children of an object are either cloned or retained as-is.
+The `shallow` parameter controls which descendants of an object are either cloned or retained as-is.
 
 * When `shallow` is **`true`**: Only the root array or object will be converted into a new array or object reference. All descendant arrays and objects will retain their original reference values.
 * When `shallow` is **`false`** (the default): All objects, root and descendants, will be converted into a new object references.
@@ -191,10 +191,10 @@ The `shallow` parameter controls which children of an object are either cloned o
 * When `shallow` is a **function**: The root object is always converted into a new object, but descendants are only cloned when the callback function, provided with the descendant `value` and its `depth` in object tree, returns `false`.
 
 ```typescript
-function first<T>(array: ArrayLike<T> | null | undefined): T | undefined
+function first<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined
 ```
 
-Returns the first element of an array, or `undefined` if appropriate.
+Return the first element of an array, or `defaultValue` (`undefined` if not specified) if a first element does not exist.
 
 ```typescript
 function flatten(a: any[]): any[];
@@ -233,16 +233,16 @@ This function determines if two values `a` and `b` are equal to each other, by d
 * Otherwise, all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
 
 ```typescript
-function last<T>(array: ArrayLike<T> | null | undefined): T | undefined;
+function last<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined;
 ```
 
-Returns the last element of an array, or `undefined` if appropriate.
+Return the last element of an array, or `defaultValue` (`undefined` if not specified) if a last element does not exist.
 
 ```typescript
-function nth<T>(array: ArrayLike<T> | null | undefined, index: number): T | undefined
+function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined
 ```
 
-Returns `index` element of an array, or `undefined` if appropriate.
+Return `n`th element of an array, or `defaultValue` (`undefined` if not specified) if an `n`th element does not exist.
 
 ```typescript
 function push<T>(array: T[] | null | undefined, ...items: any[]): T[];

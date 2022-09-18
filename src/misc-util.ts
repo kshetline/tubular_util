@@ -207,25 +207,25 @@ export function toValidNumber(value: any, defaultValue = 0): number {
     return toNumber(value, defaultValue);
 }
 
-export function first<T>(array: ArrayLike<T> | null | undefined): T | undefined {
+export function first<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined {
   if (isArrayLike(array) && array.length > 0)
     return array[0];
   else
-    return undefined;
+    return defaultValue;
 }
 
-export function nth<T>(array: ArrayLike<T> | null | undefined, index: number): T | undefined {
-  if (isArrayLike(array) && array.length > index)
-    return array[index];
+export function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined {
+  if (isArrayLike(array) && array.length > n)
+    return array[n];
   else
-    return undefined;
+    return defaultValue;
 }
 
-export function last<T>(array: ArrayLike<T> | null | undefined): T | undefined {
+export function last<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined {
   if (isArrayLike(array) && array.length > 0)
     return array[array.length - 1];
   else
-    return undefined;
+    return defaultValue;
 }
 
 export function push<T>(array: T[] | null | undefined, ...items: any[]): T[] {

@@ -237,10 +237,14 @@ describe('@tubular/util', () => {
     const a = [1.1, 2, 4, -3];
 
     expect(first(a)).to.equal(1.1);
+    expect(first(null, 88)).to.equal(88);
     expect(last(a)).to.equal(-3);
     expect(nth(a, 2)).to.equal(4);
+    expect(nth(a, 10)).to.equal(undefined);
+    expect(nth(a, 10, 7)).to.equal(7);
     expect(last(['alpha', 'omega'])).to.equal('omega');
     expect(last([])).to.equal(undefined);
+    expect(last([], 'foo')).to.equal('foo');
     expect(last(null)).to.equal(undefined);
   });
 
