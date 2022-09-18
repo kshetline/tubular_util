@@ -569,6 +569,12 @@ function doesCharacterGlyphExist(elementOrFont: Element | string, charOrCodePoin
 Determine if the font specified by `elementOrFont` can render the given `charOrCodePoint`.
 
 ```typescript
+function encodeForUri(s: string, spaceAsPlus = false): string;
+```
+
+Similar to `encodeURIComponent`, except the characters `!'()*` are also %-encoded, and spaces can optionally be encoded as `+` instead of `%20`.
+
+```typescript
 function getTextWidth(items: string | string[], font: string | HTMLElement, fallbackFont?: string): number;
 ```
 
@@ -578,7 +584,7 @@ Determine the pixel width of a single string, or of the widest of string in an a
 function htmlEscape(s: string, escapeQuotes = false): string;
 ```
 
-Convert `s` into a form compatible with HTML text content, replacing the ASCII characters `<`, `>`, and `&` with the HTML entities `&lt;`, `&gt;`, and `&amp;`, respectively. Optionally ASCII apostrophes and double quotes can be converted into `&quot;` and `&apos;`, respectively.
+Convert `s` into a form compatible with HTML text content, replacing the ASCII characters `<`, `>`, and `&` with the HTML entities `&lt;`, `&gt;`, and `&amp;`, respectively. Optionally ASCII apostrophes and double quotes can be converted into `&apos;` and `&quot;`, respectively.
 
 ```typescript
 function htmlUnescape(s: string): string;
@@ -616,7 +622,7 @@ Put the web browser in full-screen mode if `full` is true, end full-screen mode 
 function setFullScreenAsync(full: boolean, throwImmediate = false): Promise<void>;
 ```
 
-Put the web browser in full-screen mode if `full` is true, end full-screen mode if `full` is `false`. Failure can be detected either immediately or asynchronously.
+Put the web browser in full-screen mode if `full` is true, end full-screen mode if `full` is `false`. Failure can be detected either immediately or asynchronously using try/catch.
 
 ```typescript
 function toggleFullScreen(): void;
@@ -628,19 +634,13 @@ Toggle full-screen mode. Failure is ignored.
 function toggleFullScreenAsync(throwImmediate = false): Promise<void>;
 ```
 
-Toggle full-screen mode. Failure can be detected either immediately or asynchronously.
-
-```typescript
-function encodeForUri(s: string, spaceAsPlus = false): string;
-```
-
-Similar to `encodeURIComponent`, except the characters `!'()*` are also %-encoded, and spaces can optionally be encoded as `+` instead of `%20`.
+Toggle full-screen mode. Failure can be detected either immediately or asynchronously using try/catch.
 
 ```typescript
 function urlEncodeParams(params: Record<string, string | number | boolean | bigint | null>, spaceAsPlus = false): string;
 ```
 
-This function turns the name/value pairs from `params` into a URL parameter list, with each value encoded using `urlEncodeParams`.
+This function turns the name/value pairs from `params` into a URL parameter list, with each value encoded using `encodeForUri`.
 
 For example, `{ name: 'John Doe', points: 250, foo: null }` becomes `'name=John%20Doe&points=250'`.
 
@@ -679,7 +679,7 @@ _Note: If you want to give up gracefully on making your code run on old buggy an
 function blendColors(color1: string, color2: string, portion1 = 0.5): string;
 ```
 
-Blend two CSS-style colors, in even proportions by default, using a weighted average of their respective RGBA components.
+Blend two CSS-style colors, in equal proportions by default, using a weighted average of their respective RGBA components.
 
 ```typescript
 function colorFrom24BitInt(i: number, alpha = 1.0): string;
@@ -743,7 +743,7 @@ Parse a CSS color string (including commonly recognized color names such as “o
 function replaceAlpha(color: string, newAlpha: number): string;
 ```
 
-Return a CSS color string equivalent to the originally provided `color`, but with its alpha value replaced with `newValue`.
+Return a CSS color string equivalent to the originally provided `color`, but with its alpha value replaced with `newAlpha`.
 
 ```typescript
 function setPixel(imageData: ImageData, x: number, y: number, pixel: number): void;
