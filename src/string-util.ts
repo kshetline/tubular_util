@@ -505,7 +505,7 @@ for (const [base, script] of digitSystems) {
   }
 }
 
-export function convertDigitsToAscii(n: string, baseDigit?: string[]): string {
+export function convertDigitsToAscii(n: string, info?: string[]): string {
   let base = '0';
   let script = 'ASCII';
 
@@ -520,9 +520,9 @@ export function convertDigitsToAscii(n: string, baseDigit?: string[]): string {
     return match;
   });
 
-  if (baseDigit) {
-    baseDigit[0] = base;
-    baseDigit[1] = script;
+  if (info) {
+    info[0] = base;
+    info[1] = script;
   }
 
   return result;

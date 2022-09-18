@@ -248,7 +248,7 @@ Return `n`th element of an array, or `defaultValue` (`undefined` if not specifie
 function push<T>(array: T[] | null | undefined, ...items: any[]): T[];
 ```
 
-This is a form of `push` designed for chained operations, returning the array which has been modified. If `array` is `null` or `undefined` a new empty array is created and returns containing the pushed `items`.
+This is a form of `push` designed for chained operations, returning the array which has been modified. If `array` is `null` or `undefined` a new array is created and returned, containing the pushed `items`.
 
 ```typescript
 function pushIf<T>(condition: boolean, array: T[] | null | undefined, ...items: any[]): T[];
@@ -265,7 +265,7 @@ function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boolean);
 
 JavaScript objects function as *ordered* maps, with a consistently-maintained ordering of object properties. This function allows you to sort that order.
 
-By default, sorting is done in ascending alphabetical order using JavaScript’s default string collation. You can supply your own `sorter` to control how properties are ordered.
+By default, sorting is done in ascending alphabetical order using JavaScript’s default string collation. You can, however, supply your own `sorter` to control how properties will be ordered.
 
 If `inPlace` is `true` (the default is `false`) `obj` itself will be returned by the function, modified by the sorting. Otherwise, a new object with sorted properties is returned.
 
@@ -418,12 +418,12 @@ function convertDigits(n: string, baseDigit: string): string;
 Converts decimal digits in various scripts (Arabic, Devanagari, Mongolian, etc.) into digits in a different script, where `baseDigit` is the desired representation for 0. The default value for `baseDigit` is the ASCII digit zero.
 
 ```typescript
-function convertDigitsToAscii(n: string, baseDigit?: string[]): string;
+function convertDigitsToAscii(n: string, info?: string[]): string;
 ```
 
 Converts decimal digits in various scripts (Arabic, Devanagari, Mongolian, etc.) into ASCII digits.
 
-If the optional array `baseDigit` is passed, `baseDigit[0]` will be modified to contain the 0-value digit for the last script detected, and `baseDigit[1]` will be modified to contain the name of that script.
+If the optional `info` array is passed, `info[0]` will be modified to contain the 0-value digit for the last script detected, and `info[1]` will be modified to contain the name of that script.
 
 These scripts are supported:
 
