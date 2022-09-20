@@ -5,13 +5,16 @@ import {
 } from './browser-util';
 import {
   classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nth, processMillis, push, pushIf, repeat, sortObjectEntries,
-  toBoolean, toInt
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nth, processMillis, push, pushIf, regex, repeat, sortObjectEntries,
+  toBoolean, toInt, toNumber, toValidInt, toValidNumber
 } from './misc-util';
 import {
   asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
-  makePlainASCII_lc, makePlainASCII_UC, regexEscape, stripDiacriticals, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
+  makePlainASCII_lc, makePlainASCII_UC, padLeft, regexEscape, stripDiacriticals, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
 } from './string-util';
+import * as util from './index';
+
+(globalThis as any).util = util;
 
 class TestClass {
   array: number[];
@@ -53,20 +56,17 @@ describe('@tubular/util', () => {
       return;
     }
 
-    let rgba = parseColor('yellow');
-    expect(rgba.r).to.equal(255);
-    expect(rgba.g).to.equal(255);
-    expect(rgba.b).to.equal(0);
+    function fixAlphaRounding(color: any): any {
+      color.alpha = Math.round(color.alpha * 10) / 10;
+      return color;
+    }
 
-    rgba = parseColor('#9CF');
-    expect(rgba.r).to.equal(153);
-    expect(rgba.g).to.equal(204);
-    expect(rgba.b).to.equal(255);
-
-    rgba = parseColor('#8090a0');
-    expect(rgba.r).to.equal(128);
-    expect(rgba.g).to.equal(144);
-    expect(rgba.b).to.equal(160);
+    expect(parseColor('yellow')).to.deep.equal({ r: 255, g: 255, b: 0, alpha: 1 });
+    expect(parseColor('#9CF')).to.deep.equal({ r: 153, g: 204, b: 255, alpha: 1 });
+    expect(parseColor('#8090a0')).to.deep.equal({ r: 128, g: 144, b: 160, alpha: 1 });
+    expect(parseColor('SteelBlue')).to.deep.equal({ r: 70, g: 130, b: 180, alpha: 1 });
+    expect(parseColor('transparent')).to.deep.equal({ r: 0, g: 0, b: 0, alpha: 0 });
+    expect(fixAlphaRounding(parseColor('rgba(20, 30, 44, 0.5)'))).to.deep.equal({ r: 20, g: 30, b: 44, alpha: 0.5 });
   });
 
   it('should blend colors correctly', () => {
@@ -92,6 +92,10 @@ describe('@tubular/util', () => {
     expect(new Date('2019-06-08 01:18:36.890Z').getTime()).to.equal(1559956716890);
     expect(formatDateTime(1559956716890,
       [DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z])).to.equal('2019-06-08 01:18:36.890Z');
+    expect(formatDateTime(1559956716890,
+      DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z)).to.equal('2019-06-08 01:18:36.890Z');
+    expect(formatDateTime(1559956716890,
+      DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_T, DateTimeOptions.USE_Z)).to.equal('2019-06-08T01:18:36.890Z');
     expect(formatDateTime([DateTimeOptions.TIME_ONLY])).to.match(/\d\d:\d\d:\d\d [-+]\d{4}/);
   });
 
@@ -212,6 +216,7 @@ describe('@tubular/util', () => {
     expect(toBoolean('?', true)).to.equal(true);
     expect(toBoolean('?', false)).to.equal(false);
     expect(toBoolean('?')).to.equal(false);
+    expect(toBoolean('?', null)).to.equal(null);
     expect(toBoolean(null, true)).to.equal(true);
     expect(toBoolean(undefined, true)).to.equal(true);
     expect(toBoolean('')).to.equal(false);
@@ -232,10 +237,14 @@ describe('@tubular/util', () => {
     const a = [1.1, 2, 4, -3];
 
     expect(first(a)).to.equal(1.1);
+    expect(first(null, 88)).to.equal(88);
     expect(last(a)).to.equal(-3);
     expect(nth(a, 2)).to.equal(4);
+    expect(nth(a, 10)).to.equal(undefined);
+    expect(nth(a, 10, 7)).to.equal(7);
     expect(last(['alpha', 'omega'])).to.equal('omega');
     expect(last([])).to.equal(undefined);
+    expect(last([], 'foo')).to.equal('foo');
     expect(last(null)).to.equal(undefined);
   });
 
@@ -251,9 +260,9 @@ describe('@tubular/util', () => {
     elem.appendChild(document.createElement('script'));
 
     expect(last(null)).to.equal(undefined);
-    expect(first(elem.children).outerHTML).to.equal('<p></p>');
-    expect(last(elem.children).outerHTML).to.equal('<script></script>');
-    expect(nth(elem.children, 1).outerHTML).to.equal('<span></span>');
+    expect(first(elem.children)!.outerHTML).to.equal('<p></p>');
+    expect(last(elem.children)!.outerHTML).to.equal('<script></script>');
+    expect(nth(elem.children, 1)!.outerHTML).to.equal('<span></span>');
   });
 
   it('should split string into lines', () => {
@@ -303,6 +312,12 @@ describe('@tubular/util', () => {
     expect(isAllUppercaseWords('FOOBAR')).to.be.true;
     expect(isAllUppercaseWords('FOO BAR BAZ, 123')).to.be.true;
     expect(isAllUppercaseWords('FOO BaR BAZ, 123')).to.be.false;
+  });
+
+  it('should pad numbers properly', () => {
+    expect(padLeft(-5, 4)).to.equal('  -5');
+    expect(padLeft(5, 4)).to.equal('   5');
+    expect(padLeft(-5, 4, '0')).to.equal('-005');
   });
 
   it('should properly recognize data types', () => {
@@ -430,6 +445,12 @@ describe('@tubular/util', () => {
     expect(isEqual([1, 2, [3, 4]], [1, 2, [3, 4]])).to.be.true;
     expect(isEqual([], [0])).to.be.false;
     expect(isEqual([0], [1])).to.be.false;
+    // noinspection JSConsecutiveCommasInArrayLiteral
+    expect(isEqual([1, , 3], [1, undefined, 3])).to.be.false; // eslint-disable-line no-sparse-arrays
+    const a = [1, 2, 3];
+    expect(isEqual(a, [1, 2, 3])).to.be.true;
+    (a as any).foo = -7;
+    expect(isEqual(a, [1, 2, 3])).to.be.false;
 
     expect(isEqual(5, -7)).to.be.false;
     expect(isEqual('it', 'not it')).to.be.false;
@@ -539,6 +560,11 @@ describe('@tubular/util', () => {
     expect(toMaxFixed(Math.PI, 2)).to.equal('3.14');
     expect(toMaxFixed(Math.PI, 3)).to.equal('3.142');
     expect(toMaxFixed(Math.PI, 3, 'fr')).to.equal('3,142');
+    expect(toMaxFixed(1.23, 3)).to.equal('1.23');
+    expect(toMaxFixed(1.234, 3)).to.equal('1.234');
+    expect(toMaxFixed(1.2345, 3)).to.equal('1.235');
+    expect(toMaxFixed(78901.23456789, 6, undefined, true)).to.equal('78,901.234568');
+    expect(toMaxFixed(78901.23456789, 6, 'es', true)).to.equal('78.901,234568');
     expect(toMaxFixed(-1.1, 5)).to.equal('-1.1');
   });
 
@@ -546,9 +572,57 @@ describe('@tubular/util', () => {
     expect(toMaxSignificant(Math.PI, 2)).to.equal('3.1');
     expect(toMaxSignificant(Math.PI, 3)).to.equal('3.14');
     expect(toMaxSignificant(Math.PI, 3, 'fr')).to.equal('3,14');
+    expect(toMaxSignificant(1.23, 4)).to.equal('1.23');
     expect(toMaxSignificant(-1234567, 3)).to.equal('-1230000');
     expect(toMaxSignificant(-1234567, 3, null, true)).to.equal('-1,230,000');
     expect(toMaxSignificant(-1234567, 3, 'es-ES', true)).to.equal('-1.230.000');
     expect(toMaxSignificant(-1234567, 4)).to.equal('-1235000');
+  });
+
+  it('regex tag function', () => {
+    expect((regex`\d+
+    // Second part
+    -\d+${'i'}`).toString()).to.equal(String.raw`/\d+-\d+/i`);
+    expect((regex`^\s*(\d{5,6}) // Modified Julian Date
+       \s+(\d\d-\d\d-\d\d) // date, YY-MM-DD
+       \s+(\d\d:\d\d:\d\d) // time, HH:mm:ss
+       \s+(\d\d) // ST/DST code
+       \s+(\d) // leap second
+       \s+(\d) // DUT1
+       \s+([\d.]+) // msADV
+       \s+UTC\(NIST\) // label
+       \s+\*(\s*)$ // On-Time Marker (OTM)
+       `).toString()).to.equal(String.raw`/^\s*(\d{5,6})\s+(\d\d-\d\d-\d\d)\s+(\d\d:\d\d:\d\d)\s+(\d\d)\s+(\d)\s+(\d)\s+([\d.]+)\s+UTC\(NIST\)\s+\*(\s*)$/`);
+  });
+
+  it('toNumber, toValidNumber, toInt, toValidInt', () => {
+    expect(toNumber('3.4')).to.equal(3.4);
+    expect(toNumber(3.4)).to.equal(3.4);
+    expect(toNumber('!3.4')).to.equal(0);
+    expect(toNumber('!3.4', 7)).to.equal(7);
+    expect(toNumber('!3.4', null)).to.equal(null);
+    expect(toNumber(NaN)).to.be.NaN;
+    expect(toNumber(1 / 0)).to.not.be.finite;
+    expect(toValidNumber('3.4')).to.equal(3.4);
+    expect(toValidNumber(3.4)).to.equal(3.4);
+    expect(toValidNumber('!3.4')).to.equal(0);
+    expect(toValidNumber('!3.4', 7)).to.equal(7);
+    expect(toValidNumber(NaN)).to.equal(0);
+    expect(toValidNumber(1 / 0)).to.equal(0);
+    expect(toInt('123')).to.equal(123);
+    expect(toInt('g', 0, 30)).to.equal(16);
+    expect(toInt(123.4)).to.equal(123);
+    expect(toInt('!123')).to.equal(0);
+    expect(toInt('!123', 7)).to.equal(7);
+    expect(toInt('!123', null)).to.equal(null);
+    expect(toInt(NaN)).to.be.NaN;
+    expect(toInt(1 / 0)).to.not.be.finite;
+    expect(toValidInt('123')).to.equal(123);
+    expect(toValidInt('g', 0, 30)).to.equal(16);
+    expect(toValidInt(123.4)).to.equal(123);
+    expect(toValidInt('!123')).to.equal(0);
+    expect(toValidInt('!123', 7)).to.equal(7);
+    expect(toValidInt(NaN)).to.equal(0);
+    expect(toValidInt(1 / 0)).to.equal(0);
   });
 });
