@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "4.13.0",
+  "version": "4.13.1",
   "description": "Miscellaneous utility functions",
   "main": "dist/cjs/index.js",
   "module": "dist/fesm2015/index.js",

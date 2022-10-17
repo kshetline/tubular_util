@@ -322,7 +322,7 @@ export function getFontMetrics(elementOrFont: Element | string, specificChar?: s
   canvas.height = testFontSize * 3;
   canvas.style.opacity = '1';
 
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d', { willReadFrequently: true });
   const w = canvas.width, w4 = w * 4, h = canvas.height, baseline = h / 2;
 
   context.fillStyle = 'white';
@@ -429,7 +429,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
     canvas.height = size;
     canvas.style.opacity = '1';
 
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
 
     context.fillStyle = 'white';
     context.fillRect(-1, -1, size + 2, size + 2);
@@ -467,7 +467,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
 export function getTextWidth(items: string | string[], font: string | HTMLElement, fallbackFont?: string): number {
   const canvas = ((getTextWidth as any).canvas as HTMLCanvasElement ||
                   ((getTextWidth as any).canvas = document.createElement('canvas') as HTMLCanvasElement));
-  const context = canvas.getContext('2d')!;
+  const context = canvas.getContext('2d', { willReadFrequently: true })!;
   let maxWidth = 0;
   let elementFont;
 
