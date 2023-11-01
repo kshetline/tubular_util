@@ -473,6 +473,8 @@ describe('@tubular/util', () => {
     expect(isEqual({ a: 1, b: 2, c: 3 }, { a: 1, b: -2, c: 3 })).to.be.false;
     expect(isEqual({ a: 1, b: 2, c: 3 }, { a: 1, b: -2, c: 3 },
       { keysToIgnore: ['b'] })).to.be.true;
+    expect(isEqual({ a: 1, b: 2, c: 3 }, { a: 1, c: 3 },
+      { keysToIgnore: ['b'] })).to.be.true;
     expect(isEqual({ a: 1, b: 2, c: 3, d: '4' }, { a: 1, b: -2, c: 3, d: '4' },
       {
         compare: (a, b) => {

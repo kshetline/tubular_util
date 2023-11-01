@@ -436,6 +436,9 @@ export function isEqual(a: any, b: any, options: boolean | IsEqualOptions = fals
     for (const key of keys) {
       keysB.delete(key);
 
+      if (options?.keysToIgnore && options.keysToIgnore.has(key))
+        continue;
+
       if (!b.hasOwnProperty(key) || !isEqual(a[key], b[key], options, key))
         return false;
     }
