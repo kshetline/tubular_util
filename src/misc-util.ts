@@ -2,7 +2,7 @@ import { asLines, compareStrings, zeroPad } from './string-util';
 
 export interface IsEqualOptions {
   compare?: (a: any, b: any, key?: string | Symbol | undefined) => boolean | undefined;
-  keysToIgnore?: Set<string | Symbol> | string[];
+  keysToIgnore?: Set<string | symbol> | string[];
   mustBeSameClass?: boolean;
 }
 
@@ -408,7 +408,7 @@ function cloneAux<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, d
   return theClone;
 }
 
-export function isEqual(a: any, b: any, options: boolean | IsEqualOptions = false, key?: string | Symbol): boolean {
+export function isEqual(a: any, b: any, options: boolean | IsEqualOptions = false, key?: string | symbol): boolean {
   if (isBoolean(options))
     options = { mustBeSameClass: options };
 
@@ -442,6 +442,9 @@ export function isEqual(a: any, b: any, options: boolean | IsEqualOptions = fals
       if (!b.hasOwnProperty(key) || !isEqual(a[key], b[key], options, key))
         return false;
     }
+
+    if (keysB.size > 0 && options?.keysToIgnore)
+      options.keysToIgnore.forEach(key => keysB.delete(key));
 
     if (keysB.size > 0)
       return false;
