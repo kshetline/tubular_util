@@ -18,7 +18,7 @@
     "node": ">=10.24.1"
   },
   "scripts": {
-    "build": "rimraf dist/ && tsc && rollup -c -m && webpack",
+    "build": "rimraf dist/ && tsc && rollup -c -m --bundleConfigAsCjs && webpack",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
     "test": "nyc --reporter=html mocha --require ts-node/register src/**/*.spec.ts",
