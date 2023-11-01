@@ -1,5 +1,11 @@
 import { asLines, compareStrings, zeroPad } from './string-util';
 
+export interface IsEqualOptions {
+  compare?: (a: any, b: any, key?: string | Symbol | undefined) => boolean | undefined;
+  keysToIgnore?: Set<string | Symbol> | string[];
+  mustBeSameClass?: boolean;
+}
+
 export function processMillis(): number {
   if (typeof performance !== 'undefined')
     return performance.now();
@@ -402,12 +408,24 @@ function cloneAux<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, d
   return theClone;
 }
 
-export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
-  if (a === b || Object.is(a, b))
+export function isEqual(a: any, b: any, options: boolean | IsEqualOptions = false, key?: string | Symbol): boolean {
+  if (isBoolean(options))
+    options = { mustBeSameClass: options };
+
+  if (isArray(options?.keysToIgnore))
+    options.keysToIgnore = new Set(options.keysToIgnore);
+
+  let comp: boolean | undefined;
+
+  if (options.compare && (comp = options.compare(a, b, key)) !== undefined)
+    return comp;
+  else if (key && options.keysToIgnore && options.keysToIgnore.has(key))
+    return true;
+  else if (a === b || Object.is(a, b))
     return true;
   else if (typeof a !== typeof b || isArray(a) !== isArray(b) || (isArray(a) && a.length !== b.length))
     return false;
-  else if (mustBeSameClass && (!a.constructor !== !b.constructor || a.constructor !== b.constructor))
+  else if (options.mustBeSameClass && (!a.constructor !== !b.constructor || a.constructor !== b.constructor))
     return false;
   else if (!isObject(a) || !isObject(b))
     return false;
@@ -418,7 +436,7 @@ export function isEqual(a: any, b: any, mustBeSameClass = false): boolean {
     for (const key of keys) {
       keysB.delete(key);
 
-      if (!b.hasOwnProperty(key) || !isEqual(a[key], b[key], mustBeSameClass))
+      if (!b.hasOwnProperty(key) || !isEqual(a[key], b[key], options, key))
         return false;
     }
 
@@ -456,13 +474,13 @@ export function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boo
 export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySorter, inPlace = false): T {
   const sorter = isFunction(sorterOrInPlace) ? sorterOrInPlace : undefined;
   let result: T = {} as any;
-  const entries = Object.entries(obj);
+  const entries = Object.entries(obj as any);
 
   inPlace = isBoolean(sorterOrInPlace) ? sorterOrInPlace : inPlace;
   entries.sort(sorter ?? defaultSorter);
 
   if (inPlace) {
-    Object.keys(obj).forEach(key => delete (obj as any)[key]);
+    Object.keys(obj as any).forEach(key => delete (obj as any)[key]);
     result = obj;
   }
 
@@ -494,4 +512,51 @@ export function regex(main: TemplateStringsArray, flags?: string): RegExp {
   const parts = asLines(main.raw[0] || '', true, true).filter(line => !line.startsWith('//')).map(line => line.replace(/\s\/\/\s.*$/, ''));
 
   return new RegExp(parts.join(''), flags);
+}
+
+export function compareDottedValues(a: string, b: string): number {
+  if (!a || !b || a === b)
+    return 0;
+
+  // Lop off strings, starting at any non-numeric, non-dot characters
+  a = a.replace(/[-_]/g, '.').replace(/[^.0-9].*$/, '');
+  b = b.replace(/[-_]/g, '.').replace(/[^.0-9].*$/, '');
+
+  while (a.length > 0 && b.length > 0) {
+    let pos = a.indexOf('.');
+    let na: number;
+    let nb: number;
+
+    if (pos < 0) {
+      na = toInt(a);
+      a = '';
+    }
+    else {
+      na = toInt(a.substring(0, pos));
+      a = a.substring(pos + 1);
+    }
+
+    pos = b.indexOf('.');
+
+    if (pos < 0) {
+      nb = toInt(b);
+      b = '';
+    }
+    else {
+      nb = toInt(b.substring(0, pos));
+      b = b.substring(pos + 1);
+    }
+
+    if (na < nb)
+      return -1;
+    else if (na > nb)
+      return 1;
+  }
+
+  if (!a && !b)
+    return 0;
+  else if (!a)
+    return -1;
+  else
+    return 1;
 }

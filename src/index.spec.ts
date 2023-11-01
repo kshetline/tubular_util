@@ -4,7 +4,7 @@ import {
   doesCharacterGlyphExist, encodeForUri, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams
 } from './browser-util';
 import {
-  classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
+  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nth, processMillis, push, pushIf, regex, repeat, sortObjectEntries,
   toBoolean, toInt, toNumber, toValidInt, toValidNumber
 } from './misc-util';
@@ -469,6 +469,19 @@ describe('@tubular/util', () => {
     expect(isEqual({ foo: 'bar' }, null)).to.be.false;
     expect(isEqual(new Float32Array([4.56, -3.14]), new Float32Array([4.56, -3.14]))).to.be.true;
     expect(isEqual(new Float32Array([4.56, -3.142]), new Float32Array([4.56, -3.14]))).to.be.false;
+
+    expect(isEqual({ a: 1, b: 2, c: 3 }, { a: 1, b: -2, c: 3 })).to.be.false;
+    expect(isEqual({ a: 1, b: 2, c: 3 }, { a: 1, b: -2, c: 3 },
+      { keysToIgnore: ['b'] })).to.be.true;
+    expect(isEqual({ a: 1, b: 2, c: 3, d: '4' }, { a: 1, b: -2, c: 3, d: '4' },
+      {
+        compare: (a, b) => {
+          if (isNumber(a) && isNumber(b))
+            return Math.abs(a) === Math.abs(b);
+          else
+            return undefined;
+        }
+      })).to.be.true;
   });
 
   it('should properly flatten arrays', () => {
@@ -624,5 +637,13 @@ describe('@tubular/util', () => {
     expect(toValidInt('!123', 7)).to.equal(7);
     expect(toValidInt(NaN)).to.equal(0);
     expect(toValidInt(1 / 0)).to.equal(0);
+  });
+
+  it('compareDottedValues', () => {
+    expect(compareDottedValues('1.0', '2.0')).below(0);
+    expect(compareDottedValues('2.0', '1.0')).above(0);
+    expect(compareDottedValues('33.22.11', '33.22.11')).to.equal(0);
+    expect(compareDottedValues('1.0', '1.0.1')).below(0);
+    expect(compareDottedValues('1.0.10', '1.0.9')).above(0);
   });
 });
