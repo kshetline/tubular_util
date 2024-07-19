@@ -93,6 +93,14 @@ export function formatDateTime(dateOrOptions: Date | number | string | DateTimeO
     return dateStr + t + timeStr;
 }
 
+export function numSort(a: any, b: any): number {
+  return toNumber(a) - toNumber(b);
+}
+
+export function reverseNumSort(a: any, b: any): number {
+  return toNumber(b) - toNumber(a);
+}
+
 export function toDefaultLocaleFixed(n: number, minFracDigits?: number, maxFracDigits?: number): string {
   const options: any = {};
 
@@ -256,6 +264,31 @@ export function forEach2<T>(obj: Record<string | symbol, T> | null | undefined, 
 
 export function isArray(a: unknown): a is any[] {
   return Array.isArray(a);
+}
+
+export function nfe<T>(array: T[]): T[] | null { // Null For Empty
+  if (array && isArray(array) && array.length > 0)
+    return array;
+  else
+    return null;
+}
+
+export function ufe<T>(array: T[]): T[] | undefined { // Undefined For Empty
+  if (array && isArray(array) && array.length > 0)
+    return array;
+  else
+    return undefined;
+}
+
+export function getOrSet<T, U>(map: Map<T, U>, key: T, callback: () => U): U {
+  let result = map.get(key);
+
+  if (result === undefined) {
+    result = callback();
+    map.set(key, result);
+  }
+
+  return result;
 }
 
 /* eslint-disable no-prototype-builtins */
@@ -456,12 +489,14 @@ export function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boo
 export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySorter, inPlace = false): T {
   const sorter = isFunction(sorterOrInPlace) ? sorterOrInPlace : undefined;
   let result: T = {} as any;
+  // @ts-ignore
   const entries = Object.entries(obj);
 
   inPlace = isBoolean(sorterOrInPlace) ? sorterOrInPlace : inPlace;
   entries.sort(sorter ?? defaultSorter);
 
   if (inPlace) {
+    // @ts-ignore
     Object.keys(obj).forEach(key => delete (obj as any)[key]);
     result = obj;
   }

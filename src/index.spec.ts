@@ -4,13 +4,13 @@ import {
   doesCharacterGlyphExist, encodeForUri, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams
 } from './browser-util';
 import {
-  classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nth, processMillis, push, pushIf, regex, repeat, sortObjectEntries,
-  toBoolean, toInt, toNumber, toValidInt, toValidNumber
+  classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, getOrSet, isArray, isArrayLike, isBoolean, isEqual, isFunction,
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nfe, nth, numSort, processMillis, push, pushIf, regex, repeat, reverseNumSort, sortObjectEntries,
+  toBoolean, toInt, toNumber, toValidInt, toValidNumber, ufe
 } from './misc-util';
 import {
-  asLines, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
-  makePlainASCII_lc, makePlainASCII_UC, padLeft, regexEscape, stripDiacriticals, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
+  asLines, checksum53, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
+  makePlainASCII_lc, makePlainASCII_UC, padLeft, regexEscape, stripDiacriticals, stripDiacriticals_lc, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
 } from './string-util';
 import * as util from './index';
 
@@ -110,6 +110,8 @@ describe('@tubular/util', () => {
     // noinspection SpellCheckingInspection
     expect(stripDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿΆΈΪΫάέήίΰϊϋόύώϔӐӑӒӓӖӗЀйѐёіїќ'))
       .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþyΑΕΙΥαεηιυιυουωϒАаАаЕеЕиееіік');
+    expect(stripDiacriticals('a b')).to.equal('a b');
+    expect(stripDiacriticals_lc('a b')).to.equal('a b');
   });
 
   it('should simplify symbols and Latin characters to plain ASCII', () => {
@@ -423,7 +425,7 @@ describe('@tubular/util', () => {
     expect(clone(sample, new Set([Date])).date).to.equal(sample.date);
     expect(clone(sample, new Set([Map])).date).not.to.equal(sample.date);
     expect(clone(sample, (value) => value instanceof Date).date).to.equal(sample.date);
-    expect(clone(sample, (value, depth) => depth > 2).date).not.to.equal(sample.date);
+    expect(clone(sample, (_value, depth) => depth > 2).date).not.to.equal(sample.date);
   });
 
   it('should properly deep compares values', () => {
@@ -624,5 +626,32 @@ describe('@tubular/util', () => {
     expect(toValidInt('!123', 7)).to.equal(7);
     expect(toValidInt(NaN)).to.equal(0);
     expect(toValidInt(1 / 0)).to.equal(0);
+  });
+
+  it('should properly compute 53-bit checksums', () => {
+    expect(checksum53('Away we go!')).to.equal('19757548BB35B8');
+    expect(checksum53('Spiny Norman')).to.equal('062A4A04389CDA');
+  });
+
+  it('getOrSet', () => {
+    const map = new Map<string, number>();
+
+    map.set('a', 1);
+    expect(getOrSet(map, 'a', () => 2)).to.equal(1);
+    expect(getOrSet(map, 'b', () => 3)).to.equal(3);
+    expect(JSON.stringify(Array.from(map.entries()))).to.equal('[["a",1],["b",3]]');
+  });
+
+  it('should numerically sort arrays', () => {
+    expect([10, 2, 5, 20].sort(numSort)).to.deep.equal([2, 5, 10, 20]);
+    expect([10, 2, '5', 20].sort(numSort)).to.deep.equal([2, '5', 10, 20]);
+    expect([10, 2, 5, 20].sort(reverseNumSort)).to.deep.equal([20, 10, 5, 2]);
+  });
+
+  it('nfe, ufe', () => {
+    expect(nfe([1])).to.deep.equal([1]);
+    expect(nfe([])).to.equal(null);
+    expect(ufe([2, 3])).to.deep.equal([2, 3]);
+    expect(ufe([])).to.equal(undefined);
   });
 });

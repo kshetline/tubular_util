@@ -225,9 +225,9 @@ export function makePlainASCII_UC(s: string, forFileName = false): string {
 
 function capitalizeFirstLetter(s: string): string {
   if (s.length > 1 && /^['’ʼ]/.test(s))
-    return s.charAt(0) + s.charAt(1).toUpperCase() + s.substr(2).toLowerCase();
+    return s.charAt(0) + s.charAt(1).toUpperCase() + s.substring(2).toLowerCase();
   else
-    return s.charAt(0).toUpperCase() + s.substr(1).toLowerCase();
+    return s.charAt(0).toUpperCase() + s.substring(1).toLowerCase();
 }
 
 function toCanonicalLowercase(s: string): string {
@@ -265,13 +265,14 @@ export function toTitleCase(s: string, options?: TitleCaseOptions): string {
   let shortSmalls = defaultShortSmalls;
   let specials = defaultSpecials;
   const firstNonSpaceIndex = (/^\s*/.exec(s) || [])[0]?.length;
+  // @ts-ignore
   const lastNonSpaceIndex = s.length - (/\s*$/.exec(s) || [])[0]?.length;
 
   if (options.shortSmall) {
     shortSmalls = new Set(shortSmalls);
     options.shortSmall.forEach(word => {
       if (word.startsWith('-'))
-        shortSmalls.delete(word.substr(1));
+        shortSmalls.delete(word.substring(1));
       else
         shortSmalls.add(word);
     });
@@ -283,7 +284,7 @@ export function toTitleCase(s: string, options?: TitleCaseOptions): string {
       const lcWord = toCanonicalLowercase(word);
 
       if (word.startsWith('-'))
-        specials.delete(lcWord.substr(1));
+        specials.delete(lcWord.substring(1));
       else
         specials.set(lcWord, word);
     });
@@ -559,4 +560,22 @@ export function toMaxFixed(n: number, maximumFractionDigits: number, locale?: st
 
 export function toMaxSignificant(n: number, maximumSignificantDigits: number, locale?: string | null, useGrouping = false): string {
   return new Intl.NumberFormat(locale || 'en-US', { maximumSignificantDigits, useGrouping }).format(n);
+}
+
+export function checksum53(s: string, seed = 0): string {
+  let h1 = 0xDEADBEEF ^ seed;
+  let h2 = 0x41C6CE57 ^ seed;
+
+  s = s.normalize();
+
+  for (let i = 0, ch: number; i < s.length; ++i) {
+    ch = s.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).toUpperCase().padStart(14, '0');
 }
