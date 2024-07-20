@@ -116,7 +116,7 @@ export function parseColor(color: string): RGBA {
   if (match) {
     if (!utilContext) {
       const canvas = document.createElement('canvas') as HTMLCanvasElement;
-      utilContext = canvas.getContext('2d')!;
+      utilContext = canvas.getContext('2d', { willReadFrequently: true })!;
     }
 
     utilContext.fillStyle = color; // Let the context parse the color name.
