@@ -1,10 +1,11 @@
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import { blendColors, parseColor } from './browser-graphics-util';
 import {
   doesCharacterGlyphExist, encodeForUri, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams
 } from './browser-util';
 import {
-  classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, getOrSet, isArray, isArrayLike, isBoolean, isEqual, isFunction,
+  classOf, clone, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, getOrSet, getOrSetAsync, isArray, isArrayLike, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nfe, nth, numSort, processMillis, push, pushIf, regex, repeat, reverseNumSort, sortObjectEntries,
   toBoolean, toInt, toNumber, toValidInt, toValidNumber, ufe
 } from './misc-util';
@@ -14,6 +15,7 @@ import {
 } from './string-util';
 import * as util from './index';
 
+chai.use(chaiAsPromised);
 (globalThis as any).util = util;
 
 class TestClass {
@@ -633,13 +635,15 @@ describe('@tubular/util', () => {
     expect(checksum53('Spiny Norman')).to.equal('062A4A04389CDA');
   });
 
-  it('getOrSet', () => {
+  it('getOrSet, getOrSetAsync', async () => {
     const map = new Map<string, number>();
 
     map.set('a', 1);
     expect(getOrSet(map, 'a', () => 2)).to.equal(1);
     expect(getOrSet(map, 'b', () => 3)).to.equal(3);
-    expect(JSON.stringify(Array.from(map.entries()))).to.equal('[["a",1],["b",3]]');
+    expect(getOrSet(map, 'c', 5)).to.equal(5);
+    await expect(getOrSetAsync(map, 'd', () => Promise.resolve(77))).to.eventually.equal(77);
+    expect(JSON.stringify(Array.from(map.entries()))).to.equal('[["a",1],["b",3],["c",5],["d",77]]');
   });
 
   it('should numerically sort arrays', () => {

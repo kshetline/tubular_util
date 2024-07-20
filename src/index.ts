@@ -1,5 +1,5 @@
 /*
-  Copyright © 2017-2021 Kerry Shetline, kerry@shetline.com
+  Copyright © 2017-2024 Kerry Shetline, kerry@shetline.com
 
   MIT license: https://opensource.org/licenses/MIT
 

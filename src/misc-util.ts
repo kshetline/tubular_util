@@ -280,11 +280,26 @@ export function ufe<T>(array: T[]): T[] | undefined { // Undefined For Empty
     return undefined;
 }
 
-export function getOrSet<T, U>(map: Map<T, U>, key: T, callback: () => U): U {
+export function getOrSet<T, U>(map: Map<T, U>, key: T, callbackOrValue: U | (() => U)): U {
   let result = map.get(key);
 
   if (result === undefined) {
-    result = callback();
+    if (isFunction(callbackOrValue))
+      result = callbackOrValue();
+    else
+      result = callbackOrValue;
+
+    map.set(key, result);
+  }
+
+  return result;
+}
+
+export async function getOrSetAsync<T, U>(map: Map<T, U>, key: T, callback: () => Promise<U>): Promise<U> {
+  let result = map.get(key);
+
+  if (result === undefined) {
+    result = await callback();
     map.set(key, result);
   }
 

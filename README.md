@@ -63,7 +63,7 @@ function toBoolean(value: any, defaultValue: null, forHtmlAttribute?: boolean): 
 Converts a `value` of any type to a `boolean` value (or possibly `null`, if `defaultValue` is `null`).
 
 * `null`, `undefined`, or `NaN` become `defaultValue` (the default `defaultValue` is `false`).
-* Any non-zero number (represented as `number` or `string`), `'true'`, `'t'`, `'yes'`, or `'y'` (case insensitive) are all considered `true`.
+* Any non-zero number (represented as `number` or `string`), `'true'`, `'t'`, `'yes'`, or `'y'` (case-insensitive) are all considered `true`.
 * Zero (0), `'false'`, `'f'`, `'no'`, or `'n'` (case insensitive) are all considered `false`.
 * An empty string becomes `defaultValue` unless the `forHtmlAttribute` option is `true`, in which case an empty string means `true`.
 * Anything other `value` which is not of type `number` or `string` is converted to `!!value`.
@@ -233,7 +233,26 @@ This function determines if two values `a` and `b` are equal to each other, by d
 * Otherwise, all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
 
 ```typescript
-function last<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined;
+export function numSort(a: any, b: any): number
+```
+
+The default array sorting behavior of JavaScript, even for all-numeric array, is to sort the contents as if they were strings. If this behavior is not expected, the results can be surprising and unpleasant.
+
+`numSort` can be passed as a sorting function to the default sort function to solve this problem.
+
+| Code                           | Result           |
+|--------------------------------|------------------|
+| `[10, 2, 5, 20].sort()`        | [ 10, 2, 20, 5 ] |
+| `[10, 2, 5, 20].sort(numSort)` | [ 2, 5, 10, 20 ] |
+
+```typescript        
+function nfe<T>(array: T[]): T[] | null
+```
+
+Return the array if the array is not empty, otherwise `null`.
+
+```typescript
+function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined
 ```
 
 Return the last element of an array, or `defaultValue` (`undefined` if not specified) if a last element does not exist.
@@ -269,12 +288,25 @@ By default, sorting is done in ascending alphabetical order using JavaScript’s
 
 If `inPlace` is `true` (the default is `false`) `obj` itself will be returned by the function, modified by the sorting. Otherwise, a new object with sorted properties is returned.
 
+```typescript        
+function ufe<T>(array: T[]): T[] | undefined
+```
+
+Return the array if the array is not empty, otherwise `undefined`.
+
 ## String functions
 
 ```typescript
 function asLines(s: string, trimFinalBlankLines = false, trimEachLine = false): string[]
 ```
+
 Takes a string containing line breaks (LF, CR, or CRLF) and turns it into an array of individual lines. Final blank lines can be optionally omitted, and each line can optionally have leading and trailing white space trimmed.
+
+```typescript
+function checksum53(s: string, seed = 0): string
+```
+
+Returns, in the form of a hexadecimal string, a 53-bit checksum of the value of `s`.
 
 ```typescript
 function compareCaseInsensitive(a: string, b: string): number;
@@ -613,6 +645,12 @@ Return a string derived from `text`, truncated if necessary, such that the pixel
 If `text` is truncated, it is done by removing characters from the end of the string, with `clipString` (default `…`) appended, e.g. `'Long and winding road'` shortened to `'Long and wi…'`.
 
 ```typescript
+export function reverseNumSort(a: any, b: any): number
+```
+
+Same as `numSort`, but sorts in descending numerical order.
+
+```typescript
 function setFullScreen(full: boolean): void;
 ```
 
@@ -781,6 +819,18 @@ function forEach2<T>(obj: Record<string | symbol, T> | null | undefined, callbac
 ```
 
 Iterate over all key/value pairs in `obj`, including `symbol` keys.
+
+```typescript
+function getOrSet<T, U>(map: Map<T, U>, key: T, callbackOrValue: U | (() => U)): U
+```
+
+This function either returns the value from the `map` associated with `key` if it exists, or stores a new value under `key` and returns that. The value may be either provided explicitly, or provided via a callback function — ideal if you don't want to compute that value unless necessary.
+
+```typescript
+async function getOrSetAsync<T, U>(map: Map<T, U>, key: T, callback: () => Promise<U>): Promise<U>
+```
+
+This function either asynchronously returns the value from the `map` associated with `key` if it exists, or stores a new value under `key` and returns that. The value must be provided via an asynchronous `callback`.
 
 ```typescript
 function isValidJson(s: string): boolean;
