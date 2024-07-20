@@ -528,13 +528,15 @@ export function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boo
 export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySorter, inPlace = false): T {
   const sorter = isFunction(sorterOrInPlace) ? sorterOrInPlace : undefined;
   let result: T = {} as any;
+  // @ts-ignore
   const entries = Object.entries(obj);
 
   inPlace = isBoolean(sorterOrInPlace) ? sorterOrInPlace : inPlace;
   entries.sort(sorter ?? defaultSorter);
 
   if (inPlace) {
-    Object.keys(obj).forEach(key => delete (obj as any)[key]);
+    // @ts-ignore
+    Object.keys(obj).forEach(key => delete (obj as any)[key]); // @ts-ignore:this-line
     result = obj;
   }
 

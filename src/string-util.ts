@@ -265,6 +265,7 @@ export function toTitleCase(s: string, options?: TitleCaseOptions): string {
   let shortSmalls = defaultShortSmalls;
   let specials = defaultSpecials;
   const firstNonSpaceIndex = (/^\s*/.exec(s) || [])[0]?.length;
+  // @ts-ignore
   const lastNonSpaceIndex = s.length - (/\s*$/.exec(s) || [])[0]?.length;
 
   if (options.shortSmall) {
