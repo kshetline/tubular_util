@@ -64,7 +64,7 @@ Converts a `value` of any type to a `boolean` value (or possibly `null`, if `def
 
 * `null`, `undefined`, or `NaN` become `defaultValue` (the default `defaultValue` is `false`).
 * Any non-zero number (represented as `number` or `string`), `'true'`, `'t'`, `'yes'`, or `'y'` (case-insensitive) are all considered `true`.
-* Zero (0), `'false'`, `'f'`, `'no'`, or `'n'` (case insensitive) are all considered `false`.
+* Zero (0), `'false'`, `'f'`, `'no'`, or `'n'` (case-insensitive) are all considered `false`.
 * An empty string becomes `defaultValue` unless the `forHtmlAttribute` option is `true`, in which case an empty string means `true`.
 * Anything other `value` which is not of type `number` or `string` is converted to `!!value`.
 
@@ -99,13 +99,13 @@ Converts a `value` of any type to a `number` (or possibly `null`, if `defaultVal
 function toValidInt(value: any, defaultValue = 0, radix = 10): number;
 ```
 
-This function returns the same results as `toInt` unless `value` is `NaN` or an infinite, in which case a non-null `defaultValue` is returned.
+This function returns the same results as `toInt` unless `value` is `NaN` or an infinite value, in which case a non-null `defaultValue` is returned.
 
 ```typescript
 function toValidNumber(value: any, defaultValue = 0): number
 ```
 
-This function returns the same results as `toNumber` unless `value` is `NaN` or an infinite, in which case `defaultValue` is returned.
+This function returns the same results as `toNumber` unless `value` is `NaN` or an infinite value, in which case `defaultValue` is returned.
 
 ## Type/class checking
 
@@ -245,6 +245,13 @@ The default array sorting behavior of JavaScript, even for all-numeric array, is
 | `[10, 2, 5, 20].sort()`        | [ 10, 2, 20, 5 ] |
 | `[10, 2, 5, 20].sort(numSort)` | [ 2, 5, 10, 20 ] |
 
+
+```typescript
+export function reverseNumSort(a: any, b: any): number
+```
+
+Same as `numSort`, but sorts in descending numerical order.
+
 ```typescript        
 function nfe<T>(array: T[]): T[] | null
 ```
@@ -382,6 +389,7 @@ function replace(str: string, searchStr: string, replaceStr: string, caseInsensi
 
 JavaScript’s own string `replace` method only replaces one occurrence of a string with another string unless you use a regex with the `g` flag for the search string. This function replaces all occurrences without having to use a regex and without worrying about escaping special characters. Matching can optionally be case-insensitive.
 
+Most of this functionality can now be provided by `String.prototype.replaceAll` except for case-insensitive replacement without using regexes.
 
 ```typescript
 function stripDiacriticals(s: string): string;
@@ -645,12 +653,6 @@ Return a string derived from `text`, truncated if necessary, such that the pixel
 If `text` is truncated, it is done by removing characters from the end of the string, with `clipString` (default `…`) appended, e.g. `'Long and winding road'` shortened to `'Long and wi…'`.
 
 ```typescript
-export function reverseNumSort(a: any, b: any): number
-```
-
-Same as `numSort`, but sorts in descending numerical order.
-
-```typescript
 function setFullScreen(full: boolean): void;
 ```
 
@@ -891,6 +893,13 @@ const repeat = (n: number, f: (n?: number) => any): void => { while (n-- > 0) f(
 ```
 
 A function that calls function `f` `n` times.
+
+```typescript
+export function sleep(ms: number): Promise<void>;
+```
+
+`await` this function to pause asynchronous code execution `ms` milliseconds. Equivalent to `new Promise(resolve => setTimeout(resolve, ms))`.
+}
 
 ## Deprecated functions
 

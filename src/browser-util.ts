@@ -192,6 +192,14 @@ export function getCssValues(element: Element, properties: string[]): string[] {
   return properties.map(p => styles.getPropertyValue(p));
 }
 
+export function getCssVariable(name: string): string {
+  return (document.querySelector(':root') as HTMLElement).style.getPropertyValue(name);
+}
+
+export function setCssVariable(name: string, value: string): void {
+  (document.querySelector(':root') as HTMLElement).style.setProperty(name, value);
+}
+
 export function getCssRuleValue(element: Element, property: string): string | undefined {
   return (getCssRuleValues(element, [property]) || [])[0];
 }

@@ -22,6 +22,10 @@ export function processMillis(): number {
     return Date.now();
 }
 
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export enum DateTimeOptions { DATE_ONLY, NO_SECONDS, NO_ZONE, TIME_ONLY, UTC, USE_T, USE_Z, WITH_MILLIS }
 
 export function formatDateTime(options?: DateTimeOptions[]): string;

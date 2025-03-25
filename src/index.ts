@@ -1,5 +1,5 @@
 /*
-  Copyright © 2017-2024 Kerry Shetline, kerry@shetline.com
+  Copyright © 2017-2025 Kerry Shetline, kerry@shetline.com
 
   MIT license: https://opensource.org/licenses/MIT
 
@@ -21,3 +21,10 @@ export * from './browser-graphics-util';
 export * from './browser-util';
 export * from './misc-util';
 export * from './string-util';
+
+// Deprecation, schmeprecation. substr forever!
+if (String.prototype.substr == null)
+  // eslint-disable-next-line no-extend-native
+  String.prototype.substr = function (a: number, b: number): string {
+    return this.substring(a, a + b);
+  };

@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "4.16.1",
+  "version": "4.17.0",
   "description": "Miscellaneous utility functions",
   "main": "dist/cjs/index.js",
   "module": "dist/fesm2015/index.js",
@@ -21,7 +21,7 @@
     "build": "rimraf dist/ && tsc && del \"dist/*.spec.*\" && rollup -c -m --bundleConfigAsCjs && webpack",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
-    "test": "nyc --reporter=html mocha --require ts-node/register src/**/*.spec.ts",
+    "test": "nyc --reporter=html mocha --require ts-node/register --exclude src/**/browser*.spec.ts src/**/*.spec.ts",
     "test-karma": "karma start"
   },
   "keywords": [
