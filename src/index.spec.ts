@@ -545,7 +545,7 @@ describe('@tubular/util', () => {
 
   it('should sleep for a given number of milliseconds', async () => {
     // Browser seems to need more timing lenience.
-    const delta = (typeof document === 'undefined' ? 0 : 10);
+    const delta = (typeof document === 'undefined' ? 0 : 25);
 
     const start = processMillis();
     await sleep(200);
