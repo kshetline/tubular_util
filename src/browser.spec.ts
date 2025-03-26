@@ -1,6 +1,6 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { blendColors, parseColor } from './browser-graphics-util';
+import { blendColors, colorFrom24BitInt, colorFromByteArray, getPixel, parseColor, replaceAlpha, setPixel } from './browser-graphics-util';
 import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, getFontMetrics } from './browser-util';
 import { first, isArray, isArrayLike, isBoolean, last, nth } from './misc-util';
 import * as util from './index';
@@ -9,9 +9,27 @@ chai.use(chaiAsPromised);
 (globalThis as any).util = util;
 
 describe('@tubular/util browser functions, for Karma testing only', () => {
+  const canvas = document.createElement('canvas') as HTMLCanvasElement;
+  let context: CanvasRenderingContext2D;
+
+  function prepareCanvas(alpha?: number): void {
+    canvas.width = 100;
+    canvas.height = 100;
+    canvas.style.opacity = '1';
+    context = canvas.getContext('2d')!;
+
+    if (alpha != null)
+      context.globalAlpha = alpha;
+
+    context.fillStyle = 'white';
+    context.fillRect(-1, -1, 102, 102);
+    context.globalAlpha = 1;
+    context.fillStyle = 'black';
+  }
+
   it('should parse colors correctly', () => {
     function fixAlphaRounding(color: any): any {
-      color.alpha = Math.round(color.alpha * 10) / 10;
+      color.alpha = Math.round(color.alpha * 100) / 100;
       return color;
     }
 
@@ -21,9 +39,11 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(parseColor('SteelBlue')).to.deep.equal({ r: 70, g: 130, b: 180, alpha: 1 });
     expect(parseColor('transparent')).to.deep.equal({ r: 0, g: 0, b: 0, alpha: 0 });
     expect(fixAlphaRounding(parseColor('rgba(20, 30, 44, 0.5)'))).to.deep.equal({ r: 20, g: 30, b: 44, alpha: 0.5 });
+    expect(fixAlphaRounding(parseColor('#1234'))).to.deep.equal({ r: 17, g: 34, b: 51, alpha: 0.27 });
+    expect(fixAlphaRounding(parseColor('#56789Abc'))).to.deep.equal({ r: 86, g: 120, b: 154, alpha: 0.74 });
   });
 
-  it('should blend colors correctly', () => {
+  it('blendColors', () => {
     let color = blendColors('white', 'black');
     expect(color).to.equal('#808080');
 
@@ -34,7 +54,27 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(color).to.equal('rgba(30, 50, 70, 0.5)');
   });
 
-  it('should get fonts in correct shorthand form', () => {
+  it('replaceAlpha', () => {
+    let color = replaceAlpha('yellow', 0.25);
+    expect(color).to.equal('rgba(255, 255, 0, 0.25)');
+
+    color = replaceAlpha('#55667788', 0.667);
+    expect(color).to.equal('rgba(85, 102, 119, 0.667)');
+  });
+
+  it('colorFrom24BitInt', () => {
+    expect(colorFrom24BitInt(8675309)).to.equal('#845FED');
+    expect(colorFrom24BitInt(0x976543)).to.equal('#976543');
+    expect(colorFrom24BitInt(0x976543, 0.5)).to.equal('rgba(151, 101, 67, 0.5)');
+  });
+
+  it('colorFromByteArray', () => {
+    expect(colorFromByteArray([0x84, 0x5F, 0xED])).to.equal('#845FED');
+    expect(colorFromByteArray([0x97, 0x65, 0x43, 0x80])).to.equal('rgba(151, 101, 67, 0.502)');
+    expect(colorFromByteArray([0x97, 0x65, 0x43, 0x80], 1)).to.equal('#654380');
+  });
+
+  it('getFont, correct shorthand form', () => {
     const span = document.createElement('span');
 
     span.textContent = '?';
@@ -54,7 +94,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     document.body.removeChild(span);
   });
 
-  it('should get single and multiple css style values', () => {
+  it('getCssValue, getCssValues', () => {
     const span = document.createElement('span');
 
     span.style.color = 'red';
@@ -67,7 +107,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     document.body.removeChild(span);
   });
 
-  it('should correctly identify missing character glyphs', () => {
+  it('doesCharacterGlyphExist', () => {
     const fonts = ['12px sans-serif', '14pt monospace'];
 
     for (const font of fonts) {
@@ -78,7 +118,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     }
   });
 
-  it('should get first, last, nth element of a DOM array', () => {
+  it('first, last, nth element of a DOM array', () => {
     const elem = document.createElement('div');
     elem.appendChild(document.createElement('p'));
     elem.appendChild(document.createElement('span'));
@@ -102,8 +142,31 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(isBoolean(elem.childNodes)).to.be.false;
   });
 
-  it('should determine font metrics correctly', () => {
+  it('getFontMetrics', () => {
     expect(getFontMetrics('24px Arial').lineHeight).to.be.approximately(28, 1);
     expect(getFontMetrics('24px Arial', '\u1B52').extraLineHeight).to.be.approximately(35, 1);
+  });
+
+  it('getPixel/setPixel', () => {
+    prepareCanvas();
+
+    let imageData = context.getImageData(0, 0, 100, 100);
+
+    expect(getPixel(imageData, 0, 0)).to.equal(0xFFFFFFFF | 0);
+    expect(getPixel(imageData, 200, 50)).to.equal(0);
+    setPixel(imageData, 50, 50, 0xFFDCBA98 | 0);
+    expect(getPixel(imageData, 50, 50)).to.equal(0xFFDCBA98 | 0);
+
+    context.fillStyle = 'red';
+    context.fillRect(0, 0, 30, 70);
+    imageData = context.getImageData(0, 0, 100, 100);
+    expect(getPixel(imageData, 32, 5)).to.equal(0xFFFFFFFF | 0);
+    expect(getPixel(imageData, 28, 5)).to.equal(0xFFFF0000 | 0);
+    expect(getPixel(imageData, 12, 77)).to.equal(0xFFFFFFFF | 0);
+    expect(getPixel(imageData, 20, 69)).to.equal(0xFFFF0000 | 0);
+
+    prepareCanvas(0.251);
+    imageData = context.getImageData(0, 0, 100, 100);
+    expect(getPixel(imageData, 0, 0)).to.equal(0x40FFFFFF);
   });
 });
