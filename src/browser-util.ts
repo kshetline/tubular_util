@@ -94,6 +94,7 @@ export function eventToKey(event: KeyboardEvent): string {
       // noinspection JSDeprecatedSymbols
       const keyCode = event.keyCode || event.which;
 
+      /* istanbul ignore next */
       switch (keyCode) {
         case   3: case 13: key = 'Enter'; break;
         case   8: key = 'Backspace'; break;
@@ -152,6 +153,7 @@ export function eventToKey(event: KeyboardEvent): string {
     }
   }
   else {
+    /* istanbul ignore next */
     switch (key) {
       case 'Left':
       case 'UIKeyInputLeftArrow':  key = 'ArrowLeft'; break;
@@ -199,10 +201,10 @@ export function setCssVariable(name: string, value: string): void {
 }
 
 export function getCssRuleValue(element: Element, property: string): string | undefined {
-  return (getCssRuleValues(element, [property]) || [])[0];
+  return (getCssRuleValues(element, [property]) || [])[0] || undefined;
 }
 
-export function getCssRuleValues(element: Element, properties: string[]): string[] | undefined {
+export function getCssRuleValues(element: Element, properties: string[]): (string | undefined)[] {
   const stack: CSSStyleDeclaration[] = [];
 
   function searchRules(rules: CSSRuleList) {
@@ -228,12 +230,16 @@ export function getCssRuleValues(element: Element, properties: string[]): string
 
   Array.from(document.styleSheets ?? []).forEach(sheet => searchRules(sheet.rules || sheet.cssRules));
 
-  const last = stack.pop();
+  let results: (string | undefined)[] = properties.map(_p => undefined);
+  let last: CSSStyleDeclaration | undefined;
 
-  if (last)
-    return properties.map(p => last[p as any]);
-  else
-    return undefined;
+  while ((last = stack.pop())) {
+    const values = properties.map(p => last![p as any]);
+
+    results = results.map((v, i) => v || values[i]);
+  }
+
+  return results;
 }
 
 const fontStretches: Record<string, string> = {
@@ -692,11 +698,13 @@ export function restrictPixelWidth(text: string, font: string | HTMLElement, max
   return text;
 }
 
+/* istanbul ignore next */
 export function setFullScreen(full: boolean): void {
   // noinspection JSIgnoredPromiseFromCall
   setFullScreenAsync(full, true);
 }
 
+/* istanbul ignore next */
 export function setFullScreenAsync(full: boolean, throwImmediate = false): Promise<void> {
   if (full !== isFullScreen())
     return toggleFullScreenAsync(throwImmediate);
@@ -704,11 +712,13 @@ export function setFullScreenAsync(full: boolean, throwImmediate = false): Promi
   return Promise.resolve();
 }
 
+/* istanbul ignore next */
 export function toggleFullScreen(): void {
   // noinspection JSIgnoredPromiseFromCall
   toggleFullScreenAsync();
 }
 
+/* istanbul ignore next */
 export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   const fsDoc = document as FsDocument;
 
@@ -744,12 +754,14 @@ export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   return Promise.resolve();
 }
 
+/* istanbul ignore next */
 export function isFullScreen(): boolean {
   const fsDoc = document as FsDocument;
 
   return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
 }
 
+/* istanbul ignore next */
 export function isEffectivelyFullScreen(): boolean {
   return isFullScreen() ||
     (!!_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);

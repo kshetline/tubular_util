@@ -7,9 +7,9 @@ export interface RGBA {
   alpha: number;
 }
 
-const colorNameRegex = /[a-z]+/i;
-const rgbaRegex = /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)\s*\)/;
-const rgbRegex  = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
+const colorNameRegex = /^[a-z]+$/i;
+const rgbaRegex = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)\s*\)$/;
+const rgbRegex  = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/;
 
 let utilContext: CanvasRenderingContext2D;
 
@@ -98,7 +98,7 @@ export function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: nu
 }
 
 export function parseColor(color: string): RGBA {
-  let match = colorNameRegex.exec(color);
+  let match = colorNameRegex.exec((color = color.trim()));
 
   if (match) {
     if (!utilContext) {

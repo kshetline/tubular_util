@@ -574,7 +574,7 @@ function getCssRuleValue(element: Element, property: string): string | undefined
 Same as `getCssValue`, except the property value will be returned in the same form as it was defined in the applicable CSS rules. For example, if the rules stated `1em`, this function returns `1em`, rather than converting this value into a `px` value as `getCssValue` will do.
 
 ```typescript
-function getCssRuleValues(element: Element, properties: string[]): string[] | undefined;
+function getCssRuleValues(element: Element, properties: string[]): (string | undefined)[];
 ```
 Same as `getCssRuleValue`, except an array of CSS values is returned for the array of `properties`. This is more efficient than querying multiple properties one at a time.
 

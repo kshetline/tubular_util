@@ -2,7 +2,7 @@ import chai, { expect } from 'chai';
 import spies from 'chai-spies';
 import chaiAsPromised from 'chai-as-promised';
 import {
-  blendColors, colorFrom24BitInt, colorFromByteArray, drawOutlinedText, fillCircle, fillEllipse, getPixel, parseColor,
+  blendColors, colorFrom24BitInt, colorFromByteArray, colorFromRGB, drawOutlinedText, fillCircle, fillEllipse, getPixel, parseColor,
   replaceAlpha, setPixel, strokeCircle, strokeEllipse, strokeLine
 } from './browser-graphics-util';
 /* @ts-ignore */ // noinspection JSDeprecatedSymbols
@@ -75,9 +75,11 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(parseColor('#8090a0')).to.deep.equal({ r: 128, g: 144, b: 160, alpha: 1 });
     expect(parseColor('SteelBlue')).to.deep.equal({ r: 70, g: 130, b: 180, alpha: 1 });
     expect(parseColor('transparent')).to.deep.equal({ r: 0, g: 0, b: 0, alpha: 0 });
+    expect(parseColor('rgb(20, 30, 44)')).to.deep.equal({ r: 20, g: 30, b: 44, alpha: 1 });
     expect(fixAlphaRounding(parseColor('rgba(20, 30, 44, 0.5)'))).to.deep.equal({ r: 20, g: 30, b: 44, alpha: 0.5 });
     expect(fixAlphaRounding(parseColor('#1234'))).to.deep.equal({ r: 17, g: 34, b: 51, alpha: 0.27 });
     expect(fixAlphaRounding(parseColor('#56789Abc'))).to.deep.equal({ r: 86, g: 120, b: 154, alpha: 0.74 });
+    expect(parseColor('not a real color')).to.deep.equal({ r: 0, g: 0, b: 0, alpha: 0 });
   });
 
   it('blendColors', () => {
@@ -99,6 +101,11 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(color).to.equal('rgba(85, 102, 119, 0.667)');
   });
 
+  it('colorFromRGB', () => {
+    expect(colorFromRGB(1, 2, 3)).to.equal('#010203');
+    expect(colorFromRGB(1, 2, 3, 0.5)).to.equal('rgba(1, 2, 3, 0.5)');
+  });
+
   it('colorFrom24BitInt', () => {
     expect(colorFrom24BitInt(8675309)).to.equal('#845FED');
     expect(colorFrom24BitInt(0x976543)).to.equal('#976543');
@@ -106,6 +113,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('colorFromByteArray', () => {
+    expect(colorFromByteArray([])).to.equal('#000000');
     expect(colorFromByteArray([0x84, 0x5F, 0xED])).to.equal('#845FED');
     expect(colorFromByteArray([0x97, 0x65, 0x43, 0x80])).to.equal('rgba(151, 101, 67, 0.502)');
     expect(colorFromByteArray([0x97, 0x65, 0x43, 0x80], 1)).to.equal('#654380');
@@ -189,10 +197,22 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     font-family: sans-serif;
     padding: 4px;
   }
+
+  @supports (display: block) {
+    body {
+      color: blue;
+    }
+  }
+
+  @media screen and (max-width: 50000px) {
+    body {
+      margin: 1px 2px;
+    }
+  }
 </style>`;
     expect(getCssRuleValue(document.body, 'font-family')).to.equal('sans-serif');
-    expect(getCssRuleValues(document.body, ['background-color', 'padding']))
-      .to.deep.equal(['magenta', '4px']);
+    expect(getCssRuleValues(document.body, ['background-color', 'color', 'padding', 'margin']))
+      .to.deep.equal(['magenta', 'blue', '4px', '1px 2px']);
   });
 
   it('doesCharacterGlyphExist', () => {
@@ -249,6 +269,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
 
     expect(getPixel(imageData, 0, 0)).to.equal(0xFFFFFFFF | 0);
     expect(getPixel(imageData, 200, 50)).to.equal(0);
+    setPixel(imageData, -50, -50, 0);
     setPixel(imageData, 50, 50, 0xFFDCBA98 | 0);
     expect(getPixel(imageData, 50, 50)).to.equal(0xFFDCBA98 | 0);
 
@@ -275,6 +296,13 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     let comparison = await compareImages(img.src, context.getImageData(0, 0, 100, 100), compOptions);
 
     expect(comparison.rawMisMatchPercentage).to.be.lessThan(matchTolerance);
+
+    prepareCanvas();
+    context.font = '28pt Arial';
+    drawOutlinedText(context, 'Hello', 5, 50, 'red', 'blue');
+
+    comparison = await compareImages(img.src, context.getImageData(0, 0, 100, 100), compOptions);
+    expect(comparison.rawMisMatchPercentage).to.be.greaterThan(matchTolerance);
 
     prepareCanvas();
     context.font = '28pt Arial';

@@ -30,6 +30,7 @@
 /connect.lock
 /.nyc_output
 /coverage
+/coverage-karma
 /libpeerconnection.log
 npm-debug.log
 testem.log
