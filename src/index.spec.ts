@@ -2,10 +2,11 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { encodeForUri, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
-  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, getOrSet,
-  getOrSetAsync, isArray, isArrayLike, isBoolean, isEqual, isFunction, isNonFunctionObject, isNumber, isObject,
-  isString, isSymbol, isValidJson, last, nfe, nth, numSort, processMillis, push, pushIf, regex, repeat,
-  reverseNumSort, sleep, sortObjectEntries, toBoolean, toInt, toNumber, toValidInt, toValidNumber, ufe
+  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, forEach, forEach2,
+  formatDateTime, getOrSet, getOrSetAsync, isArray, isArrayLike, isBigint, isBoolean, isEqual, isFunction,
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, keyCount, last, nfe, nth, numSort,
+  processMillis, push, pushIf, regex, repeat, reverseNumSort, sleep, sortObjectEntries, toBoolean,
+  toDefaultLocaleFixed, toInt, toNumber, toValidInt, toValidNumber, ufe
 } from './misc-util';
 // noinspection JSDeprecatedSymbols
 import {
@@ -41,6 +42,12 @@ class TestClass2 extends Array<number> {
 
   sum(): number {
     return this.reduce((a, b) => a + b);
+  }
+}
+
+class TestClass3 extends TestClass {
+  constructor(public a: number, public b: number) {
+    super(a, b);
   }
 }
 
@@ -158,28 +165,54 @@ describe('@tubular/util', () => {
   });
 
   it('should correctly convert to boolean', () => {
-    expect(toBoolean('t', false)).to.equal(true);
-    expect(toBoolean('YES', false)).to.equal(true);
-    expect(toBoolean('False', true)).to.equal(false);
-    expect(toBoolean('n', true)).to.equal(false);
-    expect(toBoolean('?', true)).to.equal(true);
-    expect(toBoolean('?', false)).to.equal(false);
-    expect(toBoolean('?')).to.equal(false);
-    expect(toBoolean('?', null)).to.equal(null);
-    expect(toBoolean(null, true)).to.equal(true);
-    expect(toBoolean(undefined, true)).to.equal(true);
-    expect(toBoolean('')).to.equal(false);
-    expect(toBoolean('', true)).to.equal(true);
-    expect(toBoolean('', false, true)).to.equal(true);
+  });
+
+  it('toDefaultLocaleFixed', () => {
+    expect(toDefaultLocaleFixed(3)).to.equal('3');
+    expect(toDefaultLocaleFixed(Math.PI)).to.equal('3.142');
+    expect(toDefaultLocaleFixed(3, 2)).to.equal('3.00');
+    expect(toDefaultLocaleFixed(Math.PI, 2, 2)).to.equal('3.14');
+    expect(toDefaultLocaleFixed(3, 2, 5)).to.equal('3.00');
+    expect(toDefaultLocaleFixed(Math.PI, 2, 5)).to.equal('3.14159');
+    expect(toDefaultLocaleFixed(-Math.PI, 2, 5)).to.equal('-3.14159');
+  });
+
+  it('should correctly convert to boolean', () => {
+    expect(toBoolean(true)).to.be.true;
+    expect(toBoolean('t')).to.be.true;
+    expect(toBoolean('true')).to.be.true;
+    expect(toBoolean('TRUE')).to.be.true;
+    expect(toBoolean('Yes')).to.be.true;
+    expect(toBoolean('', true)).to.be.true;
+    expect(toBoolean(42)).to.be.true;
+    expect(toBoolean(42n)).to.be.true;
+    expect(toBoolean(Number.NaN, true)).to.be.true;
+    expect(toBoolean({})).to.be.true;
+    expect(toBoolean('', false, true)).to.be.true;
+    expect(toBoolean(false)).to.be.false;
+    expect(toBoolean('F')).to.be.false;
+    expect(toBoolean('FALSE')).to.be.false;
+    expect(toBoolean('false')).to.be.false;
+    expect(toBoolean('nope')).to.be.false;
+    expect(toBoolean(0)).to.be.false;
+    expect(toBoolean(undefined)).to.be.false;
+    expect(toBoolean(null, false, true)).to.be.false;
+    expect(toBoolean('')).to.be.false;
   });
 
   it('should correctly convert to int', () => {
     expect(toInt('-47')).to.equal(-47);
+    expect(toInt('--47')).to.equal(0);
+    expect(toInt(-47n)).to.equal(-47);
     expect(toInt('foo', 99)).to.equal(99);
+    expect(toInt(Number.NaN, 99)).to.equal(99);
+    expect(toInt('8'.repeat(350), 9999)).to.equal(9999);
+    expect(toInt(BigInt('8'.repeat(350)), 9999)).to.equal(9999);
     expect(toInt('1011', -1, 2)).to.equal(11);
     expect(toInt('cafebabe', -1, 16)).to.equal(3405691582);
     /* cSpell:disable-next-line */ // noinspection SpellCheckingInspection
     expect(toInt('cafegabe', -1, 16)).to.equal(-1);
+    expect(toInt({})).to.equal(0);
   });
 
   it('should get first, last, nth element of an array', () => {
@@ -287,6 +320,9 @@ describe('@tubular/util', () => {
     expect(isNumber(() => 'bar')).to.be.false;
     expect(isNumber(NaN)).to.be.true;
 
+    expect(isBigint(Math.PI)).to.be.false;
+    expect(isBigint(7506n)).to.be.true;
+
     expect(isObject(Math.PI)).to.be.false;
     expect(isObject({})).to.be.true;
     expect(isObject(() => 'bar')).to.be.true;
@@ -305,6 +341,8 @@ describe('@tubular/util', () => {
     expect(classOf(3, true)).to.equal('no-class:number');
     expect(classOf(new Date())).to.equal('Date');
     expect(classOf(new TestClass(44, 55))).to.equal('TestClass');
+    expect(classOf(41.3, true)).to.equal('no-class:number');
+    expect(classOf({}, true)).to.equal('Object');
   });
 
   it('should properly deep clone values', () => {
@@ -335,6 +373,7 @@ describe('@tubular/util', () => {
     expect(clone(new Set([2, 78])).has(78)).to.be.true;
     expect(clone(new Map([[2, 78]])).get(2)).to.equal(78);
     expect(clone(new Float32Array([1.25]))[0]).to.equal(1.25);
+    expect(clone(new Float64Array([-0.02]))[0]).to.equal(-0.02);
     expect(clone(new Uint8ClampedArray([3, 400]))[1]).to.equal(255);
 
     const recurse = new Set<any>([1, 2]);
@@ -351,6 +390,17 @@ describe('@tubular/util', () => {
     expect(clone(sample, new Set([Map])).date).not.to.equal(sample.date);
     expect(clone(sample, (value) => value instanceof Date).date).to.equal(sample.date);
     expect(clone(sample, (_value, depth) => depth > 2).date).not.to.equal(sample.date);
+
+    expect(clone(/abc/)).to.eql(/abc/);
+    expect(clone(new BigInt64Array(4))).to.eql(new BigInt64Array(4));
+    expect(clone(new BigUint64Array(4))).to.eql(new BigUint64Array(4));
+    expect(clone(new Float64Array(4))).to.eql(new Float64Array(4));
+    expect(clone(new Int8Array(4))).to.eql(new Int8Array(4));
+    expect(clone(new Int16Array(4))).to.eql(new Int16Array(4));
+    expect(clone(new Int32Array(4))).to.eql(new Int32Array(4));
+    expect(clone(new Uint8Array(4))).to.eql(new Uint8Array(4));
+    expect(clone(new Uint16Array(4))).to.eql(new Uint16Array(4));
+    expect(clone(new Uint32Array(4))).to.eql(new Uint32Array(4));
   });
 
   it('should properly deep compares values', () => {
@@ -402,6 +452,8 @@ describe('@tubular/util', () => {
       { keysToIgnore: ['b'] })).to.be.true;
     expect(isEqual({ a: 1, b: 2, c: 3 }, { a: 1, c: 3 },
       { keysToIgnore: ['b'] })).to.be.true;
+    expect(isEqual({ a: 1, b: 2, c: 3 }, {},
+      { keysToIgnore: ['b'] }, 'b')).to.be.true;
     expect(isEqual({ a: 1, c: 3 }, { a: 1, b: 2, c: 3 },
       { keysToIgnore: ['b'] })).to.be.true;
     expect(isEqual({ a: 1, b: 2, c: 3, d: '4' }, { a: 1, b: -2, c: 3, d: '4' },
@@ -413,6 +465,9 @@ describe('@tubular/util', () => {
             return undefined;
         }
       })).to.be.true;
+
+    expect(isEqual(new TestClass(9, 0), new TestClass3(9, 0))).to.be.true;
+    expect(isEqual(new TestClass(9, 0), new TestClass3(9, 0), { mustBeSameClass: true })).to.be.false;
   });
 
   it('should properly flatten arrays', () => {
@@ -444,9 +499,11 @@ describe('@tubular/util', () => {
 
   it('should push items into an array, and return that modified array', () => {
     expect(push([5])).to.eql([5]);
+    expect(push(null, 5)).to.eql([5]);
     expect(push([5], 6)).to.eql([5, 6]);
     expect(pushIf(false, [5], 6)).to.eql([5]);
     expect(pushIf(true, [5], 6)).to.eql([5, 6]);
+    expect(pushIf(true, null, 6)).to.eql([6]);
     expect(push(['do'], 're', 'mi')).to.eql(['do', 're', 'mi']);
     expect(push(['do'], ...['re', 'mi'])).to.eql(['do', 're', 'mi']);
   });
@@ -550,7 +607,7 @@ describe('@tubular/util', () => {
     expect(toInt('!123')).to.equal(0);
     expect(toInt('!123', 7)).to.equal(7);
     expect(toInt('!123', null)).to.equal(null);
-    expect(toInt(NaN)).to.be.NaN;
+    expect(toInt(NaN)).to.equal(0);
     expect(toInt(1 / 0)).to.not.be.finite;
     expect(toValidInt('123')).to.equal(123);
     expect(toValidInt('g', 0, 30)).to.equal(16);
@@ -559,6 +616,8 @@ describe('@tubular/util', () => {
     expect(toValidInt('!123', 7)).to.equal(7);
     expect(toValidInt(NaN)).to.equal(0);
     expect(toValidInt(1 / 0)).to.equal(0);
+    expect(toNumber(-878n, 9999)).to.equal(-878);
+    expect(toNumber(BigInt('8'.repeat(350)), 9999)).to.equal(9999);
   });
 
   it('compareDottedValues', () => {
@@ -567,6 +626,9 @@ describe('@tubular/util', () => {
     expect(compareDottedValues('33.22.11', '33.22.11')).to.equal(0);
     expect(compareDottedValues('1.0', '1.0.1')).below(0);
     expect(compareDottedValues('1.0.10', '1.0.9')).above(0);
+    expect(compareDottedValues('', '')).to.equal(0);
+    expect(compareDottedValues('2.1', '2')).above(0);
+    expect(compareDottedValues('2', '2.1')).below(0);
   });
 
   it('should properly compute 53-bit checksums', () => {
@@ -596,6 +658,34 @@ describe('@tubular/util', () => {
     expect(nfe([])).to.equal(null);
     expect(ufe([2, 3])).to.deep.equal([2, 3]);
     expect(ufe([])).to.equal(undefined);
+  });
+
+  it('forEach, forEach2', () => {
+    let s = '';
+    const obj = { a: 2, b: 3 } as any;
+
+    forEach(obj, (key, value) => s += `${key},${value};`);
+    expect(s).to.equal('a,2;b,3;');
+
+    s = '';
+    forEach(null, (key, value) => s += `${key},${value};`);
+    expect(s).to.equal('');
+
+    s = '';
+    obj[Symbol('foo')] = '4';
+    forEach2(obj, (key, value) => s += `${isSymbol(key) ? 'sym' : key},${value};`);
+    expect(s).to.equal('a,2;b,3;sym,4;');
+
+    s = '';
+    forEach2(null, (key, value) => s += `${isSymbol(key) ? 'sym' : key},${value}`);
+    expect(s).to.equal('');
+  });
+
+  it('keyCount', () => {
+    expect(keyCount(null)).to.equal(0);
+    expect(keyCount({})).to.equal(0);
+    expect(keyCount({ a: 0, b: 1 })).to.equal(2);
+    expect(keyCount([0, 1, 2])).to.equal(4); // length is the fourth key
   });
 
   it('should sleep for a given number of milliseconds', async () => {
