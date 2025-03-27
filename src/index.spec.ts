@@ -58,14 +58,21 @@ describe('@tubular/util', () => {
     expect(formatDateTime()).to.match(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d [-+]\d{4}/);
     expect(formatDateTime('Fri Jun 07 2019 21:18:36 GMT-0400',
       [DateTimeOptions.USE_T, DateTimeOptions.USE_Z])).to.equal('2019-06-08T01:18:36Z');
+    expect(formatDateTime('Fri Jun 07 2019 21:18:36 GMT-0400',
+      [DateTimeOptions.USE_T, DateTimeOptions.UTC, DateTimeOptions.NO_ZONE])).to.equal('2019-06-08T01:18:36');
     expect(new Date('2019-06-08 01:18:36.890Z').getTime()).to.equal(1559956716890);
     expect(formatDateTime(1559956716890,
       [DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z])).to.equal('2019-06-08 01:18:36.890Z');
+    expect(formatDateTime(1559956716890,
+      [DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z, DateTimeOptions.USE_T])).to.equal('2019-06-08T01:18:36.890Z');
     expect(formatDateTime(1559956716890,
       DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z)).to.equal('2019-06-08 01:18:36.890Z');
     expect(formatDateTime(1559956716890,
       DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_T, DateTimeOptions.USE_Z)).to.equal('2019-06-08T01:18:36.890Z');
     expect(formatDateTime([DateTimeOptions.TIME_ONLY])).to.match(/\d\d:\d\d:\d\d [-+]\d{4}/);
+    expect(formatDateTime([DateTimeOptions.TIME_ONLY, DateTimeOptions.NO_SECONDS])).to.match(/\d\d:\d\d [-+]\d{4}/);
+    expect(formatDateTime([DateTimeOptions.TIME_ONLY, DateTimeOptions.NO_SECONDS, DateTimeOptions.NO_ZONE])).to.match(/\d\d:\d\d/);
+    expect(formatDateTime([DateTimeOptions.DATE_ONLY])).to.match(/\d\d\d\d-\d\d-\d\d/);
   });
 
   it('string comparison', () => {

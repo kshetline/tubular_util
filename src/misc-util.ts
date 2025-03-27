@@ -6,6 +6,7 @@ export interface IsEqualOptions {
   mustBeSameClass?: boolean;
 }
 
+/* istanbul ignore next */
 export function processMillis(): number {
   if (typeof performance !== 'undefined')
     return performance.now();

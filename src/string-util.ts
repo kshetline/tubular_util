@@ -3,7 +3,6 @@ let allUpperPattern: RegExp;
 let wordPattern: RegExp;
 let digitPattern: RegExp;
 
-/* istanbul ignore next */
 try {
   // I want these regexes to fail if not supported, so it takes a bit of obfuscation
   // to prevent Babel from transforming them into something that doesn't fail.
@@ -17,7 +16,7 @@ try {
   // eslint-disable-next-line no-misleading-character-class
   wordPattern = new RegExp(String.raw`(?<=^|[^\p{L}])['’ʼ]?[` + '\\' + String.raw`p{L}'’ʼ\u0300-\u036F]+['’ʼ]?(?=[^\p{L}]|$)`, 'g' + u);
 }
-catch {
+catch /* istanbul ignore next */ {
   notLetterPattern = /[A-ZÀ-ÖØ-ÿ]/ig;
   digitPattern = /^\d$/;
   allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
