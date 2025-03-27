@@ -744,6 +744,17 @@ export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   return Promise.resolve();
 }
 
+export function isFullScreen(): boolean {
+  const fsDoc = document as FsDocument;
+
+  return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
+}
+
+export function isEffectivelyFullScreen(): boolean {
+  return isFullScreen() ||
+    (!!_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
+}
+
 export function encodeForUri(s: string, spaceAsPlus = false): string {
   s = encodeURIComponent(s).replace(/[!'()*]/g, m => '%' + m.charCodeAt(0).toString(16).toUpperCase());
 
@@ -759,15 +770,4 @@ export function urlEncodeParams(params: Record<string, string | number | boolean
   });
 
   return result.join('&');
-}
-
-export function isFullScreen(): boolean {
-  const fsDoc = document as FsDocument;
-
-  return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
-}
-
-export function isEffectivelyFullScreen(): boolean {
-  return isFullScreen() ||
-    (!!_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
 }

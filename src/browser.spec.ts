@@ -7,9 +7,11 @@ import {
 } from './browser-graphics-util';
 /* @ts-ignore */ // noinspection JSDeprecatedSymbols
 import browserUtil, {
-  beep, beepPromise, doesCharacterGlyphExist, eventToKey, getCssValue, getCssValues, getFont, getFontMetrics,
-  initPlatformDetection, iosVersion, isAndroid, isChrome, isChromeOS, isChromium, isChromiumEdge, isEdge, isFirefox,
-  isIE, isIOS, isIOS14OrEarlier, isLikelyMobile, isLinux, isMacOS, isOpera, isRaspbian, isSafari, isSamsung, isWindows
+  beep, beepPromise, doesCharacterGlyphExist, eventToKey, getCssRuleValue, getCssRuleValues, getCssValue, getCssValues,
+  getCssVariable, getFont, getFontMetrics, initPlatformDetection, iosVersion, isAndroid, isChrome, isChromeOS,
+  isChromium, isChromiumEdge, isEdge, isEffectivelyFullScreen, isFirefox, isIE, isIOS, isIOS14OrEarlier,
+  isLikelyMobile, isLinux, isMacOS, isOpera, isRaspbian, isSafari, isSamsung, isWindows, restrictPixelWidth,
+  setCssVariable, setFullScreen, toggleFullScreen
 } from './browser-util';
 import { first, isArray, isArrayLike, isBoolean, last, nth, processMillis } from './misc-util';
 import * as util from './index';
@@ -174,6 +176,25 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     document.body.removeChild(span);
   });
 
+  it('getCssVariable, setCssVariable', () => {
+    setCssVariable('--foo', 'bar');
+    expect(getCssVariable('--foo')).to.equal('bar');
+  });
+
+  it('getCssRuleValue', () => {
+    document.head.innerHTML = document.head.innerHTML + `
+<style>
+  body {
+    background-color: magenta;
+    font-family: sans-serif;
+    padding: 4px;
+  }
+</style>`;
+    expect(getCssRuleValue(document.body, 'font-family')).to.equal('sans-serif');
+    expect(getCssRuleValues(document.body, ['background-color', 'padding']))
+      .to.deep.equal(['magenta', '4px']);
+  });
+
   it('doesCharacterGlyphExist', () => {
     const fonts = ['12px sans-serif', '14pt monospace'];
 
@@ -207,6 +228,13 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(isArray(elem.childNodes)).to.be.false;
     expect(isArrayLike(elem.childNodes)).to.be.true;
     expect(isBoolean(elem.childNodes)).to.be.false;
+  });
+
+  it('restrictPixelWidth', () => {
+    expect(restrictPixelWidth('Now is the time', '12px Times New Roman, serif', 50)).to.equal('Now is …');
+    expect(restrictPixelWidth('Now is the time', '12px Times New Roman, serif', 50, '...')).to.equal('Now is t...');
+    expect(restrictPixelWidth('Now is the time', '12px Courier New, monospace', 75)).to.equal('Now is th…');
+    expect(restrictPixelWidth('Now is the time', '9px Arial, sans-serif', 250)).to.equal('Now is the time');
   });
 
   it('getFontMetrics', () => {
@@ -372,5 +400,11 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(isOpera()).to.be.true;
     expect(isLinux()).to.be.true;
     expect(isAndroid()).to.be.true;
+  });
+
+  it('misc fairly untestable', () => {
+    expect(setFullScreen).to.be.ok;
+    expect(toggleFullScreen).to.be.ok;
+    expect(isEffectivelyFullScreen).to.be.ok;
   });
 });

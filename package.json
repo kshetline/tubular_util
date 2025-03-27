@@ -22,7 +22,8 @@
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
     "test": "nyc --reporter=html mocha --require ts-node/register --exclude src/**/browser*.spec.ts src/**/*.spec.ts",
-    "test-karma": "karma start"
+    "test-karma": "karma start",
+    "test-karma-real-chrome": "karma start karma.conf-rc.js"
   },
   "keywords": [
     "canvas",
