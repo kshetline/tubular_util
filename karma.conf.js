@@ -9,7 +9,7 @@ module.exports = function (config) {
       'src/**/*.ts': 'karma-typescript'
     },
     reporters: ['progress', 'karma-typescript'],
-    browsers: ['ChromeHeadless', 'FirefoxHeadless'],
+    browsers: ['Chrome', 'FirefoxHeadless'],
     karmaTypescriptConfig: {
       tsconfig: './tsconfig.karma.json'
     },

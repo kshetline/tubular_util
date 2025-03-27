@@ -1,13 +1,22 @@
 import chai, { expect } from 'chai';
+import spies from 'chai-spies';
 import chaiAsPromised from 'chai-as-promised';
-import { blendColors, colorFrom24BitInt, colorFromByteArray, drawOutlinedText, fillCircle, fillEllipse, getPixel, parseColor, replaceAlpha, setPixel, strokeCircle, strokeEllipse, strokeLine } from './browser-graphics-util';
-// noinspection JSDeprecatedSymbols
-import { doesCharacterGlyphExist, eventToKey, getCssValue, getCssValues, getFont, getFontMetrics, initPlatformDetection, iosVersion, isAndroid, isChrome, isChromeOS, isChromium, isChromiumEdge, isEdge, isFirefox, isIE, isIOS, isIOS14OrEarlier, isLikelyMobile, isLinux, isMacOS, isOpera, isRaspbian, isSafari, isSamsung, isWindows } from './browser-util';
-import { first, isArray, isArrayLike, isBoolean, last, nth } from './misc-util';
+import {
+  blendColors, colorFrom24BitInt, colorFromByteArray, drawOutlinedText, fillCircle, fillEllipse, getPixel, parseColor,
+  replaceAlpha, setPixel, strokeCircle, strokeEllipse, strokeLine
+} from './browser-graphics-util';
+/* @ts-ignore */ // noinspection JSDeprecatedSymbols
+import browserUtil, {
+  beep, beepPromise, doesCharacterGlyphExist, eventToKey, getCssValue, getCssValues, getFont, getFontMetrics,
+  initPlatformDetection, iosVersion, isAndroid, isChrome, isChromeOS, isChromium, isChromiumEdge, isEdge, isFirefox,
+  isIE, isIOS, isIOS14OrEarlier, isLikelyMobile, isLinux, isMacOS, isOpera, isRaspbian, isSafari, isSamsung, isWindows
+} from './browser-util';
+import { first, isArray, isArrayLike, isBoolean, last, nth, processMillis } from './misc-util';
 import * as util from './index';
 import compareImages from 'resemblejs/compareImages';
 import Resemble from 'resemblejs';
 
+chai.use(spies);
 chai.use(chaiAsPromised);
 (globalThis as any).util = util;
 
@@ -112,6 +121,24 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(eventToKey({ key: 'UIKeyInputLeftArrow' } as any)).to.equal('ArrowLeft');
     expect(eventToKey({ key: 'Multiply' } as any)).to.equal('*');
     expect(eventToKey({ key: 'Win' } as any)).to.equal('Meta');
+  });
+
+  it('beep/beepPromise', async () => {
+    const spy = chai.spy.on(browserUtil, 'beepPromise');
+    // There's no good way to actually check that sound, and the right sound, happens. Settle for checking duration.
+    const start = processMillis();
+
+    await beepPromise();
+    const delay = processMillis() - start;
+    expect(delay).to.be.greaterThan(90);
+    expect(delay).to.be.lessThan(300);
+    expect(spy).to.have.been.called;
+
+    const spy2 = chai.spy.on(window.AudioContext, 'createGain');
+
+    beep();
+    await util.sleep(10);
+    expect(spy2).to.have.been.called;
   });
 
   it('getFont, correct shorthand form', () => {

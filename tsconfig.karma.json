@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "module": "commonjs",
     "strictNullChecks": false,
-    "target": "ES2015",
-    "allowSyntheticDefaultImports": true
+    "target": "ES2022"
   },
   "exclude": [
     "dist",

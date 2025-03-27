@@ -1,5 +1,3 @@
-// noinspection JSUnusedGlobalSymbols
-
 /*
   Copyright © 2017-2025 Kerry Shetline, kerry@shetline.com
 
@@ -20,8 +18,9 @@
 */
 import * as browserUtil from './browser-util';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { /* initPlatformDetection, */ ...publicBrowserUtil } = browserUtil;
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// noinspection JSUnusedGlobalSymbols
+const { initPlatformDetection, ...publicBrowserUtil } = browserUtil;
 
 export { publicBrowserUtil };
 export * from './browser-util';
