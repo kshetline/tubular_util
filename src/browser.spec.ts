@@ -1,7 +1,8 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { blendColors, colorFrom24BitInt, colorFromByteArray, drawOutlinedText, fillCircle, fillEllipse, getPixel, parseColor, replaceAlpha, setPixel, strokeCircle, strokeEllipse, strokeLine } from './browser-graphics-util';
-import { doesCharacterGlyphExist, getCssValue, getCssValues, getFont, getFontMetrics, isFirefox } from './browser-util';
+// noinspection JSDeprecatedSymbols
+import { doesCharacterGlyphExist, eventToKey, getCssValue, getCssValues, getFont, getFontMetrics, initPlatformDetection, iosVersion, isAndroid, isChrome, isChromeOS, isChromium, isChromiumEdge, isEdge, isFirefox, isIE, isIOS, isIOS14OrEarlier, isLikelyMobile, isLinux, isMacOS, isOpera, isRaspbian, isSafari, isSamsung, isWindows } from './browser-util';
 import { first, isArray, isArrayLike, isBoolean, last, nth } from './misc-util';
 import * as util from './index';
 import compareImages from 'resemblejs/compareImages';
@@ -50,6 +51,8 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     });
   }
 
+  afterEach(() => initPlatformDetection());
+
   it('should parse colors correctly', () => {
     function fixAlphaRounding(color: any): any {
       color.alpha = Math.round(color.alpha * 100) / 100;
@@ -95,6 +98,20 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(colorFromByteArray([0x84, 0x5F, 0xED])).to.equal('#845FED');
     expect(colorFromByteArray([0x97, 0x65, 0x43, 0x80])).to.equal('rgba(151, 101, 67, 0.502)');
     expect(colorFromByteArray([0x97, 0x65, 0x43, 0x80], 1)).to.equal('#654380');
+  });
+
+  it('eventToKey', () => {
+    expect(eventToKey({ keyCode: 3 } as any)).to.equal('Enter');
+    expect(eventToKey({ keyCode: 48 } as any)).to.equal('0');
+    expect(eventToKey({ keyCode: 99 } as any)).to.equal('3');
+    expect(eventToKey({ keyCode: 113 } as any)).to.equal('F2');
+    expect(eventToKey({ keyCode: 144 } as any)).to.equal('NumLock');
+    expect(eventToKey({ keyCode: 224 } as any)).to.equal('Meta');
+    expect(eventToKey({ charCode: 65 } as any)).to.equal('A');
+    expect(eventToKey({ key: 'PageUp' } as any)).to.equal('PageUp');
+    expect(eventToKey({ key: 'UIKeyInputLeftArrow' } as any)).to.equal('ArrowLeft');
+    expect(eventToKey({ key: 'Multiply' } as any)).to.equal('*');
+    expect(eventToKey({ key: 'Win' } as any)).to.equal('Meta');
   });
 
   it('getFont, correct shorthand form', () => {
@@ -253,5 +270,80 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     strokeLine(context, 10, 10, 90, 80);
     comparison = await compareImages(img.src, context.getImageData(0, 0, 100, 100), compOptions);
     expect(comparison.rawMisMatchPercentage).to.be.lessThan(matchTolerance);
+  });
+
+  it('platform checking, Android', () => {
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36,gzip(gfe)' },
+      { chrome: {} });
+    expect(isAndroid()).to.be.true;
+    expect(isChromeOS()).to.be.false;
+    expect(isChromium()).to.be.true;
+    // noinspection JSDeprecatedSymbols
+    expect(isIE()).to.be.false;
+  });
+
+  it('platform checking, Samsung', () => {
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36' });
+    expect(isSamsung()).to.be.true;
+    expect(isWindows()).to.be.false;
+    expect(isIE()).to.be.false;
+  });
+
+  it('platform checking, Edge', () => {
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246', platform: 'Win32' },
+      { chrome: {} });
+    expect(isWindows()).to.be.true;
+    expect(isEdge()).to.be.true;
+    expect(isChromium()).to.be.true;
+    expect(isChromiumEdge()).to.be.true;
+    expect(isSafari()).to.be.false;
+    expect(isIE()).to.be.false;
+  });
+
+  it('platform checking, Safari/macOS', () => {
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15', platform: 'MacIntel' });
+    expect(isSafari()).to.be.true;
+    expect(isMacOS()).to.be.true;
+    expect(isIOS()).to.be.false;
+    expect(isChromeOS()).to.be.false;
+    expect(isRaspbian()).to.be.false;
+  });
+
+  it('platform checking, Chrome/Windows', () => {
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36', platform: 'Win32', vendor: 'Google Inc.' });
+    expect(isChrome()).to.be.true;
+    expect(isWindows()).to.be.true;
+    expect(isIOS()).to.be.false;
+    expect(isChromeOS()).to.be.false;
+    expect(isEdge()).to.be.false;
+    expect(isFirefox()).to.be.false;
+    expect(isLikelyMobile()).to.be.false;
+  });
+
+  it('platform checking, Firefox/Linux', () => {
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0', platform: 'Linux armv7l' });
+    expect(isFirefox()).to.be.true;
+    expect(isLinux()).to.be.true;
+    // noinspection JSDeprecatedSymbols
+    expect(isRaspbian()).to.be.true;
+    expect(isChromeOS()).to.be.false;
+    expect(isOpera()).to.be.false;
+  });
+
+  it('platform checking, Safari/iOS', () => {
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Mobile/15E148 Safari/604.1', platform: 'iPhone' }, undefined, true);
+    expect(isSafari()).to.be.true;
+    expect(isIOS()).to.be.true;
+    expect(iosVersion()).to.equal(18);
+    expect(isLikelyMobile()).to.be.true;
+    expect(isIOS14OrEarlier()).to.be.false;
+    expect(isOpera()).to.be.false;
+  });
+
+  it('platform checking, Opera/Samsung', () => {
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 10; SM-G970F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.6998.135 Mobile Safari/537.36 OPR/76.2.4027.73374' });
+    expect(isOpera()).to.be.true;
+    expect(isLinux()).to.be.true;
+    expect(isAndroid()).to.be.true;
   });
 });

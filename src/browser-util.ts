@@ -13,8 +13,6 @@ catch {}
 if (!_navigator)
   _navigator = { appVersion: '?', maxTouchPoints: 0, platform: '?', userAgent: '?', vendor: '?' } as typeof navigator;
 
-const _platform = _navigator.platform || (_navigator as any).userAgentData?.platform || '?';
-
 let _window: typeof window | undefined;
 
 try {
@@ -89,7 +87,7 @@ export function eventToKey(event: KeyboardEvent): string {
     // noinspection JSDeprecatedSymbols
     const charCode = event.charCode;
 
-    if (charCode !== 0) {
+    if (charCode !== 0 && charCode != null) {
       key = String.fromCodePoint(charCode);
     }
     else {
@@ -546,23 +544,57 @@ export function htmlUnescape(s: string): string {
   return s;
 }
 
-const _isMacOS_ish = _platform.startsWith('Mac') || /\bMac OS X\b/i.test(_navigator.userAgent);
-const _isMacOS = _isMacOS_ish && !/\bmobile\b/i.test(_navigator.userAgent);
-const _isSamsung = /\bSamsungBrowser\b/i.test(_navigator.userAgent);
-const _isWindows = _navigator.appVersion?.includes('Windows') || _platform.startsWith('Win');
-const _isEdge = /\bedge\b/i.test(_navigator.userAgent) && _isWindows;
-const _isChromium = !!(_window as any)?.chrome;
-const _isChromiumEdge = _isChromium && /\bedg\//i.test(_navigator.userAgent) && _isWindows;
-const _isAndroid = _navigator.userAgent.includes('Android') || _isSamsung;
-const _isOpera = typeof (_window as any)?.opr !== 'undefined';
-const _isChrome = _navigator.vendor === 'Google Inc.' &&
-    ((/\bChrome\b/i.test(_navigator.userAgent) && !_isEdge && !_isSamsung && !_isOpera && !_isChromiumEdge) ||
-     /\bCriOS\b/.test(_navigator.userAgent));
-const _isChromeOS = _navigator.vendor === 'Google Inc.' && /\bCrOS\b/i.test(_navigator.userAgent);
-const _isRaspbian = _navigator.userAgent.includes('Raspbian') || _platform.includes('Linux armv');
-const _isFirefox = /firefox/i.test(_navigator.userAgent) && !/seamonkey/i.test(_navigator.userAgent);
-const _isSafari = /^((?!chrome|android).)*safari/i.test(_navigator.userAgent) && !_isEdge;
-const _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (_isMacOS_ish && _isSafari && _navigator.maxTouchPoints > 1);
+let _platform: string;
+let _isMacOS_ish: boolean;
+let _isMacOS: boolean;
+let _isSamsung: boolean;
+let _isWindows: boolean;
+let _isLinux: boolean;
+let _isEdge: boolean;
+let _isChromium: boolean;
+let _isChromiumEdge: boolean;
+let _isAndroid: boolean;
+let _isOpera: boolean;
+let _isChrome: boolean;
+let _isChromeOS: boolean;
+let _isRaspbian: boolean;
+let _isFirefox: boolean;
+let _isSafari: boolean;
+let _isIOS: boolean;
+let _iosVersion: number;
+let _isIOS14OrEarlier: boolean;
+let _isLikelyMobile: boolean;
+
+export function initPlatformDetection(nav: any = _navigator, win?: any, smallScreen?: boolean): void {
+  win = win ?? _window;
+  smallScreen = smallScreen ?? !!_window?.matchMedia('only screen and (max-width: 760px)').matches;
+  _platform = nav.platform || (nav as any).userAgentData?.platform || '?';
+  _isMacOS_ish = _platform.startsWith('Mac') || /\b(Mac OS X|macOS)\b/i.test(nav.userAgent);
+  _isMacOS = _isMacOS_ish && !/\bmobile\b/i.test(nav.userAgent);
+  _isSamsung = /\bSamsungBrowser\b|(\bAndroid\b[^)]+\bSM-)/i.test(nav.userAgent);
+  _isWindows = nav.appVersion?.includes('Windows') || _platform.startsWith('Win');
+  _isLinux = _platform.startsWith('Linux') || /\bLinux\b/i.test(nav.userAgent);
+  _isEdge = /\bedge\b/i.test(nav.userAgent) && _isWindows;
+  _isChromium = !!(win as any)?.chrome;
+  _isChromiumEdge = _isChromium && _isEdge;
+  _isAndroid = nav.userAgent.includes('Android') || _isSamsung;
+  _isOpera = typeof win?.opr !== 'undefined' || /\bOPR\/\d+\b/.test(nav.userAgent);
+  _isChrome = nav.vendor === 'Google Inc.' &&
+    ((/\bChrome\b/i.test(nav.userAgent) && !_isEdge && !_isSamsung && !_isOpera && !_isChromiumEdge) ||
+      /\bCriOS\b/.test(nav.userAgent));
+  _isChromeOS = nav.vendor === 'Google Inc.' && /\bCrOS\b/i.test(nav.userAgent);
+  _isRaspbian = nav.userAgent.includes('Raspbian') || _platform.includes('Linux armv');
+  _isFirefox = /firefox/i.test(nav.userAgent) && !/seamonkey/i.test(nav.userAgent);
+  _isSafari = /^((?!chrome|android).)*safari/i.test(nav.userAgent) && !_isEdge;
+  _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (_isMacOS_ish && _isSafari && nav.maxTouchPoints > 1);
+  _iosVersion = toNumber((((_isIOS || null) &&
+    /(((iPhone|iPad).+?OS\s+)|(Version\/))(\d+)/i.exec(nav.userAgent)) ?? [])[5]);
+  _isIOS14OrEarlier = _isIOS && _iosVersion <= 14;
+  _isLikelyMobile = _isIOS ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|\bmobile\b/i.test(nav.userAgent) || smallScreen;
+}
+
+initPlatformDetection();
 
 export function isAndroid(): boolean {
   return _isAndroid;
@@ -592,17 +624,6 @@ export function isFirefox(): boolean {
   return _isFirefox;
 }
 
-export function isFullScreen(): boolean {
-  const fsDoc = document as FsDocument;
-
-  return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
-}
-
-export function isEffectivelyFullScreen(): boolean {
-  return isFullScreen() ||
-    (!!_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
-}
-
 /**
  * @deprecated will always be false as this code no longer supports IE.
  */
@@ -615,19 +636,18 @@ export function isIOS(): boolean {
   return _isIOS;
 }
 
-const _iosVersion = toNumber((((isIOS() || null) && /(((iPhone|iPad).+?OS\s+)|(Version\/))(\d+)/i.exec(_navigator.userAgent)) ?? [])[5]);
+export function isLinux(): boolean {
+  return _isLinux;
+}
+
 export function iosVersion(): number {
   return _iosVersion;
 }
 
-const _isIOS14OrEarlier = isIOS() && iosVersion() <= 14;
 export function isIOS14OrEarlier(): boolean {
   return _isIOS14OrEarlier;
 }
 
-const _isLikelyMobile = _isIOS ||
-  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|\bmobile\b/i.test(_navigator.userAgent) ||
-  _window?.matchMedia('only screen and (max-width: 760px)').matches;
 export function isLikelyMobile(): boolean {
   return _isLikelyMobile;
 }
@@ -640,6 +660,9 @@ export function isOpera(): boolean {
   return _isOpera;
 }
 
+/**
+ * @deprecated no longer reliably detectable.
+ */
 export function isRaspbian(): boolean {
   return _isRaspbian;
 }
@@ -736,4 +759,15 @@ export function urlEncodeParams(params: Record<string, string | number | boolean
   });
 
   return result.join('&');
+}
+
+export function isFullScreen(): boolean {
+  const fsDoc = document as FsDocument;
+
+  return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
+}
+
+export function isEffectivelyFullScreen(): boolean {
+  return isFullScreen() ||
+    (!!_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
 }

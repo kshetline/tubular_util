@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 /*
   Copyright © 2017-2025 Kerry Shetline, kerry@shetline.com
 
@@ -16,9 +18,14 @@
   COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+import * as browserUtil from './browser-util';
 
-export * from './browser-graphics-util';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { /* initPlatformDetection, */ ...publicBrowserUtil } = browserUtil;
+
+export { publicBrowserUtil };
 export * from './browser-util';
+export * from './browser-graphics-util';
 export * from './misc-util';
 export * from './string-util';
 
