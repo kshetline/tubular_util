@@ -2,13 +2,18 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { encodeForUri, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
-  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, getOrSet, getOrSetAsync, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nfe, nth, numSort, processMillis, push, pushIf, regex, repeat, reverseNumSort, sleep, sortObjectEntries,
-  toBoolean, toInt, toNumber, toValidInt, toValidNumber, ufe
+  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, getOrSet,
+  getOrSetAsync, isArray, isArrayLike, isBoolean, isEqual, isFunction, isNonFunctionObject, isNumber, isObject,
+  isString, isSymbol, isValidJson, last, nfe, nth, numSort, processMillis, push, pushIf, regex, repeat,
+  reverseNumSort, sleep, sortObjectEntries, toBoolean, toInt, toNumber, toValidInt, toValidNumber, ufe
 } from './misc-util';
+// noinspection JSDeprecatedSymbols
 import {
-  asLines, checksum53, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
-  makePlainASCII_lc, makePlainASCII_UC, padLeft, regexEscape, stripDiacriticals, stripDiacriticals_lc, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
+  asLines, checksum53, compareCaseInsensitive, compareCaseSecondary, compareStrings, convertDigits,
+  convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
+  makePlainASCII_lc, makePlainASCII_UC, padLeft, padRight, regexEscape, replace, stripDiacriticals,
+  stripDiacriticals_lc, stripDiacriticals_UC, stripLatinDiacriticals, stripLatinDiacriticals_lc,
+  stripLatinDiacriticals_UC, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
 } from './string-util';
 import * as util from './index';
 
@@ -63,22 +68,50 @@ describe('@tubular/util', () => {
     expect(formatDateTime([DateTimeOptions.TIME_ONLY])).to.match(/\d\d:\d\d:\d\d [-+]\d{4}/);
   });
 
+  it('string comparison', () => {
+    expect(compareStrings('foo', 'foo')).to.equal(0);
+    expect(compareStrings('foo', 'bar')).to.equal(1);
+    expect(compareStrings('foo', 'quux')).to.equal(-1);
+    expect(compareCaseInsensitive('foo', 'FOO')).to.equal(0);
+    expect(compareCaseInsensitive('foo', 'BAR')).to.equal(1);
+    expect(compareCaseInsensitive('FOO', 'quux')).to.equal(-1);
+    expect(compareCaseSecondary('foo', 'foo')).to.equal(0);
+    expect(compareCaseSecondary('foo', 'FOO')).to.equal(1);
+    expect(compareCaseSecondary('FOO', 'foo')).to.equal(-1);
+    expect(compareCaseSecondary('foo', 'bar')).to.equal(1);
+    expect(compareCaseSecondary('foo', 'quux')).to.equal(-1);
+  });
+
   /* cSpell:disable */
   it('should strip diacritical marks from Latin characters', () => {
+    expect(stripLatinDiacriticals('')).to.equal('');
+    expect(stripLatinDiacriticals('xyz')).to.equal('xyz');
     // noinspection SpellCheckingInspection
-    expect(stripLatinDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
-      .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþy');
+    expect(stripLatinDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĤĥ̊u\u2010'))
+      .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþyHhu\u2010');
+    expect(stripLatinDiacriticals_lc('')).to.equal('');
+    expect(stripLatinDiacriticals_lc('ÐÑÒ')).to.equal('ðno');
+    expect(stripLatinDiacriticals_UC('')).to.equal('');
+    expect(stripLatinDiacriticals_UC('çèé')).to.equal('CEE');
   });
 
   it('should strip diacritical marks from Latin and non-Latin characters', () => {
     // noinspection SpellCheckingInspection
     expect(stripDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿΆΈΪΫάέήίΰϊϋόύώϔӐӑӒӓӖӗЀйѐёіїќ'))
       .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþyΑΕΙΥαεηιυιυουωϒАаАаЕеЕиееіік');
-    expect(stripDiacriticals('a b')).to.equal('a b');
-    expect(stripDiacriticals_lc('a b')).to.equal('a b');
+    expect(stripDiacriticals('')).to.equal('');
+    expect(stripDiacriticals('Á b')).to.equal('A b');
+    expect(stripDiacriticals_lc('')).to.equal('');
+    expect(stripDiacriticals_lc('Á b')).to.equal('a b');
+    expect(stripDiacriticals_UC('')).to.equal('');
+    expect(stripDiacriticals_UC('Á b')).to.equal('A B');
   });
 
   it('should simplify symbols and Latin characters to plain ASCII', () => {
+    expect(makePlainASCII(null as any)).to.equal(null);
+    expect(makePlainASCII('abc')).to.equal('abc');
+    // noinspection SpellCheckingInspection
+    expect(makePlainASCII('©«®±»ĲĳŊŋŒœĀ—―…̃x')).to.equal('(c)<<(R)+/->>IjijNgngOeoeA----...x');
     // noinspection SpellCheckingInspection
     expect(makePlainASCII('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
       .to.equal('AAAAAAAeCEEEEIIIIDhNOOOOO_OUUUUYThssaaaaaaaeceeeeiiiidhnooooo_ouuuuythy');
@@ -93,7 +126,9 @@ describe('@tubular/util', () => {
     // noinspection SpellCheckingInspection
     expect(makePlainASCII('[café*]', true)).to.equal('(cafe-)');
     // noinspection SpellCheckingInspection
-    expect(makePlainASCII_UC('[café*]', true)).to.equal('(CAFE-)');
+    expect(makePlainASCII_UC('.[café*]"/:;<>?\\|', true)).to.equal('_(CAFE-)\'________');
+    expect(makePlainASCII_lc(null as any)).to.equal(null);
+    expect(makePlainASCII_UC('')).to.equal('');
   });
   /* cSpell:enable */
 
@@ -183,6 +218,7 @@ describe('@tubular/util', () => {
   });
 
   it('should properly convert strings to title case', () => {
+    expect(toTitleCase('this')).to.equal('This');
     expect(toTitleCase("isn't this (working)?")).to.equal("Isn't This (Working)?");
     /* cspell:disable-next-line */ // noinspection SpellCheckingInspection
     expect(toTitleCase('íSN’T THIS WÖRKING?')).to.equal('Ísn’t This Wörking?');
@@ -192,6 +228,7 @@ describe('@tubular/util', () => {
     expect(toTitleCase('born in the usa', { special: ['USA'] })).to.equal('Born in the USA');
     expect(toTitleCase('born in the USA', { keepAllCaps: true })).to.equal('Born in the USA');
     expect(toTitleCase("born in the ol' USA", { keepAllCaps: true, shortSmall: ['-in', "ol'"] })).to.equal("Born In the ol' USA");
+    expect(toTitleCase('sitting on the dock of the ebay', { special: ['-eBay'] })).to.equal('Sitting on the Dock of the Ebay');
   });
 
   it('should properly detect uppercase strings and words', () => {
@@ -208,6 +245,16 @@ describe('@tubular/util', () => {
     expect(padLeft(-5, 4)).to.equal('  -5');
     expect(padLeft(5, 4)).to.equal('   5');
     expect(padLeft(-5, 4, '0')).to.equal('-005');
+  });
+
+  it('padRight', () => {
+    // noinspection JSDeprecatedSymbols
+    expect(padRight('dye', 7)).to.equal('dye    ');
+  });
+
+  it('replace', () => {
+    expect(replace('tra lA la', 'la', 'LA')).to.equal('tra lA LA');
+    expect(replace('tra lA la', 'la', 'LA', true)).to.equal('tra LA LA');
   });
 
   it('should properly recognize data types', () => {
@@ -414,6 +461,7 @@ describe('@tubular/util', () => {
     expect(isDigit('7')).to.be.true;
     expect(isDigit('೫')).to.be.true;
     expect(isDigit('ꮗ')).to.be.false;
+    expect(digitScript(null)).to.equal(undefined);
     expect(digitScript('꩒')).to.equal('Cham');
     expect(digitScript('4')).to.equal('ASCII');
     expect(digitScript('foo')).to.be.undefined;
