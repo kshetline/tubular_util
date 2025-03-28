@@ -21,9 +21,8 @@
     "build": "rimraf dist/ && tsc && del \"dist/*.spec.*\" && rollup -c -m --bundleConfigAsCjs && webpack",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
-    "test": "nyc --reporter=html mocha --require ts-node/register --exclude src/**/browser*.spec.ts src/**/*.spec.ts",
-    "test-karma": "karma start --single-run",
-    "test-karma-real-chrome": "karma start karma.conf-rc.js"
+    "test": "karma start --single-run",
+    "test-real-chrome": "karma start karma.conf-rc.js"
   },
   "keywords": [
     "canvas",
@@ -66,7 +65,6 @@
     "karma-mocha": "^2.0.1",
     "karma-typescript": "^5.5.4",
     "mocha": "^10.6.0",
-    "nyc": "^15.1.0",
     "replace": "^1.2.2",
     "resemblejs": "^5.0.0",
     "rimraf": "^6.0.1",
