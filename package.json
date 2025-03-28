@@ -22,7 +22,7 @@
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
     "test": "nyc --reporter=html mocha --require ts-node/register --exclude src/**/browser*.spec.ts src/**/*.spec.ts",
-    "test-karma": "karma start --single-run && nyc report --reporter=html --report-dir ./coverage-karma",
+    "test-karma": "karma start --single-run",
     "test-karma-real-chrome": "karma start karma.conf-rc.js"
   },
   "keywords": [

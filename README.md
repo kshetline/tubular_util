@@ -3,6 +3,8 @@
 
 An assortment of general-purpose utility functions, including string manipulation, non-exception-throwing safe string-to-number conversions, array functions, object cloning, web browser graphics, CSS support, and more.
 
+[![npm](https://img.shields.io/npm/v/@tubular/util.svg)](https://www.npmjs.com/package/@tubular/util/) [![Coverage Status](https://coveralls.io/repos/github/kshetline/tubular_util/badge.svg?branch=master)](https://coveralls.io/github/kshetline/tubular_util) [![npm downloads](https://img.shields.io/npm/dm/@tubular/util.svg)](https://npmjs.org/package/@tubular/util/) ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/min/@tubular/time)  ![license](https://img.shields.io/badge/licence-mit-informational)
+
 - [Installation](#installation)
   - [Via npm](#via-npm)
   - [Via `<script>` tag](#via-script-tag)
