@@ -10,10 +10,9 @@ try {
 }
 catch {}
 
+/* istanbul ignore next */
 if (!_navigator)
   _navigator = { appVersion: '?', maxTouchPoints: 0, platform: '?', userAgent: '?', vendor: '?' } as typeof navigator;
-
-const _platform = _navigator.platform || (_navigator as any).userAgentData?.platform || '?';
 
 let _window: typeof window | undefined;
 
@@ -55,6 +54,7 @@ export function beep(frequency = 440, gainValue = 0.025, duration = 100): void {
 }
 
 export async function beepPromise(frequency = 440, gainValue = 0.025, duration = 100): Promise<void> {
+  /* istanbul ignore next */
   if (!_window)
     return;
 
@@ -89,13 +89,14 @@ export function eventToKey(event: KeyboardEvent): string {
     // noinspection JSDeprecatedSymbols
     const charCode = event.charCode;
 
-    if (charCode !== 0) {
+    if (charCode !== 0 && charCode != null) {
       key = String.fromCodePoint(charCode);
     }
     else {
       // noinspection JSDeprecatedSymbols
       const keyCode = event.keyCode || event.which;
 
+      /* istanbul ignore next */
       switch (keyCode) {
         case   3: case 13: key = 'Enter'; break;
         case   8: key = 'Backspace'; break;
@@ -154,6 +155,7 @@ export function eventToKey(event: KeyboardEvent): string {
     }
   }
   else {
+    /* istanbul ignore next */
     switch (key) {
       case 'Left':
       case 'UIKeyInputLeftArrow':  key = 'ArrowLeft'; break;
@@ -192,15 +194,23 @@ export function getCssValues(element: Element, properties: string[]): string[] {
   return properties.map(p => styles.getPropertyValue(p));
 }
 
-export function getCssRuleValue(element: Element, property: string): string | undefined {
-  return (getCssRuleValues(element, [property]) || [])[0];
+export function getCssVariable(name: string): string {
+  return (document.querySelector(':root') as HTMLElement).style.getPropertyValue(name);
 }
 
-export function getCssRuleValues(element: Element, properties: string[]): string[] | undefined {
+export function setCssVariable(name: string, value: string): void {
+  (document.querySelector(':root') as HTMLElement).style.setProperty(name, value);
+}
+
+export function getCssRuleValue(element: Element, property: string): string | undefined {
+  return (getCssRuleValues(element, [property]))[0] || undefined;
+}
+
+export function getCssRuleValues(element: Element, properties: string[]): (string | undefined)[] {
   const stack: CSSStyleDeclaration[] = [];
 
   function searchRules(rules: CSSRuleList) {
-    Array.from(rules ?? []).forEach(rule => {
+    Array.from(rules ?? /* istanbul ignore next */ []).forEach(rule => {
       if (rule instanceof CSSMediaRule && _window?.matchMedia(rule.conditionText).matches)
         searchRules(rule.cssRules);
       else if (rule instanceof CSSSupportsRule) {
@@ -220,14 +230,19 @@ export function getCssRuleValues(element: Element, properties: string[]): string
     });
   }
 
-  Array.from(document.styleSheets ?? []).forEach(sheet => searchRules(sheet.rules || sheet.cssRules));
+  Array.from(document.styleSheets ?? /* istanbul ignore next */ [])
+    .forEach(sheet => searchRules(sheet.rules || /* istanbul ignore next */ sheet.cssRules));
 
-  const last = stack.pop();
+  let results: (string | undefined)[] = properties.map(_p => undefined);
+  let last: CSSStyleDeclaration | undefined;
 
-  if (last)
-    return properties.map(p => last[p as any]);
-  else
-    return undefined;
+  while ((last = stack.pop())) {
+    const values = properties.map(p => last![p as any]);
+
+    results = results.map((v, i) => v || values[i]);
+  }
+
+  return results;
 }
 
 const fontStretches: Record<string, string> = {
@@ -246,6 +261,7 @@ export function getFont(element: Element): string {
   const style = document.defaultView!.getComputedStyle(element, null);
   let font = style.getPropertyValue('font');
 
+  /* istanbul ignore next */ // Can't seem to force this situation to arise anymore.
   if (!font) {
     const fontStyle = style.getPropertyValue('font-style');
     const fontVariant = style.getPropertyValue('font-variant');
@@ -399,6 +415,7 @@ export function getFontMetrics(elementOrFont: Element | string, specificChar?: s
   return metrics;
 }
 
+/* istanbul ignore next */ // Only sometimes called for checking glyphs on Firefox
 function changeItalic(font: string): string {
   if (/\b(italic|oblique)\b/.test(font))
     return font.replace(/\b(italic|oblique)\b/, '');
@@ -422,7 +439,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
   const canvases = [canvas0, canvas1, canvas2];
   const pixmaps: any[] = [];
 
-  for (let i = 0; i < (firefox ? 3 : 2); ++i) {
+  for (let i = 0; i < (/* istanbul ignore next */ firefox ? 3 : 2); ++i) {
     const canvas = canvases[i];
 
     canvas.width = size;
@@ -438,7 +455,9 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
     // For Firefox, which renders missing glyphs all differently, check if a character
     // looks the same as itself when rendered in italics -- the missing glyph boxes
     // remain straight when italicized.
+    /* istanbul ignore next */
     context.font = (i === 1 && firefox ? changeItalic(metrics.font) : metrics.font);
+    /* istanbul ignore next */
     context.fillText(i === 0 || (firefox && i !== 2) ? charOrCodePoint : '\uFFFE', 0, metrics.fullAscent);
 
     pixmaps[i] = context.getImageData(0, 0, size, size).data;
@@ -476,6 +495,7 @@ export function getTextWidth(items: string | string[], font: string | HTMLElemen
   else if (typeof font === 'object')
     elementFont = getFont(font);
 
+  /* istanbul ignore else */
   if (elementFont)
     context.font = elementFont;
   else if (fallbackFont)
@@ -538,23 +558,57 @@ export function htmlUnescape(s: string): string {
   return s;
 }
 
-const _isMacOS_ish = _platform.startsWith('Mac') || /\bMac OS X\b/i.test(_navigator.userAgent);
-const _isMacOS = _isMacOS_ish && !/\bmobile\b/i.test(_navigator.userAgent);
-const _isSamsung = /\bSamsungBrowser\b/i.test(_navigator.userAgent);
-const _isWindows = _navigator.appVersion?.includes('Windows') || _platform.startsWith('Win');
-const _isEdge = /\bedge\b/i.test(_navigator.userAgent) && _isWindows;
-const _isChromium = !!(_window as any)?.chrome;
-const _isChromiumEdge = _isChromium && /\bedg\//i.test(_navigator.userAgent) && _isWindows;
-const _isAndroid = _navigator.userAgent.includes('Android') || _isSamsung;
-const _isOpera = typeof (_window as any)?.opr !== 'undefined';
-const _isChrome = _navigator.vendor === 'Google Inc.' &&
-    ((/\bChrome\b/i.test(_navigator.userAgent) && !_isEdge && !_isSamsung && !_isOpera && !_isChromiumEdge) ||
-     /\bCriOS\b/.test(_navigator.userAgent));
-const _isChromeOS = _navigator.vendor === 'Google Inc.' && /\bCrOS\b/i.test(_navigator.userAgent);
-const _isRaspbian = _navigator.userAgent.includes('Raspbian') || _platform.includes('Linux armv');
-const _isFirefox = /firefox/i.test(_navigator.userAgent) && !/seamonkey/i.test(_navigator.userAgent);
-const _isSafari = /^((?!chrome|android).)*safari/i.test(_navigator.userAgent) && !_isEdge;
-const _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (_isMacOS_ish && _isSafari && _navigator.maxTouchPoints > 1);
+let _platform: string;
+let _isMacOS_ish: boolean;
+let _isMacOS: boolean;
+let _isSamsung: boolean;
+let _isWindows: boolean;
+let _isLinux: boolean;
+let _isEdge: boolean;
+let _isChromium: boolean;
+let _isChromiumEdge: boolean;
+let _isAndroid: boolean;
+let _isOpera: boolean;
+let _isChrome: boolean;
+let _isChromeOS: boolean;
+let _isRaspbian: boolean;
+let _isFirefox: boolean;
+let _isSafari: boolean;
+let _isIOS: boolean;
+let _iosVersion: number;
+let _isIOS14OrEarlier: boolean;
+let _isLikelyMobile: boolean;
+
+export function initPlatformDetection(nav: any = _navigator, win?: any, smallScreen?: boolean): void {
+  win = win ?? _window;
+  smallScreen = smallScreen ?? !!_window?.matchMedia('only screen and (max-width: 760px)').matches;
+  _platform = nav.platform || (nav as any).userAgentData?.platform || '?';
+  _isMacOS_ish = _platform.startsWith('Mac') || /\b(Mac OS X|macOS)\b/i.test(nav.userAgent);
+  _isMacOS = _isMacOS_ish && !/\bmobile\b/i.test(nav.userAgent);
+  _isSamsung = /\bSamsungBrowser\b|(\bAndroid\b[^)]+\bSM-)/i.test(nav.userAgent);
+  _isWindows = nav.appVersion?.includes('Windows') || _platform.startsWith('Win');
+  _isLinux = _platform.startsWith('Linux') || /\bLinux\b/i.test(nav.userAgent);
+  _isEdge = /\bedge\b/i.test(nav.userAgent) && _isWindows;
+  _isChromium = !!(win as any)?.chrome;
+  _isChromiumEdge = _isChromium && _isEdge;
+  _isAndroid = nav.userAgent.includes('Android') || _isSamsung;
+  _isOpera = typeof win?.opr !== 'undefined' || /\bOPR\/\d+\b/.test(nav.userAgent);
+  _isChrome = nav.vendor === 'Google Inc.' &&
+    ((/\bChrome\b/i.test(nav.userAgent) && !_isEdge && !_isSamsung && !_isOpera && !_isChromiumEdge) ||
+      /\bCriOS\b/.test(nav.userAgent));
+  _isChromeOS = nav.vendor === 'Google Inc.' && /\bCrOS\b/i.test(nav.userAgent);
+  _isRaspbian = nav.userAgent.includes('Raspbian') || _platform.includes('Linux armv');
+  _isFirefox = /firefox/i.test(nav.userAgent) && !/seamonkey/i.test(nav.userAgent);
+  _isSafari = /^((?!chrome|android).)*safari/i.test(nav.userAgent) && !_isEdge;
+  _isIOS = /i(Pad|Pod|Phone)/i.test(_platform) || (_isMacOS_ish && _isSafari && nav.maxTouchPoints > 1);
+  _iosVersion = toNumber((((_isIOS || null) &&
+    /(((iPhone|iPad).+?OS\s+)|(Version\/))(\d+)/i.exec(nav.userAgent)) ?? [])[5]);
+  _isIOS14OrEarlier = _isIOS && _iosVersion <= 14;
+  _isLikelyMobile = _isIOS ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|\bmobile\b/i.test(nav.userAgent) || smallScreen;
+}
+
+initPlatformDetection();
 
 export function isAndroid(): boolean {
   return _isAndroid;
@@ -584,17 +638,6 @@ export function isFirefox(): boolean {
   return _isFirefox;
 }
 
-export function isFullScreen(): boolean {
-  const fsDoc = document as FsDocument;
-
-  return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
-}
-
-export function isEffectivelyFullScreen(): boolean {
-  return isFullScreen() ||
-    (!!_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
-}
-
 /**
  * @deprecated will always be false as this code no longer supports IE.
  */
@@ -607,19 +650,18 @@ export function isIOS(): boolean {
   return _isIOS;
 }
 
-const _iosVersion = toNumber((((isIOS() || null) && /(((iPhone|iPad).+?OS\s+)|(Version\/))(\d+)/i.exec(_navigator.userAgent)) ?? [])[5]);
+export function isLinux(): boolean {
+  return _isLinux;
+}
+
 export function iosVersion(): number {
   return _iosVersion;
 }
 
-const _isIOS14OrEarlier = isIOS() && iosVersion() <= 14;
 export function isIOS14OrEarlier(): boolean {
   return _isIOS14OrEarlier;
 }
 
-const _isLikelyMobile = _isIOS ||
-  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|\bmobile\b/i.test(_navigator.userAgent) ||
-  _window?.matchMedia('only screen and (max-width: 760px)').matches;
 export function isLikelyMobile(): boolean {
   return _isLikelyMobile;
 }
@@ -632,6 +674,9 @@ export function isOpera(): boolean {
   return _isOpera;
 }
 
+/**
+ * @deprecated no longer reliably detectable.
+ */
 export function isRaspbian(): boolean {
   return _isRaspbian;
 }
@@ -661,11 +706,13 @@ export function restrictPixelWidth(text: string, font: string | HTMLElement, max
   return text;
 }
 
+/* istanbul ignore next */
 export function setFullScreen(full: boolean): void {
   // noinspection JSIgnoredPromiseFromCall
   setFullScreenAsync(full, true);
 }
 
+/* istanbul ignore next */
 export function setFullScreenAsync(full: boolean, throwImmediate = false): Promise<void> {
   if (full !== isFullScreen())
     return toggleFullScreenAsync(throwImmediate);
@@ -673,11 +720,13 @@ export function setFullScreenAsync(full: boolean, throwImmediate = false): Promi
   return Promise.resolve();
 }
 
+/* istanbul ignore next */
 export function toggleFullScreen(): void {
   // noinspection JSIgnoredPromiseFromCall
   toggleFullScreenAsync();
 }
 
+/* istanbul ignore next */
 export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   const fsDoc = document as FsDocument;
 
@@ -711,6 +760,19 @@ export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
   }
 
   return Promise.resolve();
+}
+
+/* istanbul ignore next */
+export function isFullScreen(): boolean {
+  const fsDoc = document as FsDocument;
+
+  return !!(fsDoc.fullscreenElement || fsDoc.mozFullScreenElement || fsDoc.webkitFullscreenElement || fsDoc.msFullscreenElement);
+}
+
+/* istanbul ignore next */
+export function isEffectivelyFullScreen(): boolean {
+  return isFullScreen() ||
+    (!!_window && _window.innerWidth === _window.screen?.width && _window.innerHeight === _window.screen?.height);
 }
 
 export function encodeForUri(s: string, spaceAsPlus = false): string {

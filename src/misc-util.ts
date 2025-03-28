@@ -6,6 +6,7 @@ export interface IsEqualOptions {
   mustBeSameClass?: boolean;
 }
 
+/* istanbul ignore next */
 export function processMillis(): number {
   if (typeof performance !== 'undefined')
     return performance.now();
@@ -20,6 +21,10 @@ export function processMillis(): number {
   }
   else
     return Date.now();
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export enum DateTimeOptions { DATE_ONLY, NO_SECONDS, NO_ZONE, TIME_ONLY, UTC, USE_T, USE_Z, WITH_MILLIS }
@@ -155,7 +160,7 @@ export function toInt(value: any, defaultValue?: number, radix?: number): number
 export function toInt(value: any, defaultValue: null, radix?: number): number | null;
 export function toInt<T>(value: any, defaultValue: number | T = 0, radix = 10): number | T {
   if (typeof value === 'number')
-    return Math.floor(value);
+    return isNaN(value) ? defaultValue : Math.floor(value);
   else if (typeof value === 'string') {
     const matcher = digitMatchers[radix];
 
@@ -205,7 +210,7 @@ export function toNumber<T>(value: any, defaultValue: number | T | undefined = 0
   else if (typeof value === 'bigint') {
     const result = Number(value);
 
-    if (isNaN(result) || !isFinite(result))
+    if (!isFinite(result))
       return defaultValue;
     else
       return result;
@@ -351,14 +356,10 @@ export function isSymbol(a: unknown): a is symbol {
 }
 
 export function classOf(a: unknown, noClassResult = false): string | null {
-  if (isObject(a)) {
-    if (a.constructor?.name)
-      return a.constructor.name;
-    else
-      return noClassResult ? 'no-class:object' : null;
-  }
-
-  return noClassResult ? 'no-class:' + typeof a : null;
+  if (isObject(a))
+    return a.constructor.name;
+  else
+    return noClassResult ? 'no-class:' + typeof a : null;
 }
 
 export function clone<T>(orig: T, shallow: boolean | Set<any> | ((value: any, depth: number) => boolean) = false): T {
@@ -413,15 +414,15 @@ function cloneAux<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, d
   else if (orig instanceof Int8Array)
     theClone = new Int8Array(orig);
   else if (orig instanceof Int16Array)
-    theClone = new Int8Array(orig);
+    theClone = new Int16Array(orig);
   else if (orig instanceof Int32Array)
-    theClone = new Int8Array(orig);
+    theClone = new Int32Array(orig);
   else if (orig instanceof Uint8Array)
     theClone = new Uint8Array(orig);
   else if (orig instanceof Uint16Array)
-    theClone = new Uint8Array(orig);
+    theClone = new Uint16Array(orig);
   else if (orig instanceof Uint32Array)
-    theClone = new Uint8Array(orig);
+    theClone = new Uint32Array(orig);
   else if (orig instanceof Uint8ClampedArray)
     theClone = new Uint8ClampedArray(orig);
 
@@ -433,7 +434,7 @@ function cloneAux<T>(orig: T, shallow: boolean | Set<Function> | ((value: any, d
 
   const qlass = classOf(orig);
 
-  if (qlass != null && qlass !== 'Array') {
+  if (qlass != null && qlass !== 'Array' && qlass !== 'Object') {
     theClone = Object.create(Object.getPrototypeOf(orig));
 
     if (isArray(orig))
@@ -545,6 +546,7 @@ export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySo
   return result;
 }
 
+/* istanbul ignore next */
 export const noop = (..._args: any[]): void => {};
 
 export const repeat = (n: number, f: (n?: number) => any): void => { while (n-- > 0) f(n); };
@@ -565,13 +567,13 @@ export function keyCount(obj: any): number {
 
 // Intended to be used as a tag function.
 export function regex(main: TemplateStringsArray, flags?: string): RegExp {
-  const parts = asLines(main.raw[0] || '', true, true).filter(line => !line.startsWith('//')).map(line => line.replace(/\s\/\/\s.*$/, ''));
+  const parts = asLines(main.raw[0], true, true).filter(line => !line.startsWith('//')).map(line => line.replace(/\s\/\/\s.*$/, ''));
 
   return new RegExp(parts.join(''), flags);
 }
 
 export function compareDottedValues(a: string, b: string): number {
-  if (!a || !b || a === b)
+  if ((!a && !b) || a === b)
     return 0;
 
   // Lop off strings, starting at any non-numeric, non-dot characters
@@ -609,9 +611,7 @@ export function compareDottedValues(a: string, b: string): number {
       return 1;
   }
 
-  if (!a && !b)
-    return 0;
-  else if (!a)
+  if (!a)
     return -1;
   else
     return 1;

@@ -6,12 +6,18 @@ module.exports = function (config) {
       'src/**/*.ts'
     ],
     preprocessors: {
-      'src/**/*.ts': 'karma-typescript'
+      'src/**/*.ts': 'karma-typescript',
+      'src/**/!(index|*spec).ts': 'coverage'
     },
-    reporters: ['progress', 'karma-typescript'],
+    reporters: ['progress', 'karma-typescript', 'coverage'],
     browsers: ['ChromeHeadless', 'FirefoxHeadless'],
     karmaTypescriptConfig: {
       tsconfig: './tsconfig.karma.json'
     },
+    coverageReporter: {
+      type: 'lcov',
+      dir: './coverage-karma',
+      subdir: '.'
+    }
   });
 };

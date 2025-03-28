@@ -7,9 +7,9 @@ export interface RGBA {
   alpha: number;
 }
 
-const colorNameRegex = /[a-z]+/i;
-const rgbaRegex = /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)\s*\)/;
-const rgbRegex  = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
+const colorNameRegex = /^[a-z]+$/i;
+const rgbaRegex = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)\s*\)$/;
+const rgbRegex  = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/;
 
 let utilContext: CanvasRenderingContext2D;
 
@@ -44,7 +44,7 @@ export function colorFromByteArray(array: number[], offset = 0): string {
   const r = array[offset] || 0;
   const g = array[offset + 1] || 0;
   const b = array[offset + 2] || 0;
-  const alpha = (array[offset + 4] ?? 255) / 255;
+  const alpha = (array[offset + 3] ?? 255) / 255;
 
   return colorFromRGB(r, g, b, alpha);
 }
@@ -97,21 +97,8 @@ export function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: nu
   fillEllipse(context, cx, cy, r, r);
 }
 
-export function getPixel(imageData: ImageData, x: number, y: number): number {
-  if (x < 0 || y < 0 || x >= imageData.width || y >= imageData.height)
-    return 0;
-
-  const offset = (y * imageData.width + x) * 4;
-
-  // eslint-disable-next-line computed-property-spacing
-  return (imageData.data[offset    ] << 16) |
-         (imageData.data[offset + 1] <<  8) |
-          imageData.data[offset + 2]        |
-         (imageData.data[offset + 3] << 24);
-}
-
 export function parseColor(color: string): RGBA {
-  let match = colorNameRegex.exec(color);
+  let match = colorNameRegex.exec((color = color.trim()));
 
   if (match) {
     if (!utilContext) {
@@ -124,20 +111,25 @@ export function parseColor(color: string): RGBA {
   }
 
   if (color.startsWith('#')) {
-    if (color.length === 4)
-      return {
-        r: parseInt(color.substr(1, 1) + color.substr(1, 1), 16),
-        g: parseInt(color.substr(2, 1) + color.substr(2, 1), 16),
-        b: parseInt(color.substr(3, 1) + color.substr(3, 1), 16),
-        alpha: 1.0
-      };
-    else if (color.length === 7)
-      return {
-        r: parseInt(color.substr(1, 2), 16),
-        g: parseInt(color.substr(3, 2), 16),
-        b: parseInt(color.substr(5, 2), 16),
-        alpha: 1.0
-      };
+    switch (color.length) {
+      case 4:
+      case 5:
+        return {
+          r: parseInt(color.substr(1, 1) + color.substr(1, 1), 16),
+          g: parseInt(color.substr(2, 1) + color.substr(2, 1), 16),
+          b: parseInt(color.substr(3, 1) + color.substr(3, 1), 16),
+          alpha: color.length === 4 ? 1.0 : parseInt(color.substr(4, 1) + color.substr(4, 1), 16) / 255.0
+        };
+
+      case 7:
+      case 9:
+        return {
+          r: parseInt(color.substr(1, 2), 16),
+          g: parseInt(color.substr(3, 2), 16),
+          b: parseInt(color.substr(5, 2), 16),
+          alpha: color.length === 7 ? 1.0 : parseInt(color.substr(7, 2), 16) / 255.0
+        };
+    }
   }
 
   match = rgbRegex.exec(color);
@@ -157,6 +149,19 @@ export function replaceAlpha(color: string, newAlpha: number): string {
   const rgba = parseColor(color);
 
   return colorFromRGB(rgba.r, rgba.g, rgba.b, newAlpha);
+}
+
+export function getPixel(imageData: ImageData, x: number, y: number): number {
+  if (x < 0 || y < 0 || x >= imageData.width || y >= imageData.height)
+    return 0;
+
+  const offset = (y * imageData.width + x) * 4;
+
+  // eslint-disable-next-line computed-property-spacing
+  return (imageData.data[offset    ] << 16) |
+         (imageData.data[offset + 1] <<  8) |
+          imageData.data[offset + 2]        |
+         (imageData.data[offset + 3] << 24);
 }
 
 export function setPixel(imageData: ImageData, x: number, y: number, pixel: number): void {

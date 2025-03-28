@@ -1,9 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "module": "commonjs",
     "strictNullChecks": false,
-    "target": "ES2015"
+    "target": "ES2020"
   },
   "exclude": [
     "dist",

@@ -1,17 +1,20 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { blendColors, parseColor } from './browser-graphics-util';
+import { encodeForUri, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
-  doesCharacterGlyphExist, encodeForUri, getCssValue, getCssValues, getFont, getFontMetrics, htmlEscape, htmlUnescape, urlEncodeParams
-} from './browser-util';
-import {
-  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, formatDateTime, getOrSet, getOrSetAsync, isArray, isArrayLike, isBoolean, isEqual, isFunction,
-  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, last, nfe, nth, numSort, processMillis, push, pushIf, regex, repeat, reverseNumSort, sortObjectEntries,
-  toBoolean, toInt, toNumber, toValidInt, toValidNumber, ufe
+  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, forEach, forEach2,
+  formatDateTime, getOrSet, getOrSetAsync, isArray, isArrayLike, isBigint, isBoolean, isEqual, isFunction,
+  isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, keyCount, last, nfe, nth, numSort,
+  processMillis, push, pushIf, regex, repeat, reverseNumSort, sleep, sortObjectEntries, toBoolean,
+  toDefaultLocaleFixed, toInt, toNumber, toValidInt, toValidNumber, ufe
 } from './misc-util';
+// noinspection JSDeprecatedSymbols
 import {
-  asLines, checksum53, convertDigits, convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
-  makePlainASCII_lc, makePlainASCII_UC, padLeft, regexEscape, stripDiacriticals, stripDiacriticals_lc, stripLatinDiacriticals, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
+  asLines, checksum53, compareCaseInsensitive, compareCaseSecondary, compareStrings, convertDigits,
+  convertDigitsToAscii, digitScript, extendDelimited, isAllUppercase, isAllUppercaseWords, isDigit, makePlainASCII,
+  makePlainASCII_lc, makePlainASCII_UC, padLeft, padRight, regexEscape, replace, stripDiacriticals,
+  stripDiacriticals_lc, stripDiacriticals_UC, stripLatinDiacriticals, stripLatinDiacriticals_lc,
+  stripLatinDiacriticals_UC, toMaxFixed, toMaxSignificant, toMixedCase, toTitleCase
 } from './string-util';
 import * as util from './index';
 
@@ -42,6 +45,12 @@ class TestClass2 extends Array<number> {
   }
 }
 
+class TestClass3 extends TestClass {
+  constructor(public a: number, public b: number) {
+    super(a, b);
+  }
+}
+
 describe('@tubular/util', () => {
   it('should extend a string, adding delimiters where needed', () => {
     let s = '';
@@ -52,71 +61,71 @@ describe('@tubular/util', () => {
     expect(s).to.equal('A, B');
   });
 
-  it('should parse colors correctly', () => {
-    if (typeof document === 'undefined') {
-      console.info('Test must be run in browser');
-      return;
-    }
-
-    function fixAlphaRounding(color: any): any {
-      color.alpha = Math.round(color.alpha * 10) / 10;
-      return color;
-    }
-
-    expect(parseColor('yellow')).to.deep.equal({ r: 255, g: 255, b: 0, alpha: 1 });
-    expect(parseColor('#9CF')).to.deep.equal({ r: 153, g: 204, b: 255, alpha: 1 });
-    expect(parseColor('#8090a0')).to.deep.equal({ r: 128, g: 144, b: 160, alpha: 1 });
-    expect(parseColor('SteelBlue')).to.deep.equal({ r: 70, g: 130, b: 180, alpha: 1 });
-    expect(parseColor('transparent')).to.deep.equal({ r: 0, g: 0, b: 0, alpha: 0 });
-    expect(fixAlphaRounding(parseColor('rgba(20, 30, 44, 0.5)'))).to.deep.equal({ r: 20, g: 30, b: 44, alpha: 0.5 });
-  });
-
-  it('should blend colors correctly', () => {
-    if (typeof document === 'undefined') {
-      console.info('Test must be run in browser');
-      return;
-    }
-
-    let color = blendColors('white', 'black');
-    expect(color).to.equal('#808080');
-
-    color = blendColors('white', 'black', 0.75);
-    expect(color).to.equal('#BFBFBF');
-
-    color = blendColors('rgba(20, 40, 60, 0.6)', 'rgba(40, 60, 80, 0.4)');
-    expect(color).to.equal('rgba(30, 50, 70, 0.5)');
-  });
-
   it('should format date/time correctly', () => {
     expect(formatDateTime()).to.match(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d [-+]\d{4}/);
     expect(formatDateTime('Fri Jun 07 2019 21:18:36 GMT-0400',
       [DateTimeOptions.USE_T, DateTimeOptions.USE_Z])).to.equal('2019-06-08T01:18:36Z');
+    expect(formatDateTime('Fri Jun 07 2019 21:18:36 GMT-0400',
+      [DateTimeOptions.USE_T, DateTimeOptions.UTC, DateTimeOptions.NO_ZONE])).to.equal('2019-06-08T01:18:36');
     expect(new Date('2019-06-08 01:18:36.890Z').getTime()).to.equal(1559956716890);
     expect(formatDateTime(1559956716890,
       [DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z])).to.equal('2019-06-08 01:18:36.890Z');
+    expect(formatDateTime(1559956716890,
+      [DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z, DateTimeOptions.USE_T])).to.equal('2019-06-08T01:18:36.890Z');
     expect(formatDateTime(1559956716890,
       DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_Z)).to.equal('2019-06-08 01:18:36.890Z');
     expect(formatDateTime(1559956716890,
       DateTimeOptions.WITH_MILLIS, DateTimeOptions.USE_T, DateTimeOptions.USE_Z)).to.equal('2019-06-08T01:18:36.890Z');
     expect(formatDateTime([DateTimeOptions.TIME_ONLY])).to.match(/\d\d:\d\d:\d\d [-+]\d{4}/);
+    expect(formatDateTime([DateTimeOptions.TIME_ONLY, DateTimeOptions.NO_SECONDS])).to.match(/\d\d:\d\d [-+]\d{4}/);
+    expect(formatDateTime([DateTimeOptions.TIME_ONLY, DateTimeOptions.NO_SECONDS, DateTimeOptions.NO_ZONE])).to.match(/\d\d:\d\d/);
+    expect(formatDateTime([DateTimeOptions.DATE_ONLY])).to.match(/\d\d\d\d-\d\d-\d\d/);
+  });
+
+  it('string comparison', () => {
+    expect(compareStrings('foo', 'foo')).to.equal(0);
+    expect(compareStrings('foo', 'bar')).to.equal(1);
+    expect(compareStrings('foo', 'quux')).to.equal(-1);
+    expect(compareCaseInsensitive('foo', 'FOO')).to.equal(0);
+    expect(compareCaseInsensitive('foo', 'BAR')).to.equal(1);
+    expect(compareCaseInsensitive('FOO', 'quux')).to.equal(-1);
+    expect(compareCaseSecondary('foo', 'foo')).to.equal(0);
+    expect(compareCaseSecondary('foo', 'FOO')).to.equal(1);
+    expect(compareCaseSecondary('FOO', 'foo')).to.equal(-1);
+    expect(compareCaseSecondary('foo', 'bar')).to.equal(1);
+    expect(compareCaseSecondary('foo', 'quux')).to.equal(-1);
   });
 
   /* cSpell:disable */
   it('should strip diacritical marks from Latin characters', () => {
+    expect(stripLatinDiacriticals('')).to.equal('');
+    expect(stripLatinDiacriticals('xyz')).to.equal('xyz');
     // noinspection SpellCheckingInspection
-    expect(stripLatinDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
-      .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþy');
+    expect(stripLatinDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĤĥ̊u\u2010'))
+      .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþyHhu\u2010');
+    expect(stripLatinDiacriticals_lc('')).to.equal('');
+    expect(stripLatinDiacriticals_lc('ÐÑÒ')).to.equal('ðno');
+    expect(stripLatinDiacriticals_UC('')).to.equal('');
+    expect(stripLatinDiacriticals_UC('çèé')).to.equal('CEE');
   });
 
   it('should strip diacritical marks from Latin and non-Latin characters', () => {
     // noinspection SpellCheckingInspection
     expect(stripDiacriticals('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿΆΈΪΫάέήίΰϊϋόύώϔӐӑӒӓӖӗЀйѐёіїќ'))
       .to.equal('AAAAAAÆCEEEEIIIIÐNOOOOO×OUUUUYÞßaaaaaaæceeeeiiiiðnooooo÷ouuuuyþyΑΕΙΥαεηιυιυουωϒАаАаЕеЕиееіік');
-    expect(stripDiacriticals('a b')).to.equal('a b');
-    expect(stripDiacriticals_lc('a b')).to.equal('a b');
+    expect(stripDiacriticals('')).to.equal('');
+    expect(stripDiacriticals('Á b')).to.equal('A b');
+    expect(stripDiacriticals_lc('')).to.equal('');
+    expect(stripDiacriticals_lc('Á b')).to.equal('a b');
+    expect(stripDiacriticals_UC('')).to.equal('');
+    expect(stripDiacriticals_UC('Á b')).to.equal('A B');
   });
 
   it('should simplify symbols and Latin characters to plain ASCII', () => {
+    expect(makePlainASCII(null as any)).to.equal(null);
+    expect(makePlainASCII('abc')).to.equal('abc');
+    // noinspection SpellCheckingInspection
+    expect(makePlainASCII('©«®±»ĲĳŊŋŒœĀ—―…̃x')).to.equal('(c)<<(R)+/->>IjijNgngOeoeA----...x');
     // noinspection SpellCheckingInspection
     expect(makePlainASCII('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'))
       .to.equal('AAAAAAAeCEEEEIIIIDhNOOOOO_OUUUUYThssaaaaaaaeceeeeiiiidhnooooo_ouuuuythy');
@@ -131,52 +140,11 @@ describe('@tubular/util', () => {
     // noinspection SpellCheckingInspection
     expect(makePlainASCII('[café*]', true)).to.equal('(cafe-)');
     // noinspection SpellCheckingInspection
-    expect(makePlainASCII_UC('[café*]', true)).to.equal('(CAFE-)');
+    expect(makePlainASCII_UC('.[café*]"/:;<>?\\|', true)).to.equal('_(CAFE-)\'________');
+    expect(makePlainASCII_lc(null as any)).to.equal(null);
+    expect(makePlainASCII_UC('')).to.equal('');
   });
   /* cSpell:enable */
-
-  it('should get fonts in correct shorthand form', () => {
-    if (typeof document === 'undefined') {
-      console.info('Test must be run in browser');
-      return;
-    }
-
-    const span = document.createElement('span');
-
-    span.textContent = '?';
-    span.style.font = 'bold italic 14pt "Courier New", monospace';
-    span.style.lineHeight = '1.5em';
-    span.style.fontStretch = '125%';
-    document.body.appendChild(span);
-
-    const font = getFont(span);
-
-    expect(font).to.contain('italic');
-    expect(font).to.contain('"Courier New"');
-    expect(font).to.contain('monospace');
-    expect(font).to.contain('expanded');
-    expect(font).to.match(/\b18\.6\d+px\s*\/\s*28px\b/);
-    expect(font).to.match(/\b(bold|700)\b/);
-    document.body.removeChild(span);
-  });
-
-  it('should get single and multiple css style values', () => {
-    if (typeof document === 'undefined') {
-      console.info('Test must be run in browser');
-      return;
-    }
-
-    const span = document.createElement('span');
-
-    span.style.color = 'red';
-    span.style.lineHeight = '24px';
-    document.body.appendChild(span);
-
-    expect(getCssValue(span, 'color')).to.equal('rgb(255, 0, 0)');
-    expect(getCssValue(span, 'line-height')).to.equal('24px');
-    expect(getCssValues(span, ['color', 'line-height'])).to.eql(['rgb(255, 0, 0)', '24px']);
-    document.body.removeChild(span);
-  });
 
   it('should accurately measure time intervals', done => {
     let start = processMillis();
@@ -196,45 +164,63 @@ describe('@tubular/util', () => {
     }, 100);
   });
 
-  it('should correctly identify missing character glyphs', () => {
-    if (typeof document === 'undefined') {
-      console.info('Test must be run in browser');
+  it('should correctly convert to boolean', () => {
+  });
+
+  it('toDefaultLocaleFixed', () => {
+    // Skip these tests if the default locale doesn't match expectations.
+    const sample1 = Math.PI.toLocaleString([], { minimumFractionDigits: 9 });
+    const sample2 = (Math.PI * 1E9).toLocaleString([], { maximumFractionDigits: 0 });
+
+    if (!/\./.test(sample1) || /[ ,]/.test(sample1) || !/,/.test(sample2) || /[ .]/.test(sample2))
       return;
-    }
 
-    const fonts = ['12px sans-serif', '14pt monospace'];
-
-    for (const font of fonts) {
-      expect(doesCharacterGlyphExist(font, 'a')).to.be.true;
-      expect(doesCharacterGlyphExist(font, '\uFFFE')).to.be.false;
-      expect(doesCharacterGlyphExist(font, 0x2022)).to.be.true;
-      expect(doesCharacterGlyphExist(font, 0xFFFF)).to.be.false;
-    }
+    expect(toDefaultLocaleFixed(3)).to.equal('3');
+    expect(toDefaultLocaleFixed(Math.PI)).to.equal('3.142');
+    expect(toDefaultLocaleFixed(3, 2)).to.equal('3.00');
+    expect(toDefaultLocaleFixed(Math.PI, 2, 2)).to.equal('3.14');
+    expect(toDefaultLocaleFixed(3, 2, 5)).to.equal('3.00');
+    expect(toDefaultLocaleFixed(Math.PI, 2, 5)).to.equal('3.14159');
+    expect(toDefaultLocaleFixed(-Math.PI, 2, 5)).to.equal('-3.14159');
+    expect(toDefaultLocaleFixed(Math.PI * 1E9, 2, 2)).to.equal('3,141,592,653.59');
   });
 
   it('should correctly convert to boolean', () => {
-    expect(toBoolean('t', false)).to.equal(true);
-    expect(toBoolean('YES', false)).to.equal(true);
-    expect(toBoolean('False', true)).to.equal(false);
-    expect(toBoolean('n', true)).to.equal(false);
-    expect(toBoolean('?', true)).to.equal(true);
-    expect(toBoolean('?', false)).to.equal(false);
-    expect(toBoolean('?')).to.equal(false);
-    expect(toBoolean('?', null)).to.equal(null);
-    expect(toBoolean(null, true)).to.equal(true);
-    expect(toBoolean(undefined, true)).to.equal(true);
-    expect(toBoolean('')).to.equal(false);
-    expect(toBoolean('', true)).to.equal(true);
-    expect(toBoolean('', false, true)).to.equal(true);
+    expect(toBoolean(true)).to.be.true;
+    expect(toBoolean('t')).to.be.true;
+    expect(toBoolean('true')).to.be.true;
+    expect(toBoolean('TRUE')).to.be.true;
+    expect(toBoolean('Yes')).to.be.true;
+    expect(toBoolean('', true)).to.be.true;
+    expect(toBoolean(42)).to.be.true;
+    expect(toBoolean(42n)).to.be.true;
+    expect(toBoolean(Number.NaN, true)).to.be.true;
+    expect(toBoolean({})).to.be.true;
+    expect(toBoolean('', false, true)).to.be.true;
+    expect(toBoolean(false)).to.be.false;
+    expect(toBoolean('F')).to.be.false;
+    expect(toBoolean('FALSE')).to.be.false;
+    expect(toBoolean('false')).to.be.false;
+    expect(toBoolean('nope')).to.be.false;
+    expect(toBoolean(0)).to.be.false;
+    expect(toBoolean(undefined)).to.be.false;
+    expect(toBoolean(null, false, true)).to.be.false;
+    expect(toBoolean('')).to.be.false;
   });
 
   it('should correctly convert to int', () => {
     expect(toInt('-47')).to.equal(-47);
+    expect(toInt('--47')).to.equal(0);
+    expect(toInt(-47n)).to.equal(-47);
     expect(toInt('foo', 99)).to.equal(99);
+    expect(toInt(Number.NaN, 99)).to.equal(99);
+    expect(toInt('8'.repeat(350), 9999)).to.equal(9999);
+    expect(toInt(BigInt('8'.repeat(350)), 9999)).to.equal(9999);
     expect(toInt('1011', -1, 2)).to.equal(11);
     expect(toInt('cafebabe', -1, 16)).to.equal(3405691582);
     /* cSpell:disable-next-line */ // noinspection SpellCheckingInspection
     expect(toInt('cafegabe', -1, 16)).to.equal(-1);
+    expect(toInt({})).to.equal(0);
   });
 
   it('should get first, last, nth element of an array', () => {
@@ -250,23 +236,6 @@ describe('@tubular/util', () => {
     expect(last([])).to.equal(undefined);
     expect(last([], 'foo')).to.equal('foo');
     expect(last(null)).to.equal(undefined);
-  });
-
-  it('should get first, last, nth element of a DOM array', () => {
-    if (typeof document === 'undefined') {
-      console.info('Test must be run in browser');
-      return;
-    }
-
-    const elem = document.createElement('div');
-    elem.appendChild(document.createElement('p'));
-    elem.appendChild(document.createElement('span'));
-    elem.appendChild(document.createElement('script'));
-
-    expect(last(null)).to.equal(undefined);
-    expect(first(elem.children)!.outerHTML).to.equal('<p></p>');
-    expect(last(elem.children)!.outerHTML).to.equal('<script></script>');
-    expect(nth(elem.children, 1)!.outerHTML).to.equal('<span></span>');
   });
 
   it('should split string into lines', () => {
@@ -297,6 +266,7 @@ describe('@tubular/util', () => {
   });
 
   it('should properly convert strings to title case', () => {
+    expect(toTitleCase('this')).to.equal('This');
     expect(toTitleCase("isn't this (working)?")).to.equal("Isn't This (Working)?");
     /* cspell:disable-next-line */ // noinspection SpellCheckingInspection
     expect(toTitleCase('íSN’T THIS WÖRKING?')).to.equal('Ísn’t This Wörking?');
@@ -306,6 +276,7 @@ describe('@tubular/util', () => {
     expect(toTitleCase('born in the usa', { special: ['USA'] })).to.equal('Born in the USA');
     expect(toTitleCase('born in the USA', { keepAllCaps: true })).to.equal('Born in the USA');
     expect(toTitleCase("born in the ol' USA", { keepAllCaps: true, shortSmall: ['-in', "ol'"] })).to.equal("Born In the ol' USA");
+    expect(toTitleCase('sitting on the dock of the ebay', { special: ['-eBay'] })).to.equal('Sitting on the Dock of the Ebay');
   });
 
   it('should properly detect uppercase strings and words', () => {
@@ -322,6 +293,16 @@ describe('@tubular/util', () => {
     expect(padLeft(-5, 4)).to.equal('  -5');
     expect(padLeft(5, 4)).to.equal('   5');
     expect(padLeft(-5, 4, '0')).to.equal('-005');
+  });
+
+  it('padRight', () => {
+    // noinspection JSDeprecatedSymbols
+    expect(padRight('dye', 7)).to.equal('dye    ');
+  });
+
+  it('replace', () => {
+    expect(replace('tra lA la', 'la', 'LA')).to.equal('tra lA LA');
+    expect(replace('tra lA la', 'la', 'LA', true)).to.equal('tra LA LA');
   });
 
   it('should properly recognize data types', () => {
@@ -347,6 +328,9 @@ describe('@tubular/util', () => {
     expect(isNumber(() => 'bar')).to.be.false;
     expect(isNumber(NaN)).to.be.true;
 
+    expect(isBigint(Math.PI)).to.be.false;
+    expect(isBigint(7506n)).to.be.true;
+
     expect(isObject(Math.PI)).to.be.false;
     expect(isObject({})).to.be.true;
     expect(isObject(() => 'bar')).to.be.true;
@@ -360,28 +344,13 @@ describe('@tubular/util', () => {
     expect(isSymbol(Symbol('bar'))).to.be.true;
   });
 
-  it('should properly recognize DOM data types', () => {
-    if (typeof document === 'undefined') {
-      console.info('Test must be run in browser');
-      return;
-    }
-
-    expect(isArray(5)).to.be.false;
-    expect(isArray('foo')).to.be.false;
-
-    const elem = document.createElement('div');
-
-    elem.appendChild(document.createElement('p'));
-    expect(isArray(elem.childNodes)).to.be.false;
-    expect(isArrayLike(elem.childNodes)).to.be.true;
-    expect(isBoolean(elem.childNodes)).to.be.false;
-  });
-
   it('should properly get class names', () => {
     expect(classOf(3)).to.equal(null);
     expect(classOf(3, true)).to.equal('no-class:number');
     expect(classOf(new Date())).to.equal('Date');
     expect(classOf(new TestClass(44, 55))).to.equal('TestClass');
+    expect(classOf(41.3, true)).to.equal('no-class:number');
+    expect(classOf({}, true)).to.equal('Object');
   });
 
   it('should properly deep clone values', () => {
@@ -412,6 +381,7 @@ describe('@tubular/util', () => {
     expect(clone(new Set([2, 78])).has(78)).to.be.true;
     expect(clone(new Map([[2, 78]])).get(2)).to.equal(78);
     expect(clone(new Float32Array([1.25]))[0]).to.equal(1.25);
+    expect(clone(new Float64Array([-0.02]))[0]).to.equal(-0.02);
     expect(clone(new Uint8ClampedArray([3, 400]))[1]).to.equal(255);
 
     const recurse = new Set<any>([1, 2]);
@@ -428,6 +398,17 @@ describe('@tubular/util', () => {
     expect(clone(sample, new Set([Map])).date).not.to.equal(sample.date);
     expect(clone(sample, (value) => value instanceof Date).date).to.equal(sample.date);
     expect(clone(sample, (_value, depth) => depth > 2).date).not.to.equal(sample.date);
+
+    expect(clone(/abc/)).to.eql(/abc/);
+    expect(clone(new BigInt64Array(4))).to.eql(new BigInt64Array(4));
+    expect(clone(new BigUint64Array(4))).to.eql(new BigUint64Array(4));
+    expect(clone(new Float64Array(4))).to.eql(new Float64Array(4));
+    expect(clone(new Int8Array(4))).to.eql(new Int8Array(4));
+    expect(clone(new Int16Array(4))).to.eql(new Int16Array(4));
+    expect(clone(new Int32Array(4))).to.eql(new Int32Array(4));
+    expect(clone(new Uint8Array(4))).to.eql(new Uint8Array(4));
+    expect(clone(new Uint16Array(4))).to.eql(new Uint16Array(4));
+    expect(clone(new Uint32Array(4))).to.eql(new Uint32Array(4));
   });
 
   it('should properly deep compares values', () => {
@@ -479,6 +460,8 @@ describe('@tubular/util', () => {
       { keysToIgnore: ['b'] })).to.be.true;
     expect(isEqual({ a: 1, b: 2, c: 3 }, { a: 1, c: 3 },
       { keysToIgnore: ['b'] })).to.be.true;
+    expect(isEqual({ a: 1, b: 2, c: 3 }, {},
+      { keysToIgnore: ['b'] }, 'b')).to.be.true;
     expect(isEqual({ a: 1, c: 3 }, { a: 1, b: 2, c: 3 },
       { keysToIgnore: ['b'] })).to.be.true;
     expect(isEqual({ a: 1, b: 2, c: 3, d: '4' }, { a: 1, b: -2, c: 3, d: '4' },
@@ -490,6 +473,9 @@ describe('@tubular/util', () => {
             return undefined;
         }
       })).to.be.true;
+
+    expect(isEqual(new TestClass(9, 0), new TestClass3(9, 0))).to.be.true;
+    expect(isEqual(new TestClass(9, 0), new TestClass3(9, 0), { mustBeSameClass: true })).to.be.false;
   });
 
   it('should properly flatten arrays', () => {
@@ -521,9 +507,11 @@ describe('@tubular/util', () => {
 
   it('should push items into an array, and return that modified array', () => {
     expect(push([5])).to.eql([5]);
+    expect(push(null, 5)).to.eql([5]);
     expect(push([5], 6)).to.eql([5, 6]);
     expect(pushIf(false, [5], 6)).to.eql([5]);
     expect(pushIf(true, [5], 6)).to.eql([5, 6]);
+    expect(pushIf(true, null, 6)).to.eql([6]);
     expect(push(['do'], 're', 'mi')).to.eql(['do', 're', 'mi']);
     expect(push(['do'], ...['re', 'mi'])).to.eql(['do', 're', 'mi']);
   });
@@ -545,19 +533,10 @@ describe('@tubular/util', () => {
     expect(isDigit('7')).to.be.true;
     expect(isDigit('೫')).to.be.true;
     expect(isDigit('ꮗ')).to.be.false;
+    expect(digitScript(null)).to.equal(undefined);
     expect(digitScript('꩒')).to.equal('Cham');
     expect(digitScript('4')).to.equal('ASCII');
     expect(digitScript('foo')).to.be.undefined;
-  });
-
-  it('should determine font metrics correctly', () => {
-    if (typeof document === 'undefined') {
-      console.info('Test must be run in browser');
-      return;
-    }
-
-    expect(getFontMetrics('24px Arial').lineHeight).to.be.approximately(28, 1);
-    expect(getFontMetrics('24px Arial', '\u1B52').extraLineHeight).to.be.approximately(35, 1);
   });
 
   it('encodeForUri', () => {
@@ -636,7 +615,7 @@ describe('@tubular/util', () => {
     expect(toInt('!123')).to.equal(0);
     expect(toInt('!123', 7)).to.equal(7);
     expect(toInt('!123', null)).to.equal(null);
-    expect(toInt(NaN)).to.be.NaN;
+    expect(toInt(NaN)).to.equal(0);
     expect(toInt(1 / 0)).to.not.be.finite;
     expect(toValidInt('123')).to.equal(123);
     expect(toValidInt('g', 0, 30)).to.equal(16);
@@ -645,6 +624,8 @@ describe('@tubular/util', () => {
     expect(toValidInt('!123', 7)).to.equal(7);
     expect(toValidInt(NaN)).to.equal(0);
     expect(toValidInt(1 / 0)).to.equal(0);
+    expect(toNumber(-878n, 9999)).to.equal(-878);
+    expect(toNumber(BigInt('8'.repeat(350)), 9999)).to.equal(9999);
   });
 
   it('compareDottedValues', () => {
@@ -653,6 +634,9 @@ describe('@tubular/util', () => {
     expect(compareDottedValues('33.22.11', '33.22.11')).to.equal(0);
     expect(compareDottedValues('1.0', '1.0.1')).below(0);
     expect(compareDottedValues('1.0.10', '1.0.9')).above(0);
+    expect(compareDottedValues('', '')).to.equal(0);
+    expect(compareDottedValues('2.1', '2')).above(0);
+    expect(compareDottedValues('2', '2.1')).below(0);
   });
 
   it('should properly compute 53-bit checksums', () => {
@@ -682,5 +666,43 @@ describe('@tubular/util', () => {
     expect(nfe([])).to.equal(null);
     expect(ufe([2, 3])).to.deep.equal([2, 3]);
     expect(ufe([])).to.equal(undefined);
+  });
+
+  it('forEach, forEach2', () => {
+    let s = '';
+    const obj = { a: 2, b: 3 } as any;
+
+    forEach(obj, (key, value) => s += `${key},${value};`);
+    expect(s).to.equal('a,2;b,3;');
+
+    s = '';
+    forEach(null, (key, value) => s += `${key},${value};`);
+    expect(s).to.equal('');
+
+    s = '';
+    obj[Symbol('foo')] = '4';
+    forEach2(obj, (key, value) => s += `${isSymbol(key) ? 'sym' : key},${value};`);
+    expect(s).to.equal('a,2;b,3;sym,4;');
+
+    s = '';
+    forEach2(null, (key, value) => s += `${isSymbol(key) ? 'sym' : key},${value}`);
+    expect(s).to.equal('');
+  });
+
+  it('keyCount', () => {
+    expect(keyCount(null)).to.equal(0);
+    expect(keyCount({})).to.equal(0);
+    expect(keyCount({ a: 0, b: 1 })).to.equal(2);
+    expect(keyCount([0, 1, 2])).to.equal(4); // length is the fourth key
+  });
+
+  it('should sleep for a given number of milliseconds', async () => {
+    // Browser seems to need more timing lenience.
+    const delta = (typeof document === 'undefined' ? 0 : 25);
+
+    const start = processMillis();
+    await sleep(200);
+    expect(processMillis() - start).to.be.above(190 - delta);
+    expect(processMillis() - start).to.be.below(210 + delta);
   });
 });

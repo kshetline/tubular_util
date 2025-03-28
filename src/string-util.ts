@@ -16,7 +16,7 @@ try {
   // eslint-disable-next-line no-misleading-character-class
   wordPattern = new RegExp(String.raw`(?<=^|[^\p{L}])['’ʼ]?[` + '\\' + String.raw`p{L}'’ʼ\u0300-\u036F]+['’ʼ]?(?=[^\p{L}]|$)`, 'g' + u);
 }
-catch {
+catch /* istanbul ignore next */ {
   notLetterPattern = /[A-ZÀ-ÖØ-ÿ]/ig;
   digitPattern = /^\d$/;
   allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
@@ -185,8 +185,6 @@ export function makePlainASCII(s: string, forFileName = false): string {
       ch = latinExtendedASubstitutions.charAt(cc - 0x100);
     else if ((cc === 0x2014 || cc === 0x2015) && !forFileName) // em dash, horizontal bar
       ch2 = '--';
-    else if ((cc === 0x2014 || cc === 0x2015) && !forFileName) // em dash, horizontal bar
-      ch2 = '--';
     else if (cc === 0x2026 && !forFileName) // ellipsis
       ch2 = '...';
     else if ((pos = diacriticals.indexOf(ch)) >= 0)
@@ -264,9 +262,8 @@ export function toTitleCase(s: string, options?: TitleCaseOptions): string {
 
   let shortSmalls = defaultShortSmalls;
   let specials = defaultSpecials;
-  const firstNonSpaceIndex = (/^\s*/.exec(s) || [])[0]?.length;
-  // @ts-ignore
-  const lastNonSpaceIndex = s.length - (/\s*$/.exec(s) || [])[0]?.length;
+  const firstNonSpaceIndex = (/^\s*/.exec(s)!)[0]?.length;
+  const lastNonSpaceIndex = s.length - ((/\s*$/.exec(s)!)[0]?.length || 0);
 
   if (options.shortSmall) {
     shortSmalls = new Set(shortSmalls);
@@ -377,12 +374,8 @@ export function stripLatinDiacriticals(s: string): string {
     let pos: number;
 
     if (cc < 0xC0) {} // Do nothing
-    else if (0x100 <= cc && cc <= 0x17F) { // Various Latin Extended A
+    else if (0x100 <= cc && cc <= 0x17F) // Various Latin Extended A
       ch2 = latinExtendedASubstitutions.charAt(cc - 0x100);
-
-      if (ch2 === '-')
-        ch2 = undefined;
-    }
     else if ((pos = diacriticals.indexOf(ch)) >= 0) {
       ch2 = plainChars.charAt(pos);
 
