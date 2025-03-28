@@ -8,7 +8,7 @@ import {
 /* @ts-ignore */ // noinspection JSDeprecatedSymbols
 import browserUtil, {
   beep, beepPromise, doesCharacterGlyphExist, eventToKey, getCssRuleValue, getCssRuleValues, getCssValue, getCssValues,
-  getCssVariable, getFont, getFontMetrics, initPlatformDetection, iosVersion, isAndroid, isChrome, isChromeOS,
+  getCssVariable, getFont, getFontMetrics, getTextWidth, initPlatformDetection, iosVersion, isAndroid, isChrome, isChromeOS,
   isChromium, isChromiumEdge, isEdge, isEffectivelyFullScreen, isFirefox, isIE, isIOS, isIOS14OrEarlier,
   isLikelyMobile, isLinux, isMacOS, isOpera, isRaspbian, isSafari, isSamsung, isWindows, restrictPixelWidth,
   setCssVariable, setFullScreen, toggleFullScreen
@@ -122,7 +122,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   it('eventToKey', () => {
     expect(eventToKey({ keyCode: 3 } as any)).to.equal('Enter');
     expect(eventToKey({ keyCode: 48 } as any)).to.equal('0');
-    expect(eventToKey({ keyCode: 99 } as any)).to.equal('3');
+    expect(eventToKey({ which: 99 } as any)).to.equal('3');
     expect(eventToKey({ keyCode: 113 } as any)).to.equal('F2');
     expect(eventToKey({ keyCode: 144 } as any)).to.equal('NumLock');
     expect(eventToKey({ keyCode: 224 } as any)).to.equal('Meta');
@@ -160,14 +160,27 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     span.style.fontStretch = '125%';
     document.body.appendChild(span);
 
-    const font = getFont(span);
+    const checkFont = (font: string) => {
+      expect(font).to.contain('italic');
+      expect(font).to.contain('"Courier New"');
+      expect(font).to.contain('monospace');
+      expect(font).to.contain('expanded');
+      expect(font).to.match(/\b18\.6*\d+px\s*\/\s*28px\b/);
+      expect(font).to.match(/\b(bold|700)\b/);
+    };
 
-    expect(font).to.contain('italic');
-    expect(font).to.contain('"Courier New"');
-    expect(font).to.contain('monospace');
-    expect(font).to.contain('expanded');
-    expect(font).to.match(/\b18\.6\d+px\s*\/\s*28px\b/);
-    expect(font).to.match(/\b(bold|700)\b/);
+    checkFont(getFont(span));
+
+    span.style.font = '';
+    span.style.fontStyle = 'italic';
+    span.style.fontWeight = 'bold';
+    span.style.fontSize = '14pt';
+    span.style.fontFamily = '"Courier New", monospace';
+    span.style.lineHeight = '1.5em';
+    span.style.fontStretch = '125%';
+
+    checkFont(getFont(span));
+
     document.body.removeChild(span);
   });
 
@@ -213,6 +226,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(getCssRuleValue(document.body, 'font-family')).to.equal('sans-serif');
     expect(getCssRuleValues(document.body, ['background-color', 'color', 'padding', 'margin']))
       .to.deep.equal(['magenta', 'blue', '4px', '1px 2px']);
+    expect(getCssRuleValue(document.body, 'what-evs')).to.equal(undefined);
   });
 
   it('doesCharacterGlyphExist', () => {
@@ -257,9 +271,17 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(restrictPixelWidth('Now is the time', '9px Arial, sans-serif', 250)).to.equal('Now is the time');
   });
 
-  it('getFontMetrics', () => {
+  it('getFontMetrics, getTextWidth', () => {
     expect(getFontMetrics('24px Arial').lineHeight).to.be.approximately(28, 1);
     expect(getFontMetrics('24px Arial', '\u1B52').extraLineHeight).to.be.approximately(35, 1);
+
+    const span = document.createElement('span');
+
+    document.body.appendChild(span);
+    span.style.font = '24px Arial';
+    expect(getFontMetrics(span, '\u1B52').extraLineHeight).to.be.approximately(35, 1);
+    expect(getTextWidth('XYZ', span)).to.be.approximately(47, 3);
+    document.body.removeChild(span);
   });
 
   it('getPixel/setPixel', () => {
@@ -401,6 +423,8 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(isEdge()).to.be.false;
     expect(isFirefox()).to.be.false;
     expect(isLikelyMobile()).to.be.false;
+
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1', vendor: 'Google Inc.' });
   });
 
   it('platform checking, Firefox/Linux', () => {

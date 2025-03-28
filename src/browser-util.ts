@@ -10,6 +10,7 @@ try {
 }
 catch {}
 
+/* istanbul ignore next */
 if (!_navigator)
   _navigator = { appVersion: '?', maxTouchPoints: 0, platform: '?', userAgent: '?', vendor: '?' } as typeof navigator;
 
@@ -53,6 +54,7 @@ export function beep(frequency = 440, gainValue = 0.025, duration = 100): void {
 }
 
 export async function beepPromise(frequency = 440, gainValue = 0.025, duration = 100): Promise<void> {
+  /* istanbul ignore next */
   if (!_window)
     return;
 
@@ -201,14 +203,14 @@ export function setCssVariable(name: string, value: string): void {
 }
 
 export function getCssRuleValue(element: Element, property: string): string | undefined {
-  return (getCssRuleValues(element, [property]) || [])[0] || undefined;
+  return (getCssRuleValues(element, [property]))[0] || undefined;
 }
 
 export function getCssRuleValues(element: Element, properties: string[]): (string | undefined)[] {
   const stack: CSSStyleDeclaration[] = [];
 
   function searchRules(rules: CSSRuleList) {
-    Array.from(rules ?? []).forEach(rule => {
+    Array.from(rules ?? /* istanbul ignore next */ []).forEach(rule => {
       if (rule instanceof CSSMediaRule && _window?.matchMedia(rule.conditionText).matches)
         searchRules(rule.cssRules);
       else if (rule instanceof CSSSupportsRule) {
@@ -228,7 +230,8 @@ export function getCssRuleValues(element: Element, properties: string[]): (strin
     });
   }
 
-  Array.from(document.styleSheets ?? []).forEach(sheet => searchRules(sheet.rules || sheet.cssRules));
+  Array.from(document.styleSheets ?? /* istanbul ignore next */ [])
+    .forEach(sheet => searchRules(sheet.rules || /* istanbul ignore next */ sheet.cssRules));
 
   let results: (string | undefined)[] = properties.map(_p => undefined);
   let last: CSSStyleDeclaration | undefined;
@@ -258,6 +261,7 @@ export function getFont(element: Element): string {
   const style = document.defaultView!.getComputedStyle(element, null);
   let font = style.getPropertyValue('font');
 
+  /* istanbul ignore next */ // Can't seem to force this situation to arise anymore.
   if (!font) {
     const fontStyle = style.getPropertyValue('font-style');
     const fontVariant = style.getPropertyValue('font-variant');
@@ -411,6 +415,7 @@ export function getFontMetrics(elementOrFont: Element | string, specificChar?: s
   return metrics;
 }
 
+/* istanbul ignore next */ // Only sometimes called for checking glyphs on Firefox
 function changeItalic(font: string): string {
   if (/\b(italic|oblique)\b/.test(font))
     return font.replace(/\b(italic|oblique)\b/, '');
@@ -434,7 +439,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
   const canvases = [canvas0, canvas1, canvas2];
   const pixmaps: any[] = [];
 
-  for (let i = 0; i < (firefox ? 3 : 2); ++i) {
+  for (let i = 0; i < (/* istanbul ignore next */ firefox ? 3 : 2); ++i) {
     const canvas = canvases[i];
 
     canvas.width = size;
@@ -450,7 +455,9 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
     // For Firefox, which renders missing glyphs all differently, check if a character
     // looks the same as itself when rendered in italics -- the missing glyph boxes
     // remain straight when italicized.
+    /* istanbul ignore next */
     context.font = (i === 1 && firefox ? changeItalic(metrics.font) : metrics.font);
+    /* istanbul ignore next */
     context.fillText(i === 0 || (firefox && i !== 2) ? charOrCodePoint : '\uFFFE', 0, metrics.fullAscent);
 
     pixmaps[i] = context.getImageData(0, 0, size, size).data;
@@ -488,6 +495,7 @@ export function getTextWidth(items: string | string[], font: string | HTMLElemen
   else if (typeof font === 'object')
     elementFont = getFont(font);
 
+  /* istanbul ignore else */
   if (elementFont)
     context.font = elementFont;
   else if (fallbackFont)

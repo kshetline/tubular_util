@@ -168,6 +168,13 @@ describe('@tubular/util', () => {
   });
 
   it('toDefaultLocaleFixed', () => {
+    // Skip these tests if the default locale doesn't match expectations.
+    const sample1 = Math.PI.toLocaleString([], { minimumFractionDigits: 9 });
+    const sample2 = (Math.PI * 1E9).toLocaleString([], { maximumFractionDigits: 0 });
+
+    if (!/\./.test(sample1) || /[ ,]/.test(sample1) || !/,/.test(sample2) || /[ .]/.test(sample2))
+      return;
+
     expect(toDefaultLocaleFixed(3)).to.equal('3');
     expect(toDefaultLocaleFixed(Math.PI)).to.equal('3.142');
     expect(toDefaultLocaleFixed(3, 2)).to.equal('3.00');
@@ -175,6 +182,7 @@ describe('@tubular/util', () => {
     expect(toDefaultLocaleFixed(3, 2, 5)).to.equal('3.00');
     expect(toDefaultLocaleFixed(Math.PI, 2, 5)).to.equal('3.14159');
     expect(toDefaultLocaleFixed(-Math.PI, 2, 5)).to.equal('-3.14159');
+    expect(toDefaultLocaleFixed(Math.PI * 1E9, 2, 2)).to.equal('3,141,592,653.59');
   });
 
   it('should correctly convert to boolean', () => {
