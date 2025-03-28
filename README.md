@@ -77,8 +77,8 @@ function toInt(value: any, defaultValue: null, radix?: number): number | null;
 
 Converts a `value` of any type to an integer `number` (or possibly `null`, if `defaultValue` is `null`).
 
-* Any `value` of type `number` is returned as `Math.floor(value)`.
-* `null`, `undefined`, or `NaN` become `defaultValue` (the default `defaultValue` is 0).
+* `null`, `undefined`, positive or negative infinity, or `NaN` become `defaultValue` (the default `defaultValue` is 0).
+* Any other `value` of type `number` is returned as `Math.floor(value)`.
 * Any `value` of type `string` _composed completely of valid digits_ for the given `radix` (default 10) is returned as `parseInt(value, radix)`, unless the result of `parseInt` is `NaN` or an infinite value, in which case `defaultValue` is returned.
 * Any other `string` value results in `defaultValue`.
 * Any `value` of type `bigint` is returned as `Number(value)`, unless the result of `Number` is `NaN` or an infinite value, in which case `defaultValue` is returned.
@@ -91,7 +91,7 @@ function toNumber(value: any, defaultValue: null): number | null;
 
 Converts a `value` of any type to a `number` (or possibly `null`, if `defaultValue` is `null`).
 
-* Any `value` of type `number` is returned as itself.
+* Any `value` of type `number` is returned as itself (this includes infinite or `NaN` values).
 * `null` or `undefined` become `defaultValue` (the default `defaultValue` is 0).
 * Any `value` of type `string` is returned as `parseFloat(value)`, unless the result of `parseFloat` is `NaN` or an infinite value, in which case `defaultValue` is returned.
 * Any `value` of type `bigint` is returned as `Number(value)`, unless the result of `Number` is `NaN` or an infinite value, in which case `defaultValue` is returned.
@@ -223,6 +223,8 @@ function isEqual(a: any, b: any, mustBeSameClass = false): boolean;
 This function determines if two values `a` and `b` are equal to each other, by deep comparison when necessary.
 
 * As a first check, `a` and `b` are equal considered equal if `a === b` or `Object.is(a, b)` is `true`. Please note:
+
+
   | Equal?            | a = 0, b = -0 | a = NaN, b = NaN |
   | ----------------- | ------------- | ---------------- |
   | `a === b`         | true          | false            |
@@ -233,6 +235,19 @@ This function determines if two values `a` and `b` are equal to each other, by d
 * If `a` and `b` are both arrays, but of unequal length, they are not considered equal.
 * If `mustBeSameClass` is `true`, `a` and `b` must either be instances of the same class, or both must not be an instance of any class, otherwise they are not considered equal.
 * Otherwise, all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
+
+
+```typescript
+function last<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined
+```
+
+Return the last element of an array, or `defaultValue` (`undefined` if not specified) if a last element does not exist.
+
+```typescript        
+function nfe<T>(array: T[]): T[] | null
+```
+
+Return the array if the array is not empty, otherwise `null`. ("nfe" stands for "null for empty".)
 
 ```typescript
 export function numSort(a: any, b: any): number
@@ -249,28 +264,10 @@ The default array sorting behavior of JavaScript, even for all-numeric array, is
 
 
 ```typescript
-export function reverseNumSort(a: any, b: any): number
-```
-
-Same as `numSort`, but sorts in descending numerical order.
-
-```typescript        
-function nfe<T>(array: T[]): T[] | null
-```
-
-Return the array if the array is not empty, otherwise `null`.
-
-```typescript
 function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined
 ```
 
-Return the last element of an array, or `defaultValue` (`undefined` if not specified) if a last element does not exist.
-
-```typescript
-function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined
-```
-
-Return `n`th element of an array, or `defaultValue` (`undefined` if not specified) if an `n`th element does not exist.
+Return the `n`th element of the array, or `defaultValue` (`undefined` if not specified) if the element does not exist. If `n` is negative the `array.length + n` element is indexed, e.g. an `n` of -1 refers to the last item in the array, -2 to the next-to-last item, etc.
 
 ```typescript
 function push<T>(array: T[] | null | undefined, ...items: any[]): T[];
@@ -283,6 +280,12 @@ function pushIf<T>(condition: boolean, array: T[] | null | undefined, ...items: 
 ```
 
 The same as `push` above, except that `items` are pushed conditionally.
+
+```typescript
+export function reverseNumSort(a: any, b: any): number
+```
+
+Same as `numSort`, but sorts in descending numerical order.
 
 ```typescript
 type EntrySorter = (a: [string | symbol, any], b: [string | symbol, any]) => number;
@@ -301,7 +304,7 @@ If `inPlace` is `true` (the default is `false`) `obj` itself will be returned by
 function ufe<T>(array: T[]): T[] | undefined
 ```
 
-Return the array if the array is not empty, otherwise `undefined`.
+Return the array if the array is not empty, otherwise `undefined`. ("ufe" stands for "undefined for empty".)
 
 ## String functions
 
@@ -328,7 +331,7 @@ Compares two strings in a case-insensitive manner, returning a less-than-zero va
 function compareCaseSecondary(a: string, b: string): number;
 ```
 
-Compares two strings in the same manner as `compareCaseInsensitive`, but if both strings are equal in a case-insensitive manner, case is then taken into consideration, and 0 is only returned if `a` and `b` are completely identical.
+Compares two strings in the same manner as `compareCaseInsensitive`, but if both strings are equal in a case-insensitive manner, case is then taken into consideration. 0 is only returned if `a` and `b` are completely identical.
 
 ```typescript
 function compareStrings(a: string, b: string): number;
@@ -389,7 +392,7 @@ Returns a representation of `s` which can be used by `RegExp`, automatically esc
 function replace(str: string, searchStr: string, replaceStr: string, caseInsensitive = false): string;
 ```
 
-JavaScript’s own string `replace` method only replaces one occurrence of a string with another string unless you use a regex with the `g` flag for the search string. This function replaces all occurrences without having to use a regex and without worrying about escaping special characters. Matching can optionally be case-insensitive.
+JavaScript’s own string `replace` method only replaces one occurrence of a string with another string unless you use a regex with the `g` flag for the search string. This function replaces all occurrences of `searchStr` without having to use a regex and without worrying about escaping special characters. Matching can optionally be case-insensitive.
 
 Most of this functionality can now be provided by `String.prototype.replaceAll` except for case-insensitive replacement without using regexes.
 
@@ -620,7 +623,7 @@ Similar to `encodeURIComponent`, except the characters `!'()*` are also %-encode
 function getTextWidth(items: string | string[], font: string | HTMLElement, fallbackFont?: string): number;
 ```
 
-Determine the pixel width of a single string, or of the widest of string in an array of strings, as rendered in the specified `font`. If `font` is not recognized, the width can be determined according to the optional `fallbackFont`.
+Determine the pixel width of a single string, or of the widest string in an array of strings, as rendered in the specified `font`. If `font` is not recognized, the width can be determined according to the optional `fallbackFont`.
 
 ```typescript
 function htmlEscape(s: string, escapeQuotes = false): string;
@@ -701,9 +704,10 @@ function isIE(): boolean; // @deprecated, always false now since IE is not suppo
 function isIOS(): boolean;
 function isIOS14OrEarlier(): boolean;
 function isLikelyMobile(): boolean;
+function isLinux(): boolean;
 function isMacOS(): boolean;
 function isOpera(): boolean;
-function isRaspbian(): boolean;
+function isRaspbian(): boolean; // @deprecated, no longer reliably detectable.
 function isSafari(): boolean;
 function isSamsung(): boolean;
 function isWindows(): boolean;
