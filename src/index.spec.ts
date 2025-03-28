@@ -51,6 +51,13 @@ class TestClass3 extends TestClass {
   }
 }
 
+function isGoodLocale(): boolean {
+  const sample1 = Math.PI.toLocaleString([], { minimumFractionDigits: 9 });
+  const sample2 = (Math.PI * 1E9).toLocaleString([], { maximumFractionDigits: 0 });
+
+  return /\./.test(sample1) && !/[ ,]/.test(sample1) && /,/.test(sample2) && !/[ .]/.test(sample2);
+}
+
 describe('@tubular/util', () => {
   it('should extend a string, adding delimiters where needed', () => {
     let s = '';
@@ -166,13 +173,9 @@ describe('@tubular/util', () => {
 
   it('should correctly convert to boolean', () => {
   });
-
   it('toDefaultLocaleFixed', () => {
     // Skip these tests if the default locale doesn't match expectations.
-    const sample1 = Math.PI.toLocaleString([], { minimumFractionDigits: 9 });
-    const sample2 = (Math.PI * 1E9).toLocaleString([], { maximumFractionDigits: 0 });
-
-    if (!/\./.test(sample1) || /[ ,]/.test(sample1) || !/,/.test(sample2) || /[ .]/.test(sample2))
+    if (!isGoodLocale())
       return;
 
     expect(toDefaultLocaleFixed(3)).to.equal('3');
@@ -230,7 +233,10 @@ describe('@tubular/util', () => {
     expect(first(null, 88)).to.equal(88);
     expect(last(a)).to.equal(-3);
     expect(nth(a, 2)).to.equal(4);
+    expect(nth(a, -1)).to.equal(-3);
+    expect(nth(a, -4)).to.equal(1.1);
     expect(nth(a, 10)).to.equal(undefined);
+    expect(nth(a, -10)).to.equal(undefined);
     expect(nth(a, 10, 7)).to.equal(7);
     expect(last(['alpha', 'omega'])).to.equal('omega');
     expect(last([])).to.equal(undefined);
@@ -557,6 +563,10 @@ describe('@tubular/util', () => {
   });
 
   it('toMaxFixed', () => {
+    // Skip these tests if the default locale doesn't match expectations.
+    if (!isGoodLocale())
+      return;
+
     expect(toMaxFixed(Math.PI, 2)).to.equal('3.14');
     expect(toMaxFixed(Math.PI, 3)).to.equal('3.142');
     expect(toMaxFixed(Math.PI, 3, 'fr')).to.equal('3,142');
@@ -569,6 +579,10 @@ describe('@tubular/util', () => {
   });
 
   it('toMaxSignificant', () => {
+    // Skip these tests if the default locale doesn't match expectations.
+    if (!isGoodLocale())
+      return;
+
     expect(toMaxSignificant(Math.PI, 2)).to.equal('3.1');
     expect(toMaxSignificant(Math.PI, 3)).to.equal('3.14');
     expect(toMaxSignificant(Math.PI, 3, 'fr')).to.equal('3,14');
@@ -616,7 +630,7 @@ describe('@tubular/util', () => {
     expect(toInt('!123', 7)).to.equal(7);
     expect(toInt('!123', null)).to.equal(null);
     expect(toInt(NaN)).to.equal(0);
-    expect(toInt(1 / 0)).to.not.be.finite;
+    expect(toInt(1 / 0)).to.be.finite;
     expect(toValidInt('123')).to.equal(123);
     expect(toValidInt('g', 0, 30)).to.equal(16);
     expect(toValidInt(123.4)).to.equal(123);

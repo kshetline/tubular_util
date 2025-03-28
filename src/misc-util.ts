@@ -160,7 +160,7 @@ export function toInt(value: any, defaultValue?: number, radix?: number): number
 export function toInt(value: any, defaultValue: null, radix?: number): number | null;
 export function toInt<T>(value: any, defaultValue: number | T = 0, radix = 10): number | T {
   if (typeof value === 'number')
-    return isNaN(value) ? defaultValue : Math.floor(value);
+    return isNaN(value) || !isFinite(value) ? defaultValue : Math.floor(value);
   else if (typeof value === 'string') {
     const matcher = digitMatchers[radix];
 
@@ -234,8 +234,8 @@ export function first<T>(array: ArrayLike<T> | null | undefined, defaultValue?: 
 }
 
 export function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined {
-  if (isArrayLike(array) && array.length > n)
-    return array[n];
+  if (isArrayLike(array) && array.length + (n < 0 ? 1 : 0) > Math.abs(n))
+    return n < 0 ? array[array.length + n] : array[n];
   else
     return defaultValue;
 }
