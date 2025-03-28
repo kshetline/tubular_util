@@ -173,7 +173,6 @@ describe('@tubular/util', () => {
 
   it('should correctly convert to boolean', () => {
   });
-
   it('toDefaultLocaleFixed', () => {
     // Skip these tests if the default locale doesn't match expectations.
     if (!isGoodLocale())
