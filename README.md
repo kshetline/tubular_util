@@ -224,18 +224,17 @@ This function determines if two values `a` and `b` are equal to each other, by d
 
 * As a first check, `a` and `b` are equal considered equal if `a === b` or `Object.is(a, b)` is `true`. Please note:
 
-
   | Equal?            | a = 0, b = -0 | a = NaN, b = NaN |
-  | ----------------- | ------------- | ---------------- |
+  |-------------------|---------------|------------------|
   | `a === b`         | true          | false            |
   | `Object.is(a, b)` | false         | true             |
   | `isEqual(a, b)`   | true          | true             |
+
 * If `a` and `b` are not the same type (as determined by `typeof`), they are not considered equal.
 * If one of `a` and `b` is an array, and the other is not, they are not considered equal.
 * If `a` and `b` are both arrays, but of unequal length, they are not considered equal.
 * If `mustBeSameClass` is `true`, `a` and `b` must either be instances of the same class, or both must not be an instance of any class, otherwise they are not considered equal.
 * Otherwise, all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
-
 
 ```typescript
 function last<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined
