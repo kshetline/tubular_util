@@ -12,7 +12,7 @@ An assortment of general-purpose utility functions, including string manipulatio
 - [Type/class checking](#typeclass-checking)
 - [Array/object comparison and manipulation](#arrayobject-comparison-and-manipulation)
 - [String functions](#string-functions)
-- [Date and number formatting](#date-and-number-formatting)
+- [Date, time, and number formatting](#date-time-and-number-formatting)
 - [Browser-oriented functions](#browser-oriented-functions)
 - [Browser identification](#browser-identification)
 - [Browser graphics](#browser-graphics)
@@ -453,7 +453,7 @@ If `keepAllCaps` is `true`, any word that is originally fully capitalized remain
 
 `special` is a list of words that you wish to provide special capitalization rules for, such as “CinemaScope” or “MacDougall”. Some of these are built in, such as “FedEx” and “iOS”.
 
-## Date and number formatting
+## Date, time, and number formatting
 
 ```typescript
 function convertDigits(n: string, baseDigit: string): string;
