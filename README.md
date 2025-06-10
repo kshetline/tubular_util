@@ -266,7 +266,7 @@ The default array sorting behavior of JavaScript, even for all-numeric array, is
 function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined
 ```
 
-Return the `n`th element of the array, or `defaultValue` (`undefined` if not specified) if the element does not exist. If `n` is negative the `array.length + n` element is indexed, e.g. an `n` of -1 refers to the last item in the array, -2 to the next-to-last item, etc.
+Return the `n`th element of the array, or `defaultValue` (`undefined` if not specified) if the element does not exist. If `n` is negative the `array.length + n` element is indexed, e.g., an `n` of -1 refers to the last item in the array, -2 to the next-to-last item, etc.
 
 ```typescript
 function push<T>(array: T[] | null | undefined, ...items: any[]): T[];
@@ -293,7 +293,7 @@ function sortObjectEntries<T>(obj: T, inPlace?: boolean): T;
 function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boolean);
 ```
 
-JavaScript objects function as *ordered* maps, with a consistently-maintained ordering of object properties. This function allows you to sort that order.
+JavaScript objects function as *ordered* maps, with a consistently maintained ordering of object properties. This function allows you to sort that order.
 
 By default, sorting is done in ascending alphabetical order using JavaScript’s default string collation. You can, however, supply your own `sorter` to control how properties will be ordered.
 
@@ -342,7 +342,7 @@ Compares two strings, returning a less-than-zero value if `a` is less than `b`, 
 function extendDelimited(base: string, newItem: string, delimiter = ', '): string;
 ```
 
-Appends one string to another string, inserting a `delimiter` in between the strings if the first string in not an empty string.
+Appends one string to another string, inserting a `delimiter` in between the strings if the first string is not an empty string.
 
 ```typescript
 function isAllUppercase(s: string): boolean;
@@ -489,7 +489,7 @@ export function formatDateTime(date: Date | number | string, options?: DateTimeO
 
 This function returns date/time strings in basic ISO 8601 format, for either the default local time zone or for UTC. The default time value is the current time. The default format is date and time at one-second resolution, with UTC offset included, e.g. `2022-08-07 16:12:43 -0400`.
 
-The following options can be applied either as an array of options, or as a variable list of parameters after the `date` parameter:
+The following options can be applied either as an array of options or as a variable list of parameters after the `date` parameter:
 
 * `DATE_ONLY`: Date only, e.g. `2022-08-07`.
 * `NO_SECONDS`: Hide seconds, e.g. `2022-08-07 16:12 -0400`.
@@ -730,19 +730,19 @@ Blend two CSS-style colors, in equal proportions by default, using a weighted av
 function colorFrom24BitInt(i: number, alpha = 1.0): string;
 ```
 
-Turn a numerically-encoded RGB color value `i` (in the form 0xRRGGBB) into a CSS color string in the form `'#RRGGBB'`, or, if `alpha` has a non-1 value, a color string in the form `'rgba(r, g, b, alpha)'`, where `r`, `g`, and `b` are the decimal equivalents of `RR`, `GG`, and `BB`
+Turn a numerically encoded RGB color value `i` (in the form 0xRRGGBB) into a CSS color string in the form `'#RRGGBB'`, or, if `alpha` has a non-1 value, a color string in the form `'rgba(r, g, b, alpha)'`, where `r`, `g`, and `b` are the decimal equivalents of `RR`, `GG`, and `BB`
 
 ```typescript
 function colorFromByteArray(array: number[], offset = 0): string;
 ```
 
-Use values from `array`, starting at the optional `offset`, to create a CSS color string. Values should be in the integer range 0-255, in the order red, green, blue, optionally followed by an integer 0-255 alpha value.
+Use values from `array`, starting at the optional `offset`, to create a CSS color string. Values should be in the integer range 0–255, in the order red, green, blue, optionally followed by an integer 0–255 alpha value.
 
 ```typescript
 function colorFromRGB(r: number, g: number, b: number, alpha = 1.0): string;
 ```
 
-Return a CSS color string based on integer `r`, `g`, and `b` values from 0-255, and an optional `alpha` value from 0-1.
+Return a CSS color string based on integer `r`, `g`, and `b` values over the range 0–255, and with an optional `alpha` value 0–1.
 
 ```typescript
 function drawOutlinedText(context: CanvasRenderingContext2D, text: string, x: number, y: number,
@@ -819,7 +819,11 @@ Draw a line from `x0`, `y0` to `x1`, `y1`.
 function debounce<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>): (...args: Parameters<F>) => void
 ```
 
-Calls `func` after a `delay` microseconds, and no more frequently than once every `delay` microseconds when called repeatedly. If you need to obtain a result from `func` when it is executed, provide the optional `callback` parameter.
+Let us refer to the return value of `debounce` as `D`.
+
+`D` is a debounced implementation of `func`, where `func` is called once after `delay` microseconds have passed when `D` is first invoked, and subsequently no more frequently than once every `delay` microseconds when `D` is invoked repeatedly.
+
+If you need to obtain a result from `func` when `func` is executed, provide the optional `callback` parameter.
 
 ```typescript
 function forEach<T>(obj: Record<string, T> | null | undefined, callback: (key: string, value: T) => void): void;
@@ -837,7 +841,7 @@ Iterate over all key/value pairs in `obj`, including `symbol` keys.
 function getOrSet<T, U>(map: Map<T, U>, key: T, callbackOrValue: U | (() => U)): U
 ```
 
-This function either returns the value from the `map` associated with `key` if it exists, or stores a new value under `key` and returns that. The value may be either provided explicitly, or provided via a callback function — ideal if you don't want to compute that value unless necessary.
+This function either returns the value from the `map` associated with `key` if it exists or stores a new value under `key` and returns that. The value may be either provided explicitly or provided via a callback function — ideal if you don't want to compute that value unless necessary.
 
 ```typescript
 async function getOrSetAsync<T, U>(map: Map<T, U>, key: T, callback: () => Promise<U>): Promise<U>
@@ -861,13 +865,13 @@ A convenience function equivalent to `Reflect.ownKeys(obj).length`.
 const noop = (..._args: any[]): void => {};
 ```
 
-A function that does nothing, useful as a no-operation function parameter.
+A function which does nothing, useful as a no-operation function parameter.
 
 ```typescript
 function processMillis(): number;
 ```
 
-This is a platform-neutral method to return the current process running time, returning `performance.now()` in a web browser environment, or `process.hrtime()`, converted into milliseconds (and derived from the `bigint` form if available) in a Node.js environment. The function falls back on `Date.now()` if neither of the previous options are available.
+This is a platform-neutral method to return the current process running time, returning `performance.now()` in a web browser environment, or `process.hrtime()`, converted into milliseconds (and derived from the `bigint` form if available) in a Node.js environment. The function falls back on `Date.now()` if neither of the previous options is available.
 
 ```typescript
 function regex(main: TemplateStringsArray, flags?: string): RegExp;
@@ -916,7 +920,15 @@ export function sleep(ms: number): Promise<void>;
 function throttle<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>): (...args: Parameters<F>) => void
 ```
 
-Calls `func` immediately after the first call, and then no more frequently than once every `delay` microseconds when called repeatedly. If you need to obtain a result from `func` when it is executed, provide the optional `callback` parameter.
+Let us refer to the return value of `throttle` as `T`.
+
+`T` is a throttled implementation of `func`, where `func` is called immediately after the first invocation of `T`, and subsequently no more frequently than once every `delay` microseconds when `T` is invoked repeatedly.
+
+If you need to obtain a result from `func` when `func` is executed, provide the optional `callback` parameter.
+
+If `delay` is a positive value, then leading-edge throttling is performed: all invocations during the delay period are ignored.
+
+If `delay` is a negative value, then leading/trailing-edge throttling is performed using the absolute value of `delay`: the last invocation, if any, during the delay period is honored as soon as the delay runs out.
 
 ## Deprecated functions
 

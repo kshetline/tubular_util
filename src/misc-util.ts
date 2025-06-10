@@ -636,16 +636,31 @@ export function debounce<F extends AnyFunction>(delay: number, func: F, callback
 
 export function throttle<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
     (...args: Parameters<F>) => void {
+  const trailing = (delay < 0);
   let timer: any;
+  let pendingArgs: any;
+
+  const callFunc = (args: any) => {
+    const result = func.apply(this, args);
+
+    if (callback)
+      callback(result);
+
+    timer = setTimeout(() => {
+      timer = undefined;
+
+      if (pendingArgs) {
+        args = pendingArgs;
+        pendingArgs = undefined;
+        callFunc(args);
+      }
+    }, Math.abs(delay));
+  };
 
   return function (...args: Parameters<F>): void {
-    if (!timer) {
-      const result = func.apply(this, args);
-
-      if (callback)
-        callback(result);
-
-      timer = setTimeout(() => timer = undefined, delay);
-    }
+    if (!timer)
+      callFunc(args);
+    else if (trailing)
+      pendingArgs = args;
   };
 }

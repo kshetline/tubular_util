@@ -743,14 +743,15 @@ describe('@tubular/util', () => {
   });
 
   it('throttle', async () => {
-    const start = processMillis();
+    let start = processMillis();
     let count = 0;
     let time = 0;
+    let rightA = -7;
 
     function testFunction(a: number, b: string, c: string): number {
       ++count;
       time = processMillis();
-      expect(a === -7 && b === 'foo' && c === 'bar').to.be.true;
+      expect(a === rightA && b === 'foo' && c === 'bar').to.be.true;
 
       return 909;
     }
@@ -764,5 +765,17 @@ describe('@tubular/util', () => {
 
     expect(time).is.lessThan(start + 5);
     expect(count).equals(1);
+
+    const throttledTrailing = throttle(-10, testFunction, val => { expect(val).to.equal(909); rightA = -9; });
+
+    start = processMillis();
+    count = 0;
+    throttledTrailing(-7, 'foo', 'bar');
+    throttledTrailing(-8, 'foo', 'bar');
+    throttledTrailing(-9, 'foo', 'bar');
+    await sleep(100);
+
+    expect(time).is.greaterThan(start + 5);
+    expect(count).equals(2);
   });
 });

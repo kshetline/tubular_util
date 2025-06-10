@@ -435,7 +435,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
 
   const canvas0 = self.canvas0 || (self.canvas0 = document.createElement('canvas') as HTMLCanvasElement);
   const canvas1 = self.canvas1 || (self.canvas1 = document.createElement('canvas') as HTMLCanvasElement);
-  const canvas2 = self.canvas2 || (self.canvas2 = firefox && document.createElement('canvas') as HTMLCanvasElement);
+  const canvas2 = self.canvas2 || (self.canvas2 = /* istanbul ignore next */ firefox && document.createElement('canvas') as HTMLCanvasElement);
   const canvases = [canvas0, canvas1, canvas2];
   const pixmaps: any[] = [];
 
@@ -468,8 +468,8 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
       return true;
   }
 
-  // Italic font trick doesn't always help with Firefox, so take the extra step of
-  // looking for box edges.
+  // Italic font trick doesn't always help with Firefox, so take the extra step of looking for box edges.
+  /* istanbul ignore next */
   if (firefox) {
     for (let i = 0; i < pixmaps[0].length; i += 4) {
       const row = floor(i / 4 / size);
