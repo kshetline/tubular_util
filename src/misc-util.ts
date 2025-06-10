@@ -616,3 +616,36 @@ export function compareDottedValues(a: string, b: string): number {
   else
     return 1;
 }
+
+type AnyFunction = (...args: any[]) => any | void;
+
+export function debounce<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
+    (...args: Parameters<F>) => void {
+  let timer: any;
+
+  return function (...args: Parameters<F>): void {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const result = func.apply(this, args);
+
+      if (callback)
+        callback(result);
+    }, delay);
+  };
+}
+
+export function throttle<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
+    (...args: Parameters<F>) => void {
+  let timer: any;
+
+  return function (...args: Parameters<F>): void {
+    if (!timer) {
+      const result = func.apply(this, args);
+
+      if (callback)
+        callback(result);
+
+      timer = setTimeout(() => timer = undefined, delay);
+    }
+  };
+}

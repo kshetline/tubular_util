@@ -1,18 +1,28 @@
 import sourcemaps from 'rollup-plugin-sourcemaps';
 import { terser } from 'rollup-plugin-terser';
 import typescript from '@rollup/plugin-typescript';
+import pkg from './package.json';
 
+// noinspection JSUnusedGlobalSymbols
 export default [
   {
     input: 'dist/index.js',
     output: [
       {
-        file: 'dist/cjs/index.js',
+        file: pkg['umd:main'],
+        sourcemap: true,
+        format: 'umd',
+        name: 'JSONZ'
+      },
+      {
+        file: pkg.main,
+        sourcemap: true,
         format: 'cjs'
       },
       {
-        file: 'dist/fesm2015/index.js',
-        format: 'es'
+        file: pkg.module,
+        sourcemap: true,
+        format: 'esm'
       }
     ],
     plugins: [

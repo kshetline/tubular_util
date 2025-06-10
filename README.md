@@ -816,6 +816,12 @@ Draw a line from `x0`, `y0` to `x1`, `y1`.
 ## Other functions
 
 ```typescript
+function debounce<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>): (...args: Parameters<F>) => void
+```
+
+Calls `func` after a `delay` microseconds, and no more frequently than once every `delay` microseconds when called repeatedly. If you need to obtain a result from `func` when it is executed, provide the optional `callback` parameter.
+
+```typescript
 function forEach<T>(obj: Record<string, T> | null | undefined, callback: (key: string, value: T) => void): void;
 ```
 
@@ -905,6 +911,12 @@ export function sleep(ms: number): Promise<void>;
 
 `await` this function to pause asynchronous code execution `ms` milliseconds. Equivalent to `new Promise(resolve => setTimeout(resolve, ms))`.
 }
+
+```typescript
+function throttle<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>): (...args: Parameters<F>) => void
+```
+
+Calls `func` immediately after the first call, and then no more frequently than once every `delay` microseconds when called repeatedly. If you need to obtain a result from `func` when it is executed, provide the optional `callback` parameter.
 
 ## Deprecated functions
 

@@ -54,6 +54,7 @@
         "ignoreComments": true,
         "ignoredNodes": [
           "ClassProperty[value]",
+          "TSTypeAnnotation > TSFunctionType",
           "NewExpression[arguments] :expression *"
         ],
         "ObjectExpression": "first",

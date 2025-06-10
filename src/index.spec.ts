@@ -2,10 +2,10 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { encodeForUri, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
-  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, forEach, forEach2,
+  classOf, clone, compareDottedValues, DateTimeOptions, debounce, first, flatten, flattenDeep, forEach, forEach2,
   formatDateTime, getOrSet, getOrSetAsync, isArray, isArrayLike, isBigint, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, keyCount, last, nfe, nth, numSort,
-  processMillis, push, pushIf, regex, repeat, reverseNumSort, sleep, sortObjectEntries, toBoolean,
+  processMillis, push, pushIf, regex, repeat, reverseNumSort, sleep, sortObjectEntries, throttle, toBoolean,
   toDefaultLocaleFixed, toInt, toNumber, toValidInt, toValidNumber, ufe
 } from './misc-util';
 // noinspection JSDeprecatedSymbols
@@ -716,5 +716,53 @@ describe('@tubular/util', () => {
     await sleep(200);
     expect(processMillis() - start).to.be.above(190 - delta);
     expect(processMillis() - start).to.be.below(210 + delta);
+  });
+
+  it('debounce', async () => {
+    const start = processMillis();
+    let count = 0;
+    let time = 0;
+
+    function testFunction(a: number, b: string): number {
+      ++count;
+      time = processMillis();
+      expect(a === 7 && b === 'baz').to.be.true;
+
+      return 909;
+    }
+
+    const debounced = debounce(10, testFunction, val => expect(val).to.equal(909));
+
+    debounced(5, 'baz');
+    debounced(6, 'baz');
+    debounced(7, 'baz');
+    await sleep(100);
+
+    expect(time).is.greaterThan(start + 5);
+    expect(count).equals(1);
+  });
+
+  it('throttle', async () => {
+    const start = processMillis();
+    let count = 0;
+    let time = 0;
+
+    function testFunction(a: number, b: string, c: string): number {
+      ++count;
+      time = processMillis();
+      expect(a === -7 && b === 'foo' && c === 'bar').to.be.true;
+
+      return 909;
+    }
+
+    const throttled = throttle(10, testFunction, val => expect(val).to.equal(909));
+
+    throttled(-7, 'foo', 'bar');
+    throttled(-8, 'foo', 'bar');
+    throttled(-9, 'foo', 'bar');
+    await sleep(100);
+
+    expect(time).is.lessThan(start + 5);
+    expect(count).equals(1);
   });
 });
