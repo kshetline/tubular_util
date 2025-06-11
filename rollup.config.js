@@ -6,7 +6,7 @@ module.exports = [{
   input: 'src/index.ts',
   output: [
     {
-      file: pkg['umd:main'],
+      file: pkg.browser,
       sourcemap: true,
       format: 'umd',
       name: 'tbUtil'
