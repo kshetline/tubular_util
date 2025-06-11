@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "4.19.0-alpha.0",
+  "version": "4.19.0",
   "description": "Miscellaneous utility functions",
   "main": "dist/index.cjs.min.js",
   "module": "dist/index.esm.min.js",
@@ -9,7 +9,7 @@
   "typings": "dist/index",
   "sideEffects": false,
   "exports": {
-    "import": "./dist/fesm2015/index.js",
+    "import": "./dist/index.js",
     "require": "./dist/cjs/index.js",
     "script": "./dist/umd/index.js",
     "default": "./dist/cjs/index.js"
@@ -18,7 +18,7 @@
     "node": ">=10.24.1"
   },
   "scripts": {
-    "build": "rimraf dist/ && tsc && del \"dist/*.spec.*\" && rollup -c",
+    "build": "rimraf dist/ && tsc && rollup -c",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.ts' '**/*.cjs'",
     "test": "karma start --single-run",
@@ -50,7 +50,6 @@
     "chai": "^4.4.1",
     "chai-as-promised": "^7.1.2",
     "chai-spies": "^1.1.0",
-    "del-cli": "^5.1.0",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-chai-friendly": "^1.0.0",
@@ -72,9 +71,9 @@
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-terser": "^7.0.2",
     "ts-node": "^10.9.2",
-    "tslib": "^2.6.3",
-    "tsx": "^4.16.2",
-    "typescript": "^4.9.5"
+    "tslib": "^2.8.1",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
   },
   "repository": "https://github.com/kshetline/tubular_util.git"
 }

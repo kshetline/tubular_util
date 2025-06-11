@@ -617,9 +617,9 @@ export function compareDottedValues(a: string, b: string): number {
     return 1;
 }
 
-type AnyFunction = (...args: any[]) => any | void;
+export type TbuAnyFunction = (...args: any[]) => any | void;
 
-export function debounce<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
+export function debounce<F extends TbuAnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
     (...args: Parameters<F>) => void {
   let timer: any;
 
@@ -634,7 +634,7 @@ export function debounce<F extends AnyFunction>(delay: number, func: F, callback
   };
 }
 
-export function throttle<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
+export function throttle<F extends TbuAnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
     (...args: Parameters<F>) => void {
   const trailing = (delay < 0);
   let timer: any;
