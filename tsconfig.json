@@ -24,7 +24,12 @@
       "dom"
     ]
   },
+  "include": [
+    "src/**/*",
+    "ambient.d.ts"
+  ],
   "exclude": [
+    "src/**/*.spec.ts",
     "dist",
     "node_modules"
   ]

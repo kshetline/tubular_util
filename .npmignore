@@ -1,7 +1,10 @@
 **/*
 !/dist/**/*
-/dist/**/*.js.map
+/dist/*.js.map
 /dist/*.spec.*
+/dist/browser*
+/dist/misc*
+/dist/string*
 !package.json
 !LICENSE.md
 !README.md

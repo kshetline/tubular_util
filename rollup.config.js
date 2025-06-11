@@ -1,34 +1,29 @@
-import sourcemaps from 'rollup-plugin-sourcemaps';
-import { terser } from 'rollup-plugin-terser';
-import typescript from '@rollup/plugin-typescript';
-import pkg from './package.json';
+const terser = require('@rollup/plugin-terser');
+const typescript = require('@rollup/plugin-typescript');
+const pkg = require('./package.json');
 
-// noinspection JSUnusedGlobalSymbols
-export default [
+module.exports = [
   {
-    input: 'dist/index.js',
-    output: [
-      {
-        file: pkg['umd:main'],
-        sourcemap: true,
-        format: 'umd',
-        name: 'JSONZ'
-      },
-      {
-        file: pkg.main,
-        sourcemap: true,
-        format: 'cjs'
-      },
-      {
-        file: pkg.module,
-        sourcemap: true,
-        format: 'esm'
-      }
-    ],
-    plugins: [
-      sourcemaps(),
-      terser({ output: { max_line_len: 511 } }),
-      typescript({ sourceMap: true, inlineSources: true })
-    ]
-  }
-];
+    input: 'src/index.ts',
+    output: [{
+      file: pkg['umd:main'],
+      sourcemap: true,
+      format: 'umd',
+      name: 'tbUtil'
+    },
+    {
+      file: pkg.main,
+      sourcemap: true,
+      format: 'cjs'
+    },
+    {
+      file: pkg.module,
+      sourcemap: true,
+      format: 'esm'
+    }
+  ],
+  plugins: [
+    terser({ format: { max_line_len: 511 }}),
+    typescript()
+  ]
+}];
