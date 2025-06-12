@@ -24,6 +24,6 @@ module.exports = [{
   ],
   plugins: [
     terser({ format: { max_line_len: 511 } }),
-    typescript({ sourceMap: true, inlineSources: true })
+    typescript()
   ]
 }];
