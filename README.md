@@ -39,7 +39,7 @@ To remotely download the full code as an ES module:
 
 ```html
 <script type="module">
-  import('https://unpkg.com/@tubular/util/dist/fesm2015/index.mjs').then(pkg => {
+  import('https://unpkg.com/@tubular/util/dist/index.min.mjs').then(pkg => {
     const { toBoolean, toNumber, compareCaseSecondary } = pkg;
 
     // ...
@@ -50,7 +50,7 @@ To remotely download the full code as an ES module:
 For the old-fashioned UMD approach:
 
 ```html
-<script src="https://unpkg.com/@tubular/util/dist/umd/index.js"></script>
+<script src="https://unpkg.com/@tubular/util/dist/index.min.js"></script>
 ```
 
 The **@tubular/util** package will be made available via the global variable `tbUtil`. Functions, classes, and constants will also be available via this variable, such as `tbUtil.toBoolean`, `tbUtil.toNumber`, `tbUtil.compareCaseSecondary`, etc.
