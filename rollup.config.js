@@ -1,3 +1,4 @@
+const sourcemaps = require('rollup-plugin-sourcemaps');
 const terser = require('@rollup/plugin-terser');
 const typescript = require('@rollup/plugin-typescript');
 const pkg = require('./package.json');
@@ -23,7 +24,8 @@ module.exports = [{
     }
   ],
   plugins: [
-    terser({ format: { max_line_len: 511 } }),
-    typescript()
+    typescript({ sourceMap: false, inlineSources: true }),
+    sourcemaps(),
+    terser({ format: { max_line_len: 511 } })
   ]
 }];
