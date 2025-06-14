@@ -1,18 +1,16 @@
+// noinspection JSDeprecatedSymbols
+
 import { forEach, isNumber, toInt, toNumber } from './misc-util';
 
 const { ceil, floor, max, min } = Math;
 
-let _navigator: typeof navigator | undefined;
+let _navigator = { appVersion: '?', maxTouchPoints: 0, platform: '?', userAgent: '?', vendor: '?' } as Navigator;
 
 try {
   if (typeof navigator !== 'undefined')
     _navigator = navigator;
 }
 catch {}
-
-/* istanbul ignore next */
-if (!_navigator)
-  _navigator = { appVersion: '?', maxTouchPoints: 0, platform: '?', userAgent: '?', vendor: '?' } as typeof navigator;
 
 let _window: typeof window | undefined;
 
@@ -290,9 +288,9 @@ export function getFontMetrics(elementOrFont: Element | string, specificChar?: s
   let font;
 
   if (typeof elementOrFont === 'string')
-    font = elementOrFont as string;
+    font = elementOrFont;
   else
-    font = getFont(elementOrFont as Element);
+    font = getFont(elementOrFont);
 
   let metrics: FontMetrics | false = !specificChar && cachedMetrics[font];
 
@@ -331,14 +329,14 @@ export function getFontMetrics(elementOrFont: Element | string, specificChar?: s
 
   document.body.removeChild(heightDiv);
 
-  const canvas = (getFontMetrics as any).canvas || ((getFontMetrics as any).canvas =
-                  document.createElement('canvas') as HTMLCanvasElement);
+  const canvas = ((getFontMetrics as any).canvas || ((getFontMetrics as any).canvas =
+                  document.createElement('canvas'))) as HTMLCanvasElement;
 
   canvas.width = testFontSize * 2 + padding;
   canvas.height = testFontSize * 3;
   canvas.style.opacity = '1';
 
-  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const context = canvas.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D;
   const w = canvas.width, w4 = w * 4, h = canvas.height, baseline = h / 2;
 
   context.fillStyle = 'white';
@@ -433,9 +431,10 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
   const PADDING = 8;
   const size = metrics.lineHeight + PADDING;
 
-  const canvas0 = self.canvas0 || (self.canvas0 = document.createElement('canvas') as HTMLCanvasElement);
-  const canvas1 = self.canvas1 || (self.canvas1 = document.createElement('canvas') as HTMLCanvasElement);
-  const canvas2 = self.canvas2 || (self.canvas2 = /* istanbul ignore next */ firefox && document.createElement('canvas') as HTMLCanvasElement);
+  const canvas0 = (self.canvas0 || (self.canvas0 = document.createElement('canvas'))) as HTMLCanvasElement;
+  const canvas1 = (self.canvas1 || (self.canvas1 = document.createElement('canvas'))) as HTMLCanvasElement;
+  const canvas2 = (self.canvas2 || (self.canvas2 =
+    /* istanbul ignore next */ firefox && document.createElement('canvas'))) as HTMLCanvasElement;
   const canvases = [canvas0, canvas1, canvas2];
   const pixmaps: any[] = [];
 
@@ -446,7 +445,7 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
     canvas.height = size;
     canvas.style.opacity = '1';
 
-    const context = canvas.getContext('2d', { willReadFrequently: true });
+    const context = canvas.getContext('2d', { willReadFrequently: true })!;
 
     context.fillStyle = 'white';
     context.fillRect(-1, -1, size + 2, size + 2);
@@ -484,8 +483,8 @@ export function doesCharacterGlyphExist(elementOrFont: Element | string, charOrC
 }
 
 export function getTextWidth(items: string | string[], font: string | HTMLElement, fallbackFont?: string): number {
-  const canvas = ((getTextWidth as any).canvas as HTMLCanvasElement ||
-                  ((getTextWidth as any).canvas = document.createElement('canvas') as HTMLCanvasElement));
+  const canvas = ((getTextWidth as any).canvas ||
+                  ((getTextWidth as any).canvas = document.createElement('canvas'))) as HTMLCanvasElement;
   const context = canvas.getContext('2d', { willReadFrequently: true })!;
   let maxWidth = 0;
   let elementFont;
@@ -579,7 +578,7 @@ let _iosVersion: number;
 let _isIOS14OrEarlier: boolean;
 let _isLikelyMobile: boolean;
 
-export function initPlatformDetection(nav: any = _navigator, win?: any, smallScreen?: boolean): void {
+export function initPlatformDetection(nav: Navigator = _navigator, win?: Window, smallScreen?: boolean): void {
   win = win ?? _window;
   smallScreen = smallScreen ?? !!_window?.matchMedia('only screen and (max-width: 760px)').matches;
   _platform = nav.platform || (nav as any).userAgentData?.platform || '?';
@@ -592,7 +591,7 @@ export function initPlatformDetection(nav: any = _navigator, win?: any, smallScr
   _isChromium = !!(win as any)?.chrome;
   _isChromiumEdge = _isChromium && _isEdge;
   _isAndroid = nav.userAgent.includes('Android') || _isSamsung;
-  _isOpera = typeof win?.opr !== 'undefined' || /\bOPR\/\d+\b/.test(nav.userAgent);
+  _isOpera = typeof (win as any)?.opr !== 'undefined' || /\bOPR\/\d+\b/.test(nav.userAgent);
   _isChrome = nav.vendor === 'Google Inc.' &&
     ((/\bChrome\b/i.test(nav.userAgent) && !_isEdge && !_isSamsung && !_isOpera && !_isChromiumEdge) ||
       /\bCriOS\b/.test(nav.userAgent));
@@ -756,7 +755,7 @@ export function toggleFullScreenAsync(throwImmediate = false): Promise<void> {
     if (throwImmediate)
       throw e;
 
-    return Promise.reject(e);
+    return Promise.reject(e instanceof Error ? e : new Error(e));
   }
 
   return Promise.resolve();

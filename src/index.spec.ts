@@ -435,7 +435,7 @@ describe('@tubular/util', () => {
     expect(isEqual([], [0])).to.be.false;
     expect(isEqual([0], [1])).to.be.false;
     // noinspection JSConsecutiveCommasInArrayLiteral
-    expect(isEqual([1, , 3], [1, undefined, 3])).to.be.false; // eslint-disable-line no-sparse-arrays
+    expect(isEqual([1, , 3], [1, undefined, 3])).to.be.false;
     const a = [1, 2, 3];
     expect(isEqual(a, [1, 2, 3])).to.be.true;
     (a as any).foo = -7;

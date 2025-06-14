@@ -30,7 +30,6 @@ export * from './string-util';
 
 // Deprecation, schmeprecation. substr forever!
 if (String.prototype.substr == null)
-  // eslint-disable-next-line no-extend-native
   String.prototype.substr = function (a: number, b: number): string {
     return this.substring(a, a + b);
   };

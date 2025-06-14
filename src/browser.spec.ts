@@ -32,7 +32,7 @@ const filledShapes = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYA
 const strokes = 'data:image/png;base64,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';
 
 describe('@tubular/util browser functions, for Karma testing only', () => {
-  const canvas = document.createElement('canvas') as HTMLCanvasElement;
+  const canvas = document.createElement('canvas');
   let context: CanvasRenderingContext2D;
   const compOptions: Resemble.ComparisonOptions = { ignore: 'antialiasing' };
   const matchTolerance = isFirefox() ? 1 : 0.5;
@@ -53,12 +53,12 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   }
 
   async function createImage(src: string): Promise<HTMLImageElement> {
-    const img = document.createElement('img') as HTMLImageElement;
+    const img = document.createElement('img');
 
     img.src = src;
     return new Promise((resolve, reject) => {
       img.onload = () => resolve(img);
-      img.onerror = err => reject(err);
+      img.onerror = err => reject(err instanceof Error ? err : new Error(String(err)));
     });
   }
 
@@ -378,8 +378,8 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('platform checking, Android', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36,gzip(gfe)' },
-      { chrome: {} });
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36,gzip(gfe)' } as Navigator,
+      { chrome: {} } as any);
     expect(isAndroid()).to.be.true;
     expect(isChromeOS()).to.be.false;
     expect(isChromium()).to.be.true;
@@ -388,15 +388,15 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('platform checking, Samsung', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36' });
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36' } as Navigator);
     expect(isSamsung()).to.be.true;
     expect(isWindows()).to.be.false;
     expect(isIE()).to.be.false;
   });
 
   it('platform checking, Edge', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246', platform: 'Win32' },
-      { chrome: {} });
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246', platform: 'Win32' } as Navigator,
+      { chrome: {} } as any);
     expect(isWindows()).to.be.true;
     expect(isEdge()).to.be.true;
     expect(isChromium()).to.be.true;
@@ -406,7 +406,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('platform checking, Safari/macOS', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15', platform: 'MacIntel' });
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15', platform: 'MacIntel' } as Navigator);
     expect(isSafari()).to.be.true;
     expect(isMacOS()).to.be.true;
     expect(isIOS()).to.be.false;
@@ -415,7 +415,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('platform checking, Chrome/Windows', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36', platform: 'Win32', vendor: 'Google Inc.' });
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36', platform: 'Win32', vendor: 'Google Inc.' } as Navigator);
     expect(isChrome()).to.be.true;
     expect(isWindows()).to.be.true;
     expect(isIOS()).to.be.false;
@@ -424,11 +424,11 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
     expect(isFirefox()).to.be.false;
     expect(isLikelyMobile()).to.be.false;
 
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1', vendor: 'Google Inc.' });
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1', vendor: 'Google Inc.' } as Navigator);
   });
 
   it('platform checking, Firefox/Linux', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0', platform: 'Linux armv7l' });
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0', platform: 'Linux armv7l' } as Navigator);
     expect(isFirefox()).to.be.true;
     expect(isLinux()).to.be.true;
     // noinspection JSDeprecatedSymbols
@@ -438,7 +438,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('platform checking, Safari/iOS', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Mobile/15E148 Safari/604.1', platform: 'iPhone' }, undefined, true);
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Mobile/15E148 Safari/604.1', platform: 'iPhone' } as Navigator, undefined, true);
     expect(isSafari()).to.be.true;
     expect(isIOS()).to.be.true;
     expect(iosVersion()).to.equal(18);
@@ -448,7 +448,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('platform checking, Opera/Samsung', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 10; SM-G970F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.6998.135 Mobile Safari/537.36 OPR/76.2.4027.73374' });
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Linux; Android 10; SM-G970F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.6998.135 Mobile Safari/537.36 OPR/76.2.4027.73374' } as Navigator);
     expect(isOpera()).to.be.true;
     expect(isLinux()).to.be.true;
     expect(isAndroid()).to.be.true;

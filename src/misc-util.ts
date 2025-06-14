@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { asLines, compareStrings, zeroPad } from './string-util';
 
 export interface IsEqualOptions {
-  compare?: (a: any, b: any, key?: string | Symbol | undefined) => boolean | undefined;
+  compare?: (a: any, b: any, key?: string | symbol) => boolean | undefined;
   keysToIgnore?: Set<string | symbol> | string[];
   mustBeSameClass?: boolean;
 }
@@ -47,7 +48,7 @@ export function formatDateTime(dateOrOptions: Date | number | string | DateTimeO
   if (Array.isArray(dateOrOptions))
     options = dateOrOptions;
   else if (arguments.length > 1 && isNumber(finalArg))
-    options = Array.from(arguments).slice(1); // eslint-disable-line prefer-rest-params
+    options = Array.from(arguments).slice(1);
   else if (isArray(finalArg))
     options = finalArg;
 
@@ -317,7 +318,6 @@ export async function getOrSetAsync<T, U>(map: Map<T, U>, key: T, callback: () =
   return result;
 }
 
-/* eslint-disable no-prototype-builtins */
 export function isArrayLike(a: unknown): a is ArrayLike<any> {
   return Array.isArray(a) || a instanceof Array || (isObject(a) && isNumber((a as any).length) &&
       (a as any).length >= 0 && (a as any).length <= Number.MAX_SAFE_INTEGER && (a as any).length === Math.floor((a as any).length));
@@ -537,7 +537,7 @@ export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySo
 
   if (inPlace) {
     // @ts-ignore
-    Object.keys(obj).forEach(key => delete (obj as any)[key]); // @ts-ignore:this-line
+    Object.keys(obj).forEach(key => delete (obj as any)[key]);
     result = obj;
   }
 
@@ -617,7 +617,7 @@ export function compareDottedValues(a: string, b: string): number {
     return 1;
 }
 
-export type TbuAnyFunction = (...args: any[]) => any | void;
+export type TbuAnyFunction = (...args: any[]) => any;
 
 export function debounce<F extends TbuAnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
     (...args: Parameters<F>) => void {

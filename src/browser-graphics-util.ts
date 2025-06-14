@@ -102,7 +102,7 @@ export function parseColor(color: string): RGBA {
 
   if (match) {
     if (!utilContext) {
-      const canvas = document.createElement('canvas') as HTMLCanvasElement;
+      const canvas = document.createElement('canvas');
       utilContext = canvas.getContext('2d', { willReadFrequently: true })!;
     }
 
@@ -157,7 +157,6 @@ export function getPixel(imageData: ImageData, x: number, y: number): number {
 
   const offset = (y * imageData.width + x) * 4;
 
-  // eslint-disable-next-line computed-property-spacing
   return (imageData.data[offset    ] << 16) |
          (imageData.data[offset + 1] <<  8) |
           imageData.data[offset + 2]        |
@@ -170,7 +169,6 @@ export function setPixel(imageData: ImageData, x: number, y: number, pixel: numb
 
   const offset = (y * imageData.width + x) * 4;
 
-  // eslint-disable-next-line computed-property-spacing
   imageData.data[offset    ] =  (pixel & 0x00FF0000) >> 16;
   imageData.data[offset + 1] =  (pixel & 0x0000FF00) >>  8;
   imageData.data[offset + 2] =   pixel & 0x000000FF;
