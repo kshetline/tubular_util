@@ -1,3 +1,5 @@
+// noinspection JSDeprecatedSymbols
+
 import chai, { expect } from 'chai';
 import spies from 'chai-spies';
 import chaiAsPromised from 'chai-as-promised';
@@ -134,6 +136,9 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('beep/beepPromise', async () => {
+    if (isChrome()) // Test fails on Chrome without human browser interaction
+      return;
+
     const spy = chai.spy.on(browserUtil, 'beepPromise');
     // There's no good way to actually check that sound, and the right sound, happens. Settle for checking duration.
     const start = processMillis();

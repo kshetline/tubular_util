@@ -11,18 +11,17 @@ export default [
       '@typescript-eslint': tsPlugin
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules,
-      ...tsPlugin.configs['recommended-requiring-type-checking'].rules,
-      '@typescript-eslint/ban-ts-comment': 'off',
-      'brace-style': [
+      ...stylistic.configs.recommended.rules,
+      '@stylistic/arrow-parens': ['error', 'as-needed'],
+      '@stylistic/brace-style': [
         'error',
         'stroustrup',
         {
           'allowSingleLine': true
         }
       ],
-      'camelcase': 'off',
-      'comma-dangle': [
+      '@stylistic/camelcase': 'off',
+      '@stylistic/comma-dangle': [
         'error',
         {
           'arrays': 'only-multiline',
@@ -32,8 +31,7 @@ export default [
           'functions': 'never'
         }
       ],
-      'curly': 'off',
-      'indent': 'off',
+      '@stylistic/curly': 'off',
       '@stylistic/indent': [
         'error',
         2,
@@ -52,29 +50,23 @@ export default [
           'SwitchCase': 1
         }
       ],
-      'key-spacing': 'off',
-      'multiline-ternary': 'off',
-      '@typescript-eslint/no-base-to-string': 'off',
-      'no-control-regex': 'off',
-      'no-empty': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      'no-labels': 'off',
-      'no-mixed-operators': 'off',
-      'no-multi-spaces': 'off',
-      'no-new': 'off',
-      'no-return-assign': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      'no-unused-expressions': 'off',
-      'no-useless-constructor': 'off',
+      '@stylistic/indent-binary-ops': 'off',
+      '@stylistic/key-spacing': 'off',
+      '@stylistic/max-statements-per-line': 'off',
+      '@stylistic/member-delimiter-style': "error",
+      '@stylistic/multiline-ternary': 'off',
+      '@stylistic/no-control-regex': 'off',
+      '@stylistic/no-empty': 'off',
+      '@stylistic/no-labels': 'off',
+      '@stylistic/no-mixed-operators': 'off',
+      '@stylistic/no-multi-spaces': 'off', // TODO, ignoreEOLComments
+      '@stylistic/no-new': 'off',
+      '@stylistic/no-return-assign': 'off',
+      '@stylistic/no-useless-constructor': 'off',
       '@/no-useless-constructor': 'error',
-      '@typescript-eslint/no-unused-expressions': 'off',
+      '@stylistic/no-unused-expressions': 'off',
       'chai-friendly/no-unused-expressions': 'error',
-      'no-unused-vars': 'off',
+      '@/no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -85,9 +77,8 @@ export default [
         }
       ],
       'one-var': 'off',
-      'operator-linebreak': 'off',
-      '@typescript-eslint/restrict-template-expressions': 'off',
-      'semi': [
+      '@stylistic/operator-linebreak': 'off',
+      '@stylistic/semi': [
         'error',
         'always'
       ],
@@ -99,7 +90,7 @@ export default [
           'asyncArrow': 'always'
         }
       ],
-      'quotes': [
+      '@stylistic/quotes': [
         'error',
         'single',
         {

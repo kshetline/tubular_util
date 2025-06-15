@@ -400,7 +400,7 @@ describe('@tubular/util', () => {
     expect(clone(sample, true).date).to.equal(sample.date);
     expect(clone(sample, new Set([Date])).date).to.equal(sample.date);
     expect(clone(sample, new Set([Map])).date).not.to.equal(sample.date);
-    expect(clone(sample, (value) => value instanceof Date).date).to.equal(sample.date);
+    expect(clone(sample, value => value instanceof Date).date).to.equal(sample.date);
     expect(clone(sample, (_value, depth) => depth > 2).date).not.to.equal(sample.date);
 
     expect(clone(/abc/)).to.eql(/abc/);

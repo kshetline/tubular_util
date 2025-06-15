@@ -282,7 +282,7 @@ export function getFont(element: Element): string {
   return font;
 }
 
-const cachedMetrics: {[font: string]: FontMetrics} = {};
+const cachedMetrics: { [font: string]: FontMetrics } = {};
 
 export function getFontMetrics(elementOrFont: Element | string, specificChar?: string): FontMetrics {
   let font;
