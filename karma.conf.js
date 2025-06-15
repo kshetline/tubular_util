@@ -15,9 +15,10 @@ module.exports = function (config) {
       tsconfig: './tsconfig.karma.json'
     },
     coverageReporter: {
-      type: 'lcov',
-      dir: './coverage-karma',
-      subdir: '.'
+      reporters: [
+        { type: 'text' },
+        { type: 'lcov', dir: './coverage-karma', subdir: '.' }
+      ]
     }
   });
 };

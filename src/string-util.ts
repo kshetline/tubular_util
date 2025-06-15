@@ -124,6 +124,7 @@ export function makePlainASCII(s: string, forFileName = false): string {
     let pos: number;
     let ch2;
 
+    /* eslint-disable @stylistic/no-multi-spaces */
     if (forFileName) {
       if      (ch === '"')
         ch = "'";
@@ -190,6 +191,7 @@ export function makePlainASCII(s: string, forFileName = false): string {
       ch2 = ''; // Omit combining diacritical marks
     else
       ch  = '_';
+    /* eslint-enable @stylistic/no-multi-spaces */
 
     if (ch2 === undefined)
       sb.push(ch);
