@@ -25,11 +25,11 @@ An assortment of general-purpose utility functions, including string manipulatio
 
 `npm install @tubular/util`
 
-`import { toBoolean, toNumber, compareCaseSecondary`...`} from '@tubular/time'; // ESM`
+`import { toBoolean, toNumber, compareCaseSecondary`...`} from '@tubular/util'; // ESM`
 
 ...or...
 
-`const { toBoolean, toNumber, compareCaseSecondary`...`} = require('@tubular/time/cjs'); // CommonJS`
+`const { toBoolean, toNumber, compareCaseSecondary`...`} = require('@tubular/util'); // CommonJS`
 
 _Documentation examples will assume **@tubular/util** has been imported as above._
 
