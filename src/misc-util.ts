@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { asLines, compareStrings, zeroPad } from './string-util';
 
 export interface IsEqualOptions {
