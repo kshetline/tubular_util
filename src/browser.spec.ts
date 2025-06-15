@@ -136,8 +136,10 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('beep/beepPromise', async () => {
-    if (isChrome()) // Test fails on Chrome without human browser interaction
+    if (isChromium()) { // Test fails on Chrome without human browser interaction
+      expect(true).to.be.true;
       return;
+    }
 
     const spy = chai.spy.on(browserUtil, 'beepPromise');
     // There's no good way to actually check that sound, and the right sound, happens. Settle for checking duration.

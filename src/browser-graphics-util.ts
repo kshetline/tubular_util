@@ -1,3 +1,5 @@
+/* eslint-disable @stylistic/computed-property-spacing, @stylistic/no-multi-spaces, */
+
 const { max, min, round } = Math;
 
 export interface RGBA {
@@ -157,7 +159,6 @@ export function getPixel(imageData: ImageData, x: number, y: number): number {
 
   const offset = (y * imageData.width + x) * 4;
 
-  // eslint-disable-next-line @stylistic/computed-property-spacing
   return (imageData.data[offset    ] << 16) |
          (imageData.data[offset + 1] <<  8) |
           imageData.data[offset + 2]        |
@@ -170,12 +171,10 @@ export function setPixel(imageData: ImageData, x: number, y: number, pixel: numb
 
   const offset = (y * imageData.width + x) * 4;
 
-  /* eslint-disable @stylistic/computed-property-spacing */
   imageData.data[offset    ] =  (pixel & 0x00FF0000) >> 16;
   imageData.data[offset + 1] =  (pixel & 0x0000FF00) >>  8;
   imageData.data[offset + 2] =   pixel & 0x000000FF;
   imageData.data[offset + 3] = ((pixel & 0xFF000000) >> 24) & 0xFF;
-  /* eslint-enable @stylistic/computed-property-spacing */
 }
 
 export function strokeCircle(context: CanvasRenderingContext2D, cx: number, cy: number, radius: number): void {

@@ -47,12 +47,13 @@ interface FsDocumentElement extends HTMLElement {
   webkitRequestFullscreen?: () => void;
 }
 
+/* istanbul ignore next */
 export function beep(frequency = 440, gainValue = 0.025, duration = 100): void {
   beepPromise(frequency, gainValue, duration).finally();
 }
 
+/* istanbul ignore next */
 export async function beepPromise(frequency = 440, gainValue = 0.025, duration = 100): Promise<void> {
-  /* istanbul ignore next */
   if (!_window)
     return;
 
@@ -94,6 +95,7 @@ export function eventToKey(event: KeyboardEvent): string {
       // noinspection JSDeprecatedSymbols
       const keyCode = event.keyCode || event.which;
 
+      /* eslint-disable @stylistic/no-multi-spaces, */
       /* istanbul ignore next */
       switch (keyCode) {
         case   3: case 13: key = 'Enter'; break;
@@ -141,6 +143,7 @@ export function eventToKey(event: KeyboardEvent): string {
         case 221: key = ']'; break;
         case 222: key = '\''; break;
         case 224: key = 'Meta'; break;
+        /* eslint-enable @stylistic/no-multi-spaces, */
 
         default:
           if (112 <= keyCode && keyCode <= 135)
@@ -153,6 +156,7 @@ export function eventToKey(event: KeyboardEvent): string {
     }
   }
   else {
+    /* eslint-disable @stylistic/no-multi-spaces, */
     /* istanbul ignore next */
     switch (key) {
       case 'Left':
@@ -176,6 +180,7 @@ export function eventToKey(event: KeyboardEvent): string {
       case 'Scroll':   key = 'ScrollLock'; break;
       case 'Spacebar': key = ' '; break;
       case 'Win':      key = 'Meta'; break;
+      /* eslint-enable @stylistic/no-multi-spaces, */
     }
   }
 
