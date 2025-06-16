@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "4.18.0-alpha.0",
+  "version": "4.18.0",
   "description": "Miscellaneous utility functions",
   "module": "dist/index.min.mjs",
   "main": "dist/index.min.cjs",
