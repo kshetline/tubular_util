@@ -6,21 +6,18 @@ let digitPattern: RegExp;
 try {
   // I want these regexes to fail if not supported, so it takes a bit of obfuscation
   // to prevent Babel from transforming them into something that doesn't fail.
-  /* eslint-disable prefer-regex-literals */
   const u = String.fromCharCode(117);
   'm&m'.split(new RegExp('(?<!4)[^\\' + 'p{L}]+', u));
   // This line reached if Unicode character classes and lookbehind both work.
   notLetterPattern = new RegExp('\\' + 'P{L}', 'g' + u);
   digitPattern = new RegExp('^\\' + 'p{Nd}$', u);
   allUpperPattern = new RegExp('^\\' + 'p{Lu}+$', u);
-  // eslint-disable-next-line no-misleading-character-class
   wordPattern = new RegExp(String.raw`(?<=^|[^\p{L}])['’ʼ]?[` + '\\' + String.raw`p{L}'’ʼ\u0300-\u036F]+['’ʼ]?(?=[^\p{L}]|$)`, 'g' + u);
 }
 catch /* istanbul ignore next */ {
   notLetterPattern = /[A-ZÀ-ÖØ-ÿ]/ig;
   digitPattern = /^\d$/;
   allUpperPattern = /^[A-ZÀ-ÖØ-Þ]+$/;
-  // eslint-disable-next-line no-misleading-character-class
   wordPattern = /['’ʼ]?\b[A-Za-zÀ-ÖØ-ÿ'’ʼ\u0300-\u036F]+\b['’ʼ]?/g;
 }
 
@@ -127,6 +124,7 @@ export function makePlainASCII(s: string, forFileName = false): string {
     let pos: number;
     let ch2;
 
+    /* eslint-disable @stylistic/no-multi-spaces */
     if (forFileName) {
       if      (ch === '"')
         ch = "'";
@@ -193,6 +191,7 @@ export function makePlainASCII(s: string, forFileName = false): string {
       ch2 = ''; // Omit combining diacritical marks
     else
       ch  = '_';
+    /* eslint-enable @stylistic/no-multi-spaces */
 
     if (ch2 === undefined)
       sb.push(ch);
@@ -317,7 +316,7 @@ export function padLeft(item: string, length: number, padChar?: string): string;
 export function padLeft(item: string | number, length: number, padChar = ' '): string {
   let sign = '';
 
-  if (!/^\s$/.test(padChar) && typeof item === 'number' && (item as number) < 0 && padChar === '0') {
+  if (!/^\s$/.test(padChar) && typeof item === 'number' && item < 0 && padChar === '0') {
     sign = '-';
     item = -item;
     --length;
@@ -410,7 +409,6 @@ export function stripLatinDiacriticals_UC(s: string): string {
 
 export function stripDiacriticals(s: string): string {
   if (s)
-    // eslint-disable-next-line no-misleading-character-class
     return s.normalize('NFD').replace(/[\u0300-\u036F\u1AB0-\u1AFF\u1DC0-\u1DFF]/g, '').replace(/Ø/g, 'O').replace(/ø/g, 'o');
   else
     return s;
@@ -438,7 +436,6 @@ export function zeroPad(n: number | string, digits: number): string {
 
 // The \ escape before the second [ is considered unnecessary here by ESLint,
 // but being left out is an error for some regex parsers.
-// eslint-disable-next-line no-useless-escape
 const charsNeedingRegexEscape = /[-\[\]/{}()*+?.\\^$|]/g;
 
 export function regexEscape(s: string): string {

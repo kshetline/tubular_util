@@ -2,10 +2,10 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { encodeForUri, htmlEscape, htmlUnescape, urlEncodeParams } from './browser-util';
 import {
-  classOf, clone, compareDottedValues, DateTimeOptions, first, flatten, flattenDeep, forEach, forEach2,
+  classOf, clone, compareDottedValues, DateTimeOptions, debounce, first, flatten, flattenDeep, forEach, forEach2,
   formatDateTime, getOrSet, getOrSetAsync, isArray, isArrayLike, isBigint, isBoolean, isEqual, isFunction,
   isNonFunctionObject, isNumber, isObject, isString, isSymbol, isValidJson, keyCount, last, nfe, nth, numSort,
-  processMillis, push, pushIf, regex, repeat, reverseNumSort, sleep, sortObjectEntries, toBoolean,
+  processMillis, push, pushIf, regex, repeat, reverseNumSort, sleep, sortObjectEntries, throttle, toBoolean,
   toDefaultLocaleFixed, toInt, toNumber, toValidInt, toValidNumber, ufe
 } from './misc-util';
 // noinspection JSDeprecatedSymbols
@@ -400,7 +400,7 @@ describe('@tubular/util', () => {
     expect(clone(sample, true).date).to.equal(sample.date);
     expect(clone(sample, new Set([Date])).date).to.equal(sample.date);
     expect(clone(sample, new Set([Map])).date).not.to.equal(sample.date);
-    expect(clone(sample, (value) => value instanceof Date).date).to.equal(sample.date);
+    expect(clone(sample, value => value instanceof Date).date).to.equal(sample.date);
     expect(clone(sample, (_value, depth) => depth > 2).date).not.to.equal(sample.date);
 
     expect(clone(/abc/)).to.eql(/abc/);
@@ -435,7 +435,7 @@ describe('@tubular/util', () => {
     expect(isEqual([], [0])).to.be.false;
     expect(isEqual([0], [1])).to.be.false;
     // noinspection JSConsecutiveCommasInArrayLiteral
-    expect(isEqual([1, , 3], [1, undefined, 3])).to.be.false; // eslint-disable-line no-sparse-arrays
+    expect(isEqual([1, , 3], [1, undefined, 3])).to.be.false;
     const a = [1, 2, 3];
     expect(isEqual(a, [1, 2, 3])).to.be.true;
     (a as any).foo = -7;
@@ -716,5 +716,66 @@ describe('@tubular/util', () => {
     await sleep(200);
     expect(processMillis() - start).to.be.above(190 - delta);
     expect(processMillis() - start).to.be.below(210 + delta);
+  });
+
+  it('debounce', async () => {
+    const start = processMillis();
+    let count = 0;
+    let time = 0;
+
+    function testFunction(a: number, b: string): number {
+      ++count;
+      time = processMillis();
+      expect(a === 7 && b === 'baz').to.be.true;
+
+      return 909;
+    }
+
+    const debounced = debounce(10, testFunction, val => expect(val).to.equal(909));
+
+    debounced(5, 'baz');
+    debounced(6, 'baz');
+    debounced(7, 'baz');
+    await sleep(100);
+
+    expect(time).is.greaterThan(start + 5);
+    expect(count).equals(1);
+  });
+
+  it('throttle', async () => {
+    let start = processMillis();
+    let count = 0;
+    let time = 0;
+    let rightA = -7;
+
+    function testFunction(a: number, b: string, c: string): number {
+      ++count;
+      time = processMillis();
+      expect(a === rightA && b === 'foo' && c === 'bar').to.be.true;
+
+      return 909;
+    }
+
+    const throttled = throttle(10, testFunction, val => expect(val).to.equal(909));
+
+    throttled(-7, 'foo', 'bar');
+    throttled(-8, 'foo', 'bar');
+    throttled(-9, 'foo', 'bar');
+    await sleep(100);
+
+    expect(time).is.lessThan(start + 5);
+    expect(count).equals(1);
+
+    const throttledTrailing = throttle(-10, testFunction, val => { expect(val).to.equal(909); rightA = -9; });
+
+    start = processMillis();
+    count = 0;
+    throttledTrailing(-7, 'foo', 'bar');
+    throttledTrailing(-8, 'foo', 'bar');
+    throttledTrailing(-9, 'foo', 'bar');
+    await sleep(100);
+
+    expect(time).is.greaterThan(start + 5);
+    expect(count).equals(2);
   });
 });

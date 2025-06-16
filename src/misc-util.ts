@@ -1,7 +1,7 @@
 import { asLines, compareStrings, zeroPad } from './string-util';
 
 export interface IsEqualOptions {
-  compare?: (a: any, b: any, key?: string | Symbol | undefined) => boolean | undefined;
+  compare?: (a: any, b: any, key?: string | symbol) => boolean | undefined;
   keysToIgnore?: Set<string | symbol> | string[];
   mustBeSameClass?: boolean;
 }
@@ -47,7 +47,7 @@ export function formatDateTime(dateOrOptions: Date | number | string | DateTimeO
   if (Array.isArray(dateOrOptions))
     options = dateOrOptions;
   else if (arguments.length > 1 && isNumber(finalArg))
-    options = Array.from(arguments).slice(1); // eslint-disable-line prefer-rest-params
+    options = Array.from(arguments).slice(1);
   else if (isArray(finalArg))
     options = finalArg;
 
@@ -317,7 +317,6 @@ export async function getOrSetAsync<T, U>(map: Map<T, U>, key: T, callback: () =
   return result;
 }
 
-/* eslint-disable no-prototype-builtins */
 export function isArrayLike(a: unknown): a is ArrayLike<any> {
   return Array.isArray(a) || a instanceof Array || (isObject(a) && isNumber((a as any).length) &&
       (a as any).length >= 0 && (a as any).length <= Number.MAX_SAFE_INTEGER && (a as any).length === Math.floor((a as any).length));
@@ -537,7 +536,7 @@ export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySo
 
   if (inPlace) {
     // @ts-ignore
-    Object.keys(obj).forEach(key => delete (obj as any)[key]); // @ts-ignore:this-line
+    Object.keys(obj).forEach(key => delete (obj as any)[key]);
     result = obj;
   }
 
@@ -546,7 +545,7 @@ export function sortObjectEntries<T>(obj: T, sorterOrInPlace?: boolean | EntrySo
   return result;
 }
 
-/* istanbul ignore next */
+/* istanbul ignore next */ // noinspection JSUnusedGlobalSymbols
 export const noop = (..._args: any[]): void => {};
 
 export const repeat = (n: number, f: (n?: number) => any): void => { while (n-- > 0) f(n); };
@@ -615,4 +614,52 @@ export function compareDottedValues(a: string, b: string): number {
     return -1;
   else
     return 1;
+}
+
+export type TbuAnyFunction = (...args: any[]) => any;
+
+export function debounce<F extends TbuAnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
+    (...args: Parameters<F>) => void {
+  let timer: any;
+
+  return function (...args: Parameters<F>): void {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const result = func.apply(this, args);
+
+      if (callback)
+        callback(result);
+    }, delay);
+  };
+}
+
+export function throttle<F extends TbuAnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
+    (...args: Parameters<F>) => void {
+  const trailing = (delay < 0);
+  let timer: any;
+  let pendingArgs: any;
+
+  const callFunc = (args: any) => {
+    const result = func.apply(this, args);
+
+    if (callback)
+      callback(result);
+
+    timer = setTimeout(() => {
+      timer = undefined;
+
+      if (pendingArgs) {
+        args = pendingArgs;
+        pendingArgs = undefined;
+        callFunc(args);
+      }
+    }, Math.abs(delay));
+  };
+
+  return function (...args: Parameters<F>): void {
+    if (!timer)
+      callFunc(args);
+    else if (trailing)
+      pendingArgs = args;
+  };
 }

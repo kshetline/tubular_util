@@ -3,7 +3,7 @@
 
 An assortment of general-purpose utility functions, including string manipulation, non-exception-throwing safe string-to-number conversions, array functions, object cloning, web browser graphics, CSS support, and more.
 
-[![npm](https://img.shields.io/npm/v/@tubular/util.svg)](https://www.npmjs.com/package/@tubular/util/) [![Coverage Status](https://coveralls.io/repos/github/kshetline/tubular_util/badge.svg?branch=master)](https://coveralls.io/github/kshetline/tubular_util) [![npm downloads](https://img.shields.io/npm/dm/@tubular/util.svg)](https://npmjs.org/package/@tubular/util/) ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/min/@tubular/time)  ![license](https://img.shields.io/badge/licence-mit-informational)
+[![npm](https://img.shields.io/npm/v/@tubular/util.svg)](https://www.npmjs.com/package/@tubular/util/) [![Coverage Status](https://coveralls.io/repos/github/kshetline/tubular_util/badge.svg?branch=master)](https://coveralls.io/github/kshetline/tubular_util) [![npm downloads](https://img.shields.io/npm/dm/@tubular/util.svg)](https://npmjs.org/package/@tubular/util/) ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/min/@tubular/util)  ![license](https://img.shields.io/badge/licence-mit-informational)
 
 - [Installation](#installation)
   - [Via npm](#via-npm)
@@ -12,7 +12,7 @@ An assortment of general-purpose utility functions, including string manipulatio
 - [Type/class checking](#typeclass-checking)
 - [Array/object comparison and manipulation](#arrayobject-comparison-and-manipulation)
 - [String functions](#string-functions)
-- [Date and number formatting](#date-and-number-formatting)
+- [Date, time, and number formatting](#date-time-and-number-formatting)
 - [Browser-oriented functions](#browser-oriented-functions)
 - [Browser identification](#browser-identification)
 - [Browser graphics](#browser-graphics)
@@ -25,11 +25,11 @@ An assortment of general-purpose utility functions, including string manipulatio
 
 `npm install @tubular/util`
 
-`import { toBoolean, toNumber, compareCaseSecondary`...`} from '@tubular/time'; // ESM`
+`import { toBoolean, toNumber, compareCaseSecondary`...`} from '@tubular/util'; // ESM`
 
 ...or...
 
-`const { toBoolean, toNumber, compareCaseSecondary`...`} = require('@tubular/time/cjs'); // CommonJS`
+`const { toBoolean, toNumber, compareCaseSecondary`...`} = require('@tubular/util'); // CommonJS`
 
 _Documentation examples will assume **@tubular/util** has been imported as above._
 
@@ -39,7 +39,7 @@ To remotely download the full code as an ES module:
 
 ```html
 <script type="module">
-  import('https://unpkg.com/@tubular/util/dist/fesm2015/index.mjs').then(pkg => {
+  import('https://unpkg.com/@tubular/util/dist/index.min.mjs').then(pkg => {
     const { toBoolean, toNumber, compareCaseSecondary } = pkg;
 
     // ...
@@ -50,7 +50,7 @@ To remotely download the full code as an ES module:
 For the old-fashioned UMD approach:
 
 ```html
-<script src="https://unpkg.com/@tubular/util/dist/umd/index.js"></script>
+<script src="https://unpkg.com/@tubular/util/dist/index.min.js"></script>
 ```
 
 The **@tubular/util** package will be made available via the global variable `tbUtil`. Functions, classes, and constants will also be available via this variable, such as `tbUtil.toBoolean`, `tbUtil.toNumber`, `tbUtil.compareCaseSecondary`, etc.
@@ -224,18 +224,17 @@ This function determines if two values `a` and `b` are equal to each other, by d
 
 * As a first check, `a` and `b` are equal considered equal if `a === b` or `Object.is(a, b)` is `true`. Please note:
 
-
   | Equal?            | a = 0, b = -0 | a = NaN, b = NaN |
-  | ----------------- | ------------- | ---------------- |
+  |-------------------|---------------|------------------|
   | `a === b`         | true          | false            |
   | `Object.is(a, b)` | false         | true             |
   | `isEqual(a, b)`   | true          | true             |
+
 * If `a` and `b` are not the same type (as determined by `typeof`), they are not considered equal.
 * If one of `a` and `b` is an array, and the other is not, they are not considered equal.
 * If `a` and `b` are both arrays, but of unequal length, they are not considered equal.
 * If `mustBeSameClass` is `true`, `a` and `b` must either be instances of the same class, or both must not be an instance of any class, otherwise they are not considered equal.
 * Otherwise, all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
-
 
 ```typescript
 function last<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined
@@ -267,7 +266,7 @@ The default array sorting behavior of JavaScript, even for all-numeric array, is
 function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined
 ```
 
-Return the `n`th element of the array, or `defaultValue` (`undefined` if not specified) if the element does not exist. If `n` is negative the `array.length + n` element is indexed, e.g. an `n` of -1 refers to the last item in the array, -2 to the next-to-last item, etc.
+Return the `n`th element of the array, or `defaultValue` (`undefined` if not specified) if the element does not exist. If `n` is negative the `array.length + n` element is indexed, e.g., an `n` of -1 refers to the last item in the array, -2 to the next-to-last item, etc.
 
 ```typescript
 function push<T>(array: T[] | null | undefined, ...items: any[]): T[];
@@ -294,7 +293,7 @@ function sortObjectEntries<T>(obj: T, inPlace?: boolean): T;
 function sortObjectEntries<T>(obj: T, sorter?: EntrySorter, inPlace?: boolean);
 ```
 
-JavaScript objects function as *ordered* maps, with a consistently-maintained ordering of object properties. This function allows you to sort that order.
+JavaScript objects function as *ordered* maps, with a consistently maintained ordering of object properties. This function allows you to sort that order.
 
 By default, sorting is done in ascending alphabetical order using JavaScript’s default string collation. You can, however, supply your own `sorter` to control how properties will be ordered.
 
@@ -343,7 +342,7 @@ Compares two strings, returning a less-than-zero value if `a` is less than `b`, 
 function extendDelimited(base: string, newItem: string, delimiter = ', '): string;
 ```
 
-Appends one string to another string, inserting a `delimiter` in between the strings if the first string in not an empty string.
+Appends one string to another string, inserting a `delimiter` in between the strings if the first string is not an empty string.
 
 ```typescript
 function isAllUppercase(s: string): boolean;
@@ -454,7 +453,7 @@ If `keepAllCaps` is `true`, any word that is originally fully capitalized remain
 
 `special` is a list of words that you wish to provide special capitalization rules for, such as “CinemaScope” or “MacDougall”. Some of these are built in, such as “FedEx” and “iOS”.
 
-## Date and number formatting
+## Date, time, and number formatting
 
 ```typescript
 function convertDigits(n: string, baseDigit: string): string;
@@ -490,7 +489,7 @@ export function formatDateTime(date: Date | number | string, options?: DateTimeO
 
 This function returns date/time strings in basic ISO 8601 format, for either the default local time zone or for UTC. The default time value is the current time. The default format is date and time at one-second resolution, with UTC offset included, e.g. `2022-08-07 16:12:43 -0400`.
 
-The following options can be applied either as an array of options, or as a variable list of parameters after the `date` parameter:
+The following options can be applied either as an array of options or as a variable list of parameters after the `date` parameter:
 
 * `DATE_ONLY`: Date only, e.g. `2022-08-07`.
 * `NO_SECONDS`: Hide seconds, e.g. `2022-08-07 16:12 -0400`.
@@ -731,19 +730,19 @@ Blend two CSS-style colors, in equal proportions by default, using a weighted av
 function colorFrom24BitInt(i: number, alpha = 1.0): string;
 ```
 
-Turn a numerically-encoded RGB color value `i` (in the form 0xRRGGBB) into a CSS color string in the form `'#RRGGBB'`, or, if `alpha` has a non-1 value, a color string in the form `'rgba(r, g, b, alpha)'`, where `r`, `g`, and `b` are the decimal equivalents of `RR`, `GG`, and `BB`
+Turn a numerically encoded RGB color value `i` (in the form 0xRRGGBB) into a CSS color string in the form `'#RRGGBB'`, or, if `alpha` has a non-1 value, a color string in the form `'rgba(r, g, b, alpha)'`, where `r`, `g`, and `b` are the decimal equivalents of `RR`, `GG`, and `BB`
 
 ```typescript
 function colorFromByteArray(array: number[], offset = 0): string;
 ```
 
-Use values from `array`, starting at the optional `offset`, to create a CSS color string. Values should be in the integer range 0-255, in the order red, green, blue, optionally followed by an integer 0-255 alpha value.
+Use values from `array`, starting at the optional `offset`, to create a CSS color string. Values should be in the integer range 0–255, in the order red, green, blue, optionally followed by an integer 0–255 alpha value.
 
 ```typescript
 function colorFromRGB(r: number, g: number, b: number, alpha = 1.0): string;
 ```
 
-Return a CSS color string based on integer `r`, `g`, and `b` values from 0-255, and an optional `alpha` value from 0-1.
+Return a CSS color string based on integer `r`, `g`, and `b` values over the range 0–255, and with an optional `alpha` value 0–1.
 
 ```typescript
 function drawOutlinedText(context: CanvasRenderingContext2D, text: string, x: number, y: number,
@@ -817,6 +816,16 @@ Draw a line from `x0`, `y0` to `x1`, `y1`.
 ## Other functions
 
 ```typescript
+function debounce<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>): (...args: Parameters<F>) => void
+```
+
+Let us refer to the return value of `debounce` as `D`.
+
+`D` is a debounced implementation of `func`, where `func` is called once after `delay` microseconds have passed when `D` is first invoked, and subsequently no more frequently than once every `delay` microseconds when `D` is invoked repeatedly.
+
+If you need to obtain a result from `func` when `func` is executed, provide the optional `callback` parameter.
+
+```typescript
 function forEach<T>(obj: Record<string, T> | null | undefined, callback: (key: string, value: T) => void): void;
 ```
 
@@ -832,7 +841,7 @@ Iterate over all key/value pairs in `obj`, including `symbol` keys.
 function getOrSet<T, U>(map: Map<T, U>, key: T, callbackOrValue: U | (() => U)): U
 ```
 
-This function either returns the value from the `map` associated with `key` if it exists, or stores a new value under `key` and returns that. The value may be either provided explicitly, or provided via a callback function — ideal if you don't want to compute that value unless necessary.
+This function either returns the value from the `map` associated with `key` if it exists or stores a new value under `key` and returns that. The value may be either provided explicitly or provided via a callback function — ideal if you don't want to compute that value unless necessary.
 
 ```typescript
 async function getOrSetAsync<T, U>(map: Map<T, U>, key: T, callback: () => Promise<U>): Promise<U>
@@ -856,13 +865,13 @@ A convenience function equivalent to `Reflect.ownKeys(obj).length`.
 const noop = (..._args: any[]): void => {};
 ```
 
-A function that does nothing, useful as a no-operation function parameter.
+A function which does nothing, useful as a no-operation function parameter.
 
 ```typescript
 function processMillis(): number;
 ```
 
-This is a platform-neutral method to return the current process running time, returning `performance.now()` in a web browser environment, or `process.hrtime()`, converted into milliseconds (and derived from the `bigint` form if available) in a Node.js environment. The function falls back on `Date.now()` if neither of the previous options are available.
+This is a platform-neutral method to return the current process running time, returning `performance.now()` in a web browser environment, or `process.hrtime()`, converted into milliseconds (and derived from the `bigint` form if available) in a Node.js environment. The function falls back on `Date.now()` if neither of the previous options is available.
 
 ```typescript
 function regex(main: TemplateStringsArray, flags?: string): RegExp;
@@ -906,6 +915,20 @@ export function sleep(ms: number): Promise<void>;
 
 `await` this function to pause asynchronous code execution `ms` milliseconds. Equivalent to `new Promise(resolve => setTimeout(resolve, ms))`.
 }
+
+```typescript
+function throttle<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>): (...args: Parameters<F>) => void
+```
+
+Let us refer to the return value of `throttle` as `T`.
+
+`T` is a throttled implementation of `func`, where `func` is called immediately after the first invocation of `T`, and subsequently no more frequently than once every `delay` microseconds when `T` is invoked repeatedly.
+
+If you need to obtain a result from `func` when `func` is executed, provide the optional `callback` parameter.
+
+If `delay` is a positive value, then leading-edge throttling is performed: all invocations during the delay period are ignored.
+
+If `delay` is a negative value, then leading/trailing-edge throttling is performed using the absolute value of `delay`: the last invocation, if any, during the delay period is honored as soon as the delay runs out.
 
 ## Deprecated functions
 
