@@ -104,7 +104,7 @@ function toValidInt(value: any, defaultValue = 0, radix = 10): number;
 This function returns the same results as `toInt` unless `value` is `NaN` or an infinite value, in which case a non-null `defaultValue` is returned.
 
 ```typescript
-function toValidNumber(value: any, defaultValue = 0): number
+function toValidNumber(value: any, defaultValue = 0): number;
 ```
 
 This function returns the same results as `toNumber` unless `value` is `NaN` or an infinite value, in which case `defaultValue` is returned.
@@ -136,7 +136,7 @@ function isBigint(a: unknown): a is bigint;
 Returns `true` if `a` is a `bigint` value.
 
 ```typescript
-function isBoolean(a: unknown): a is boolean
+function isBoolean(a: unknown): a is boolean;
 ```
 
 Returns `true` if `a` is a `boolean` value.
@@ -193,7 +193,7 @@ The `shallow` parameter controls which descendants of an object are either clone
 * When `shallow` is a **function**: The root object is always converted into a new object, but descendants are only cloned when the callback function, provided with the descendant `value` and its `depth` in object tree, returns `false`.
 
 ```typescript
-function first<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined
+function first<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined;
 ```
 
 Return the first element of an array, or `defaultValue` (`undefined` if not specified) if a first element does not exist.
@@ -237,19 +237,19 @@ This function determines if two values `a` and `b` are equal to each other, by d
 * Otherwise, all object children/array slots of `a` and `b` must be equal, by recursive application of `isEqual`, for `a` and `b` to be considered equal. Neither `a` nor `b` can own a property or index that the other does not have.<br><br>For example, `isEqual([1, , 3], [1, undefined, 3])` is `false`, even though `[1, , 3][1] === [1, undefined, 3][1]` is `true`.
 
 ```typescript
-function last<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined
+function last<T>(array: ArrayLike<T> | null | undefined, defaultValue?: T): T | undefined;
 ```
 
 Return the last element of an array, or `defaultValue` (`undefined` if not specified) if a last element does not exist.
 
 ```typescript        
-function nfe<T>(array: T[]): T[] | null
+function nfe<T>(array: T[]): T[] | null;
 ```
 
 Return the array if the array is not empty, otherwise `null`. ("nfe" stands for "null for empty".)
 
 ```typescript
-export function numSort(a: any, b: any): number
+export function numSort(a: any, b: any): number;
 ```
 
 The default array sorting behavior of JavaScript, even for all-numeric array, is to sort the contents as if they were strings. If this behavior is not expected, the results can be surprising and unpleasant.
@@ -263,7 +263,7 @@ The default array sorting behavior of JavaScript, even for all-numeric array, is
 
 
 ```typescript
-function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined
+function nth<T>(array: ArrayLike<T> | null | undefined, n: number, defaultValue?: T): T | undefined;
 ```
 
 Return the `n`th element of the array, or `defaultValue` (`undefined` if not specified) if the element does not exist. If `n` is negative the `array.length + n` element is indexed, e.g., an `n` of -1 refers to the last item in the array, -2 to the next-to-last item, etc.
@@ -281,7 +281,7 @@ function pushIf<T>(condition: boolean, array: T[] | null | undefined, ...items: 
 The same as `push` above, except that `items` are pushed conditionally.
 
 ```typescript
-export function reverseNumSort(a: any, b: any): number
+export function reverseNumSort(a: any, b: any): number;
 ```
 
 Same as `numSort`, but sorts in descending numerical order.
@@ -300,7 +300,7 @@ By default, sorting is done in ascending alphabetical order using JavaScript’s
 If `inPlace` is `true` (the default is `false`) `obj` itself will be returned by the function, modified by the sorting. Otherwise, a new object with sorted properties is returned.
 
 ```typescript        
-function ufe<T>(array: T[]): T[] | undefined
+function ufe<T>(array: T[]): T[] | undefined;
 ```
 
 Return the array if the array is not empty, otherwise `undefined`. ("ufe" stands for "undefined for empty".)
@@ -308,13 +308,13 @@ Return the array if the array is not empty, otherwise `undefined`. ("ufe" stands
 ## String functions
 
 ```typescript
-function asLines(s: string, trimFinalBlankLines = false, trimEachLine = false): string[]
+function asLines(s: string, trimFinalBlankLines = false, trimEachLine = false): string[];
 ```
 
 Takes a string containing line breaks (LF, CR, or CRLF) and turns it into an array of individual lines. Final blank lines can be optionally omitted, and each line can optionally have leading and trailing white space trimmed.
 
 ```typescript
-function checksum53(s: string, seed = 0): string
+function checksum53(s: string, seed = 0): string;
 ```
 
 Returns, in the form of a hexadecimal string, a 53-bit checksum of the value of `s`.
@@ -451,7 +451,7 @@ If `keepAllCaps` is `true`, any word that is originally fully capitalized remain
 
 `shortSmall` is a list of additional words that you wish not to have capitalized, in additions to the built-in list. You can also delete words from the built-in list by including them here with a leading dash, e.g. “-and” to allow the word “and” to be capitalized even when it is not the first or last word of a title.
 
-`special` is a list of words that you wish to provide special capitalization rules for, such as “CinemaScope” or “MacDougall”. Some of these are built in, such as “FedEx” and “iOS”.
+`special` is a list of words that you wish to provide special capitalization rules for, such as “CinemaScope” or “MacDougal”. Some of these are built in, such as “FedEx” and “iOS”.
 
 ## Date, time, and number formatting
 
@@ -754,7 +754,7 @@ Draw outlined `text` at location `x`, `y` using the styles (usually simply color
 Note that the `strokeWidth` (default value 4) determines the pixel width of the outline stroke, but that only about half of that width will be visible after filled text is drawn on top of the stroked text.
 
 ```typescript
-function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: number, r: number): void ;
+function fillCircle(context: CanvasRenderingContext2D, cx: number, cy: number, r: number): void;
 ```
 
 A method for drawing filled circles which is more convenient than using the standard `CanvasRenderingContext2D` arc and path methods.
@@ -816,7 +816,7 @@ Draw a line from `x0`, `y0` to `x1`, `y1`.
 ## Other functions
 
 ```typescript
-function debounce<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>): (...args: Parameters<F>) => void
+function debounce<F extends AnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>): (...args: Parameters<F>) => void;
 ```
 
 Let us refer to the return value of `debounce` as `D`.
@@ -838,13 +838,13 @@ function forEach2<T>(obj: Record<string | symbol, T> | null | undefined, callbac
 Iterate over all key/value pairs in `obj`, including `symbol` keys.
 
 ```typescript
-function getOrSet<T, U>(map: Map<T, U>, key: T, callbackOrValue: U | (() => U)): U
+function getOrSet<T, U>(map: Map<T, U>, key: T, callbackOrValue: U | (() => U)): U;
 ```
 
 This function either returns the value from the `map` associated with `key` if it exists or stores a new value under `key` and returns that. The value may be either provided explicitly or provided via a callback function — ideal if you don't want to compute that value unless necessary.
 
 ```typescript
-async function getOrSetAsync<T, U>(map: Map<T, U>, key: T, callback: () => Promise<U>): Promise<U>
+async function getOrSetAsync<T, U>(map: Map<T, U>, key: T, callback: () => Promise<U>): Promise<U>;
 ```
 
 This function either asynchronously returns the value from the `map` associated with `key` if it exists, or stores a new value under `key` and returns that. The value must be provided via an asynchronous `callback`.
