@@ -82,5 +82,8 @@
       "rollup": "$rollup"
     }
   },
-  "repository": "https://github.com/kshetline/tubular_util.git"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kshetline/tubular_util.git"
+  }
 }
