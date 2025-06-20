@@ -10,7 +10,18 @@
 /node_modules
 
 # IDEs and editors
-/.idea
+!/.idea
+/.idea/dictionaries/*.xml
+!/.idea/dictionaries/project.xml
+/.idea/misc.xml
+/.idea/uiDesigner.xml
+/.idea/vcs.xml
+/.idea/shelf/
+/.idea/workspace.xml
+/.idea/httpRequests/
+/.idea/dataSources/
+/.idea/dataSources.local.xml
+
 .project
 .classpath
 .c9/

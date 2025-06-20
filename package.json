@@ -1,6 +1,6 @@
 {
   "name": "@tubular/util",
-  "version": "4.18.0",
+  "version": "4.18.1",
   "description": "Miscellaneous utility functions",
   "module": "dist/index.min.mjs",
   "main": "dist/index.min.cjs",
@@ -9,10 +9,17 @@
   "typings": "dist/index",
   "sideEffects": false,
   "exports": {
-    "import": "./dist/index.min.mjs",
-    "require": "./dist/index.min.cjs",
-    "browser": "./dist/index.min.js",
-    "default": "./dist/index.min.cjs"
+    ".": {
+      "import": "./dist/index.min.mjs",
+      "require": "./dist/index.min.cjs",
+      "browser": "./dist/index.min.js",
+      "default": "./dist/index.min.cjs"
+    },
+    "./dist/cjs/index.cjs": "./dist/index.min.cjs",
+    "./dist/cjs/index.js": "./dist/index.min.cjs",
+    "./dist/fesm2015/index.js": "./dist/index.min.mjs",
+    "./dist/fesm2015/index.mjs": "./dist/index.min.mjs",
+    "./dist/umd/index.js": "./dist/index.min.js"
   },
   "engines": {
     "node": ">=10.24.1"
@@ -70,5 +77,13 @@
     "tsx": "^4.19.4",
     "typescript": "~5.2.2"
   },
-  "repository": "https://github.com/kshetline/tubular_util.git"
+  "overrides": {
+    "@rollup/pluginutils": {
+      "rollup": "$rollup"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kshetline/tubular_util.git"
+  }
 }
