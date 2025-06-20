@@ -13,6 +13,7 @@
 !/.idea
 /.idea/dictionaries/*.xml
 !/.idea/dictionaries/project.xml
+/.idea/misc.xml
 /.idea/uiDesigner.xml
 /.idea/vcs.xml
 /.idea/shelf/
