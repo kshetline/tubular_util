@@ -422,7 +422,7 @@ describe('@tubular/util browser functions, for Karma testing only', () => {
   });
 
   it('platform checking, Chrome/Windows', () => {
-    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36', platform: 'Win32', vendor: 'Google Inc.' } as Navigator);
+    initPlatformDetection({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36', platform: 'Win32', vendor: 'Google Inc.' } as Navigator, undefined, false);
     expect(isChrome()).to.be.true;
     expect(isWindows()).to.be.true;
     expect(isIOS()).to.be.false;
