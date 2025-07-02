@@ -47,6 +47,7 @@ export default [
         }
       ],
       '@stylistic/curly': 'off',
+      '@/eqeqeq': ['error', 'smart'],
       '@stylistic/indent': [
         'error',
         2,
