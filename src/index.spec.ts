@@ -421,6 +421,7 @@ describe('@tubular/util', () => {
     expect(isEqual(null, null)).to.be.true;
     expect(isEqual(5, null)).to.be.false;
     expect(isEqual(null, 5)).to.be.false;
+    expect(isEqual(new Date(), {}, { mustBeSameClass: true })).to.be.false;
     expect(isEqual(undefined, undefined)).to.be.true;
     expect(isEqual(5, undefined)).to.be.false;
     expect(isEqual(undefined, 5)).to.be.false;
