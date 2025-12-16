@@ -1,3 +1,15 @@
+### 4.19.0
+
+* Added `cancel()` method to `debounce`d and `throttle`d functions.
+
+### 4.18.2
+
+* Fixed a `package.json` problem with Angular/Nx.
+
+### 4.18.1
+
+* Added `package.json` redirects for old repo paths.
+
 ### 4.18.0
 
 * Added `debounce` and `throttle` functions.

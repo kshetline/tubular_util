@@ -618,48 +618,73 @@ export function compareDottedValues(a: string, b: string): number {
 
 export type TbuAnyFunction = (...args: any[]) => any;
 
-export function debounce<F extends TbuAnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
-    (...args: Parameters<F>) => void {
-  let timer: any;
+class Debouncer<F extends TbuAnyFunction> {
+  private pendingArgs: any;
+  private timer: any;
+  private readonly trailing: boolean;
 
-  return function (...args: Parameters<F>): void {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      const result = func.apply(this, args);
+  constructor(private delay: number, private func: F, private callback?: (result: ReturnType<F>) => void) {
+    this.trailing = delay < 0;
+  }
 
-      if (callback)
-        callback(result);
-    }, delay);
+  debouncer = (...args: Parameters<F>): void => {
+    if (this.timer)
+      clearTimeout(this.timer);
+
+    this.timer = setTimeout(() => {
+      const result = this.func.apply(this, args);
+
+      if (this.callback)
+        this.callback(result);
+    }, this.delay);
+  };
+
+  private callFunc = (args: any) => {
+    const result = this.func.apply(this, args);
+
+    if (this.callback)
+      this.callback(result);
+
+    this.timer = setTimeout(() => {
+      this.timer = undefined;
+
+      if (this.pendingArgs) {
+        args = this.pendingArgs;
+        this.pendingArgs = undefined;
+        this.callFunc(args);
+      }
+    }, Math.abs(this.delay));
+  };
+
+  throttler = (...args: Parameters<F>): void => {
+    if (!this.timer)
+      this.callFunc(args);
+    else if (this.trailing)
+      this.pendingArgs = args;
+  };
+
+  cancel = (): void => {
+    if (this.timer)
+      clearTimeout(this.timer);
+
+    this.timer = undefined;
   };
 }
 
+export function debounce<F extends TbuAnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
+    ((...args: Parameters<F>) => void) & { cancel: () => void } {
+  const d = new Debouncer(delay, func, callback);
+
+  (d.debouncer as any).cancel = d.cancel;
+
+  return d.debouncer as any;
+}
+
 export function throttle<F extends TbuAnyFunction>(delay: number, func: F, callback?: (result: ReturnType<F>) => void):
-    (...args: Parameters<F>) => void {
-  const trailing = (delay < 0);
-  let timer: any;
-  let pendingArgs: any;
+    ((...args: Parameters<F>) => void) & { cancel: () => void } {
+  const t = new Debouncer(delay, func, callback);
 
-  const callFunc = (args: any) => {
-    const result = func.apply(this, args);
+  (t.throttler as any).cancel = t.cancel;
 
-    if (callback)
-      callback(result);
-
-    timer = setTimeout(() => {
-      timer = undefined;
-
-      if (pendingArgs) {
-        args = pendingArgs;
-        pendingArgs = undefined;
-        callFunc(args);
-      }
-    }, Math.abs(delay));
-  };
-
-  return function (...args: Parameters<F>): void {
-    if (!timer)
-      callFunc(args);
-    else if (trailing)
-      pendingArgs = args;
-  };
+  return t.throttler as any;
 }

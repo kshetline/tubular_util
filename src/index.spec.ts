@@ -737,10 +737,19 @@ describe('@tubular/util', () => {
     debounced(5, 'baz');
     debounced(6, 'baz');
     debounced(7, 'baz');
-    await sleep(100);
+    await sleep(50);
 
     expect(time).is.greaterThan(start + 5);
     expect(count).equals(1);
+
+    const debounced2 = debounce(10, testFunction);
+    const debounced3 = debounce(10, testFunction);
+
+    debounced2(0, 'foo');
+    debounced3(7, 'baz');
+    debounced2.cancel();
+    await sleep(50);
+    expect(count).equals(2);
   });
 
   it('throttle', async () => {

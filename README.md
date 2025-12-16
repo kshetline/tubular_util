@@ -825,6 +825,24 @@ Let us refer to the return value of `debounce` as `D`.
 
 If you need to obtain a result from `func` when `func` is executed, provide the optional `callback` parameter.
 
+The returned debounced function has the same signature as `func`, and can be invoked in the same way. It also has an added `cancel()` method which can be used to cancel any pending invocation of `func`.
+
+Example:
+
+```javascript
+function showMessage(message) {
+  console.log(message);
+}
+
+const debouncedMessage = debounce(100, showMessage);
+
+debouncedMessage('Hey!');
+debouncedMessage('Hello!'); // Overrides previous invocation so that "Hey!" is not logged.
+await sleep(200); // Message "Hello!" is logged during this sleep.
+debouncedMessage('Goodbye');
+debouncedMessage.cancel(); // Never say "Goodbye".
+```
+
 ```typescript
 function forEach<T>(obj: Record<string, T> | null | undefined, callback: (key: string, value: T) => void): void;
 ```
@@ -929,6 +947,26 @@ If you need to obtain a result from `func` when `func` is executed, provide the 
 If `delay` is a positive value, then leading-edge throttling is performed: all invocations during the delay period are ignored.
 
 If `delay` is a negative value, then leading/trailing-edge throttling is performed using the absolute value of `delay`: the last invocation, if any, during the delay period is honored as soon as the delay runs out.
+
+The returned throttled function has the same signature as `func`, and can be invoked in the same way. It also has an added `cancel()` method which can be used to cancel any pending invocation of `func`.
+
+Example:
+
+```javascript
+function showMessage(message) {
+  console.log(message);
+}
+
+const throttledMessage = throttle(100, showMessage);
+
+throttledMessage('Hey!'); // "Hey!" appears immediately.
+throttledMessage('Hello!');
+throttledMessage('Hello?'); // Overrides previous invocation so that "Hello!" is not logged.
+await sleep(200); // Message "Hello?" is logged during this sleep.
+throttledMessage('Farewell'); // "Farewell" appears immediately.
+throttledMessage('Goodbye');
+throttledMessage.cancel(); // Never say "Goodbye".
+```
 
 ## Deprecated functions
 
